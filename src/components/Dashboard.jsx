@@ -115,7 +115,14 @@ const Dashboard = ({ onBack }) => {
                     supabaseService.getProjects()
                 ]);
 
-                setSpecies(dbSpecies.length > 0 ? dbSpecies : []);
+                if (dbSpecies.length === 0) {
+                    await supabaseService.seedSpecies(INITIAL_SPECIES.map(({ id, ...rest }) => rest));
+                    const restoredSpecies = await supabaseService.getSpecies();
+                    setSpecies(restoredSpecies);
+                } else {
+                    setSpecies(dbSpecies);
+                }
+
                 setProjects(dbProjects.length > 0 ? dbProjects : MOCK_PROJECTS);
 
                 if (account) {

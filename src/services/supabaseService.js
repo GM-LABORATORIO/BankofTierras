@@ -115,5 +115,14 @@ export const supabaseService = {
             .select();
         if (error) throw error;
         return data[0];
+    },
+
+    async seedSpecies(initialSpecies) {
+        if (!supabase) return;
+        const { data: existing } = await supabase.from('species').select('id').limit(1);
+        if (existing && existing.length === 0) {
+            const { error } = await supabase.from('species').insert(initialSpecies);
+            if (error) console.error("Error seeding species:", error);
+        }
     }
 };
