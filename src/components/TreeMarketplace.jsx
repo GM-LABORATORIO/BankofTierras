@@ -5,11 +5,13 @@ import { useWeb3 } from '../context/Web3Context';
 import { ethers } from 'ethers';
 import { supabaseService } from '../services/supabaseService';
 
+const ADMIN_WALLET = "0xA583f0675a2d6f01ab21DEA98629e9Ee04320108";
+
 const TreeMarketplace = ({ species, setSpecies, resetSpecies, myForest, setMyForest }) => {
     const { signer, contractAddresses, CARBON_TOKEN_ABI, account } = useWeb3();
     const [selectedTree, setSelectedTree] = useState(null);
     const [isAdopted, setIsAdopted] = useState(false);
-    const [isAdmin, setIsAdmin] = useState(false);
+    const isAdmin = account?.toLowerCase() === ADMIN_WALLET.toLowerCase();
     const [editingItem, setEditingItem] = useState(null);
     const [isAdding, setIsAdding] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
@@ -135,13 +137,6 @@ const TreeMarketplace = ({ species, setSpecies, resetSpecies, myForest, setMyFor
                                     </button>
                                 </>
                             )}
-                            <button
-                                onClick={() => setIsAdmin(!isAdmin)}
-                                className={`p-3 rounded-2xl border transition-all shadow-2xl ${isAdmin ? 'bg-emerald-500 border-emerald-500 text-white' : 'bg-black/40 border-white/10 text-gray-400 hover:text-white'}`}
-                                title="Modo Edición para Demo"
-                            >
-                                <Settings size={20} />
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -534,51 +529,53 @@ const TreeMarketplace = ({ species, setSpecies, resetSpecies, myForest, setMyFor
             </AnimatePresence>
 
             {/* My Virtual Forest - Side Scroll on Mobile */}
-            {myForest.length > 0 && (
-                <div className="bg-[#0a0a0a]/50 border border-emerald-500/20 p-8 lg:p-12 rounded-[3.5rem] relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/5 rounded-full blur-[100px] -mr-48 -mt-48" />
+            {
+                myForest.length > 0 && (
+                    <div className="bg-[#0a0a0a]/50 border border-emerald-500/20 p-8 lg:p-12 rounded-[3.5rem] relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/5 rounded-full blur-[100px] -mr-48 -mt-48" />
 
-                    <h3 className="text-2xl font-black text-white mb-10 flex items-center gap-4 relative z-10 uppercase italic tracking-tighter">
-                        <div className="p-3 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
-                            <ShieldCheck className="text-emerald-500" size={24} />
+                        <h3 className="text-2xl font-black text-white mb-10 flex items-center gap-4 relative z-10 uppercase italic tracking-tighter">
+                            <div className="p-3 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
+                                <ShieldCheck className="text-emerald-500" size={24} />
+                            </div>
+                            Mi Bosque Virtual <span className="text-emerald-500">({myForest.length})</span>
+                        </h3>
+
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
+                            {myForest.map((tree, i) => (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    key={i}
+                                    className="flex items-center gap-5 p-5 bg-black border border-white/10 rounded-3xl hover:border-emerald-500/30 transition-all group"
+                                >
+                                    <div className="relative w-20 h-20 rounded-2xl overflow-hidden shrink-0">
+                                        <img src={getImageUrl(tree.image)} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
+                                        <div className="absolute inset-0 bg-emerald-500/10" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="text-base font-black text-white truncate group-hover:text-emerald-400 transition-colors uppercase tracking-widest">{tree.name}</div>
+                                        <div className="text-[10px] text-gray-500 font-bold truncate italic">{tree.scientific}</div>
+                                        <div className="mt-2 inline-flex items-center gap-2 px-2 py-0.5 bg-emerald-500/10 rounded-md text-[8px] font-black text-emerald-500 uppercase tracking-widest">Inmortalizado</div>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => {
+                                                setSelectedTree(tree);
+                                                setIsAdopted(true);
+                                            }}
+                                            className="p-3 bg-white/5 rounded-xl text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500 hover:text-white transition-all shadow-lg"
+                                        >
+                                            <Download size={16} />
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            ))}
                         </div>
-                        Mi Bosque Virtual <span className="text-emerald-500">({myForest.length})</span>
-                    </h3>
-
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
-                        {myForest.map((tree, i) => (
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                key={i}
-                                className="flex items-center gap-5 p-5 bg-black border border-white/10 rounded-3xl hover:border-emerald-500/30 transition-all group"
-                            >
-                                <div className="relative w-20 h-20 rounded-2xl overflow-hidden shrink-0">
-                                    <img src={getImageUrl(tree.image)} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
-                                    <div className="absolute inset-0 bg-emerald-500/10" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <div className="text-base font-black text-white truncate group-hover:text-emerald-400 transition-colors uppercase tracking-widest">{tree.name}</div>
-                                    <div className="text-[10px] text-gray-500 font-bold truncate italic">{tree.scientific}</div>
-                                    <div className="mt-2 inline-flex items-center gap-2 px-2 py-0.5 bg-emerald-500/10 rounded-md text-[8px] font-black text-emerald-500 uppercase tracking-widest">Inmortalizado</div>
-                                </div>
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => {
-                                            setSelectedTree(tree);
-                                            setIsAdopted(true);
-                                        }}
-                                        className="p-3 bg-white/5 rounded-xl text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500 hover:text-white transition-all shadow-lg"
-                                    >
-                                        <Download size={16} />
-                                    </button>
-                                </div>
-                            </motion.div>
-                        ))}
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 };
 
