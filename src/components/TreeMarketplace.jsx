@@ -67,18 +67,18 @@ const TreeMarketplace = ({ species, setSpecies, resetSpecies, myForest, setMyFor
         }
     };
 
-    const handleUpdateSpecies = (e) => {
+    const handleUpdateSpecies = async (e) => {
         e.preventDefault();
         if (isAdding) {
             const newItem = {
                 ...editingItem,
                 id: `new-${Date.now()}`
             };
-            setSpecies([...species, newItem]);
+            await setSpecies([...species, newItem]);
             setIsAdding(false);
         } else {
             const updated = species.map(s => s.id === editingItem.id ? editingItem : s);
-            setSpecies(updated);
+            await setSpecies(updated);
         }
         setEditingItem(null);
     };

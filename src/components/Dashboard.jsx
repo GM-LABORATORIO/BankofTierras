@@ -115,12 +115,12 @@ const Dashboard = ({ onBack }) => {
                     supabaseService.getProjects()
                 ]);
 
-                if (dbSpecies.length === 0) {
+                if (dbSpecies.length === 0 && INITIAL_SPECIES.length > 0) {
                     await supabaseService.seedSpecies(INITIAL_SPECIES.map(({ id, ...rest }) => rest));
                     const restoredSpecies = await supabaseService.getSpecies();
-                    setSpecies(restoredSpecies);
+                    setSpecies(restoredSpecies.length > 0 ? restoredSpecies : INITIAL_SPECIES);
                 } else {
-                    setSpecies(dbSpecies);
+                    setSpecies(dbSpecies.length > 0 ? dbSpecies : INITIAL_SPECIES);
                 }
 
                 setProjects(dbProjects.length > 0 ? dbProjects : MOCK_PROJECTS);
@@ -225,11 +225,32 @@ const Dashboard = ({ onBack }) => {
             component: <TreeMarketplace
                 species={species}
                 setSpecies={async (newS) => {
-                    const latest = newS[newS.length - 1];
-                    if (latest && latest.id.toString().startsWith('new-')) {
-                        const { id, ...cleanItem } = latest;
-                        await supabaseService.addSpecies(cleanItem);
+                    // Detect changes to sync with Supabase
+                    const latestAdded = newS.find(s => s.id && s.id.toString().startsWith('new-'));
+
+                    if (latestAdded) {
+                        const { id, ...cleanItem } = latestAdded;
+                        const saved = await supabaseService.addSpecies(cleanItem);
+                        if (saved) {
+                            // Replace the temp 'new-' id with the real DB id
+                            setSpecies(newS.map(s => s.id === latestAdded.id ? saved : s));
+                        } else {
+                            setSpecies(newS);
+                        }
+                        return;
                     }
+
+                    // Check for updates to existing items
+                    const changedItem = newS.find(newItem => {
+                        const oldVersion = species.find(oldItem => oldItem.id === newItem.id);
+                        return oldVersion && JSON.stringify(oldVersion) !== JSON.stringify(newItem);
+                    });
+
+                    if (changedItem) {
+                        const { id, created_at, ...updates } = changedItem;
+                        await supabaseService.updateSpecies(id, updates);
+                    }
+
                     setSpecies(newS);
                 }}
                 resetSpecies={() => setSpecies([])} // In DB context, maybe just re-fetch
