@@ -1,13 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = (supabaseUrl && supabaseAnonKey)
+    ? createClient(supabaseUrl, supabaseAnonKey)
+    : null;
 
 export const supabaseService = {
     // --- Species ---
     async getSpecies() {
+        if (!supabase) return [];
         const { data, error } = await supabase
             .from('species')
             .select('*')
@@ -17,6 +20,7 @@ export const supabaseService = {
     },
 
     async addSpecies(speciesItem) {
+        if (!supabase) return null;
         const { data, error } = await supabase
             .from('species')
             .insert([speciesItem])
@@ -26,6 +30,7 @@ export const supabaseService = {
     },
 
     async updateSpecies(id, updates) {
+        if (!supabase) return null;
         const { data, error } = await supabase
             .from('species')
             .update(updates)
@@ -37,6 +42,7 @@ export const supabaseService = {
 
     // --- Projects ---
     async getProjects() {
+        if (!supabase) return [];
         const { data, error } = await supabase
             .from('projects')
             .select('*')
@@ -46,6 +52,7 @@ export const supabaseService = {
     },
 
     async addProject(project) {
+        if (!supabase) return null;
         const { data, error } = await supabase
             .from('projects')
             .insert([project])
@@ -55,6 +62,7 @@ export const supabaseService = {
     },
 
     async updateProject(id, updates) {
+        if (!supabase) return null;
         const { data, error } = await supabase
             .from('projects')
             .update(updates)
@@ -66,6 +74,7 @@ export const supabaseService = {
 
     // --- Adoptions ---
     async getAdoptions(walletAddress) {
+        if (!supabase || !walletAddress) return [];
         const { data, error } = await supabase
             .from('adoptions')
             .select(`
@@ -78,6 +87,7 @@ export const supabaseService = {
     },
 
     async addAdoption(adoption) {
+        if (!supabase) return null;
         const { data, error } = await supabase
             .from('adoptions')
             .insert([adoption])
@@ -88,6 +98,7 @@ export const supabaseService = {
 
     // --- Compensations ---
     async getCompensations(walletAddress) {
+        if (!supabase || !walletAddress) return [];
         const { data, error } = await supabase
             .from('compensations')
             .select('*')
@@ -97,6 +108,7 @@ export const supabaseService = {
     },
 
     async addCompensation(compensation) {
+        if (!supabase) return null;
         const { data, error } = await supabase
             .from('compensations')
             .insert([compensation])
