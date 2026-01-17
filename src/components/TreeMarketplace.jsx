@@ -575,7 +575,7 @@ const TreeMarketplace = ({ species, setSpecies, resetSpecies, myForest, setMyFor
                     </div>
                 )
             }
-        </div >
+        </div>
     );
 };
 
