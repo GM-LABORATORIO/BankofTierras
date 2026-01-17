@@ -1,0 +1,107 @@
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+export const supabaseService = {
+    // --- Species ---
+    async getSpecies() {
+        const { data, error } = await supabase
+            .from('species')
+            .select('*')
+            .order('created_at', { ascending: false });
+        if (error) throw error;
+        return data;
+    },
+
+    async addSpecies(speciesItem) {
+        const { data, error } = await supabase
+            .from('species')
+            .insert([speciesItem])
+            .select();
+        if (error) throw error;
+        return data[0];
+    },
+
+    async updateSpecies(id, updates) {
+        const { data, error } = await supabase
+            .from('species')
+            .update(updates)
+            .eq('id', id)
+            .select();
+        if (error) throw error;
+        return data[0];
+    },
+
+    // --- Projects ---
+    async getProjects() {
+        const { data, error } = await supabase
+            .from('projects')
+            .select('*')
+            .order('created_at', { ascending: false });
+        if (error) throw error;
+        return data;
+    },
+
+    async addProject(project) {
+        const { data, error } = await supabase
+            .from('projects')
+            .insert([project])
+            .select();
+        if (error) throw error;
+        return data[0];
+    },
+
+    async updateProject(id, updates) {
+        const { data, error } = await supabase
+            .from('projects')
+            .update(updates)
+            .eq('id', id)
+            .select();
+        if (error) throw error;
+        return data[0];
+    },
+
+    // --- Adoptions ---
+    async getAdoptions(walletAddress) {
+        const { data, error } = await supabase
+            .from('adoptions')
+            .select(`
+                *,
+                species:species_id (*)
+            `)
+            .eq('wallet_address', walletAddress);
+        if (error) throw error;
+        return data;
+    },
+
+    async addAdoption(adoption) {
+        const { data, error } = await supabase
+            .from('adoptions')
+            .insert([adoption])
+            .select();
+        if (error) throw error;
+        return data[0];
+    },
+
+    // --- Compensations ---
+    async getCompensations(walletAddress) {
+        const { data, error } = await supabase
+            .from('compensations')
+            .select('*')
+            .eq('wallet_address', walletAddress);
+        if (error) throw error;
+        return data;
+    },
+
+    async addCompensation(compensation) {
+        const { data, error } = await supabase
+            .from('compensations')
+            .insert([compensation])
+            .select();
+        if (error) throw error;
+        return data[0];
+    }
+};

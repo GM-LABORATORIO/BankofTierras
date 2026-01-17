@@ -4,6 +4,7 @@ import { ShieldCheck, Search, CheckCircle2, XCircle, FileSearch, Fingerprint, Cl
 import { MOCK_PROJECTS } from '../constants/mockData';
 import { useWeb3 } from '../context/Web3Context';
 import { ethers } from 'ethers';
+import { supabaseService } from '../services/supabaseService';
 
 const AuditorPanel = ({ projects, setProjects }) => {
     const { signer, contractAddresses, AMAZONAS_NFT_ABI, CARBON_TOKEN_ABI, account } = useWeb3();
@@ -29,6 +30,9 @@ const AuditorPanel = ({ projects, setProjects }) => {
 
             const tx = await nftContract.verifyProject(tokenId);
             await tx.wait();
+
+            // Actualizar en Supabase
+            await supabaseService.updateProject(tokenId, { status: 'Verificado' });
 
             // Actualizar estado local para demo
             const updatedProjects = projects.map(p =>
@@ -69,6 +73,9 @@ const AuditorPanel = ({ projects, setProjects }) => {
 
             const tx = await tokenContract.mint(account, amount);
             await tx.wait();
+
+            // Actualizar en Supabase
+            await supabaseService.updateProject(project.id, { status: 'Tokenizado' });
 
             // Actualizar estado local para que desaparezca de "Listos para Emisión"
             const updatedProjects = projects.map(p =>

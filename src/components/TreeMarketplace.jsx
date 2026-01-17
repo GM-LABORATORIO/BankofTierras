@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, Shrub as Tree, Info, Globe, ShieldCheck, MapPin, ExternalLink, QrCode, Download, CheckCircle2, Settings, Search, Loader2 } from 'lucide-react';
 import { useWeb3 } from '../context/Web3Context';
 import { ethers } from 'ethers';
+import { supabaseService } from '../services/supabaseService';
 
 const TreeMarketplace = ({ species, setSpecies, resetSpecies, myForest, setMyForest }) => {
     const { signer, contractAddresses, CARBON_TOKEN_ABI, account } = useWeb3();
@@ -47,14 +48,16 @@ const TreeMarketplace = ({ species, setSpecies, resetSpecies, myForest, setMyFor
             await tx.wait();
 
             setIsAdopted(true);
-            setMyForest([...myForest, {
+            const adoptionItem = {
                 ...tree,
+                db_id: tree.id, // Store DB ID to link in adoptions table
                 id: `adoption-${Date.now()}`,
                 adoptionDate: new Date().toLocaleDateString(),
                 owner: guardianName || 'Anónimo',
                 wallet: account,
                 txHash: tx.hash
-            }]);
+            };
+            setMyForest([...myForest, adoptionItem]);
 
         } catch (error) {
             console.error(error);

@@ -9,7 +9,8 @@ import {
     LogOut,
     ChevronLeft,
     Menu,
-    X
+    X,
+    Loader2
 } from 'lucide-react';
 import { useWeb3 } from '../context/Web3Context';
 import OriginatorPanel from './OriginatorPanel';
@@ -90,50 +91,65 @@ const INITIAL_SPECIES = [
     }
 ];
 
+import { supabaseService } from '../services/supabaseService';
+
 const Dashboard = ({ onBack }) => {
     const { account, connectWallet, isConnecting, carbonBalance } = useWeb3();
     const [activeTab, setActiveTab] = useState('originator');
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
-    // Persistence Logic
-    const [projects, setProjects] = useState(() => {
-        const saved = localStorage.getItem('amz_projects');
-        return saved ? JSON.parse(saved) : MOCK_PROJECTS;
-    });
+    // Persistence Logic with Supabase
+    const [projects, setProjects] = useState([]);
+    const [species, setSpecies] = useState([]);
+    const [myForest, setMyForest] = useState([]);
+    const [totalRetired, setTotalRetired] = useState(0);
 
-    const [species, setSpecies] = useState(() => {
-        const saved = localStorage.getItem('amz_species');
-        return saved ? JSON.parse(saved) : INITIAL_SPECIES;
-    });
-
-    const [myForest, setMyForest] = useState(() => {
-        const saved = localStorage.getItem('amz_forest');
-        return saved ? JSON.parse(saved) : [];
-    });
-
-    const [totalRetired, setTotalRetired] = useState(() => {
-        const saved = localStorage.getItem('amz_retired');
-        return saved ? parseFloat(saved) : 0;
-    });
-
-    // Save to localStorage whenever they change
+    // Initial Data Fetch
     useEffect(() => {
-        localStorage.setItem('amz_projects', JSON.stringify(projects));
-    }, [projects]);
+        const fetchData = async () => {
+            setIsLoading(true);
+            try {
+                const [dbSpecies, dbProjects] = await Promise.all([
+                    supabaseService.getSpecies(),
+                    supabaseService.getProjects()
+                ]);
 
-    useEffect(() => {
-        localStorage.setItem('amz_species', JSON.stringify(species));
-    }, [species]);
+                setSpecies(dbSpecies.length > 0 ? dbSpecies : []);
+                setProjects(dbProjects.length > 0 ? dbProjects : MOCK_PROJECTS);
 
-    useEffect(() => {
-        localStorage.setItem('amz_forest', JSON.stringify(myForest));
-    }, [myForest]);
+                if (account) {
+                    const [dbAdoptions, dbCompensations] = await Promise.all([
+                        supabaseService.getAdoptions(account),
+                        supabaseService.getCompensations(account)
+                    ]);
 
-    useEffect(() => {
-        localStorage.setItem('amz_retired', totalRetired.toString());
-    }, [totalRetired]);
+                    setMyForest(dbAdoptions.map(a => ({
+                        ...a.species,
+                        guardianName: a.guardian_name,
+                        adoptionDate: a.adoption_date,
+                        txHash: a.tx_hash,
+                        wallet: a.wallet_address
+                    })));
 
-    const updateProjects = (newProjects) => setProjects(newProjects);
+                    const total = dbCompensations.reduce((acc, curr) => acc + parseFloat(curr.amount), 0);
+                    setTotalRetired(total);
+                }
+            } catch (error) {
+                console.error("Error fetching data from Supabase:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [account]);
+
+    const updateProjects = async (newProjects) => {
+        // Find the diff and update Supabase (simplification for the hackathon: state update + db update on action)
+        setProjects(newProjects);
+    };
+
     const updateSpecies = (newSpecies) => setSpecies(newSpecies);
 
     const tabs = [
@@ -141,13 +157,32 @@ const Dashboard = ({ onBack }) => {
             id: 'originator',
             label: 'Originador',
             icon: <Users size={20} />,
-            component: <OriginatorPanel projects={projects} setProjects={updateProjects} />
+            component: <OriginatorPanel projects={projects} setProjects={async (newP) => {
+                const latest = newP[0]; // Assuming new project is at the top
+                if (latest && !latest.id.toString().includes('-')) { // primitive check for new items
+                    await supabaseService.addProject({
+                        name: latest.name,
+                        location: latest.location,
+                        area: latest.area,
+                        regId: latest.regId,
+                        status: latest.status,
+                        image: latest.image,
+                        reportIpfs: latest.reportIpfs,
+                        owner_wallet: account
+                    });
+                }
+                setProjects(newP);
+            }} />
         },
         {
             id: 'auditor',
             label: 'Auditor',
             icon: <ShieldCheck size={20} />,
-            component: <AuditorPanel projects={projects} setProjects={updateProjects} />
+            component: <AuditorPanel projects={projects} setProjects={async (newP) => {
+                // Find what changed and update DB
+                setProjects(newP);
+                // Implementation note: Auditor updates are handled within AuditorPanel for specific IDs
+            }} />
         },
         {
             id: 'corporate',
@@ -157,7 +192,17 @@ const Dashboard = ({ onBack }) => {
                 myForest={myForest}
                 projects={projects}
                 totalRetired={totalRetired}
-                onRetire={(amount) => setTotalRetired(prev => prev + parseFloat(amount))}
+                onRetire={async (amount, certData) => {
+                    setTotalRetired(prev => prev + parseFloat(amount));
+                    await supabaseService.addCompensation({
+                        wallet_address: account,
+                        company_name: certData.company,
+                        nit: certData.nit,
+                        amount: parseFloat(amount),
+                        tx_hash: certData.txHash,
+                        date: certData.date
+                    });
+                }}
             />
         },
         {
@@ -172,10 +217,29 @@ const Dashboard = ({ onBack }) => {
             icon: <Heart size={20} />,
             component: <TreeMarketplace
                 species={species}
-                setSpecies={updateSpecies}
-                resetSpecies={() => updateSpecies(INITIAL_SPECIES)}
+                setSpecies={async (newS) => {
+                    const latest = newS[newS.length - 1];
+                    if (latest && latest.id.toString().startsWith('new-')) {
+                        const { id, ...cleanItem } = latest;
+                        await supabaseService.addSpecies(cleanItem);
+                    }
+                    setSpecies(newS);
+                }}
+                resetSpecies={() => setSpecies([])} // In DB context, maybe just re-fetch
                 myForest={myForest}
-                setMyForest={setMyForest}
+                setMyForest={async (newF) => {
+                    const latest = newF[newF.length - 1];
+                    if (latest && latest.id.toString().startsWith('adoption-')) {
+                        await supabaseService.addAdoption({
+                            species_id: latest.db_id || latest.id, // Ensure we have the DB UUID
+                            wallet_address: account,
+                            guardian_name: latest.owner,
+                            adoption_date: latest.adoptionDate,
+                            tx_hash: latest.txHash
+                        });
+                    }
+                    setMyForest(newF);
+                }}
             />
         },
     ];
@@ -305,7 +369,14 @@ const Dashboard = ({ onBack }) => {
                             exit={{ opacity: 0, y: -10 }}
                             transition={{ duration: 0.2 }}
                         >
-                            {tabs.find(t => t.id === activeTab)?.component}
+                            {isLoading ? (
+                                <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+                                    <Loader2 className="w-12 h-12 text-emerald-500 animate-spin" />
+                                    <p className="text-gray-500 font-black uppercase tracking-widest text-xs italic">Sincronizando con Amazonas Cero Cloud...</p>
+                                </div>
+                            ) : (
+                                tabs.find(t => t.id === activeTab)?.component
+                            )}
                         </motion.div>
                     </AnimatePresence>
                 </div>

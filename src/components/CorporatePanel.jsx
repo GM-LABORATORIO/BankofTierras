@@ -40,15 +40,17 @@ const CorporatePanel = ({ myForest = [], projects = [], totalRetired = 0, onReti
             const tx = await tokenContract.retireForTaxExemption(amount, nit);
             await tx.wait();
 
-            setShowLegalCert({
+            const certData = {
                 amount: retireAmount,
                 nit: nit,
                 company: companyName,
                 txHash: tx.hash,
                 date: new Date().toLocaleDateString()
-            });
+            };
 
-            if (onRetire) onRetire(retireAmount);
+            setShowLegalCert(certData);
+
+            if (onRetire) onRetire(retireAmount, certData);
             refreshBalance();
             setRetireAmount('');
             setNit('');
