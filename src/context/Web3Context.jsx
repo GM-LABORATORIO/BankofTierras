@@ -188,16 +188,31 @@ export const Web3Provider = ({ children }) => {
             carbonBalance,
             prices,
             buyTokens: async (projectId, amount) => {
-                // Simulación de compra en Blockchain
-                // En un Smart Contract real, esto enviaría AVAX al contrato del proyecto
-                // y el contrato emitiría los tokens al usuario.
-                // Aquí simulamos el éxito para el MVP.
+                // REAL TRANSACTION FOR DEMO (Mainnet Ready)
+                // We'll use a symbolic price (e.g. 0.0001 AVAX per token) for the demo
+                // so the user can show real wallet interaction without spending much.
+                if (!signer) throw new Error("Wallet no conectada");
+
                 setIsConnecting(true);
                 try {
-                    await new Promise(r => setTimeout(r, 2000)); // Delay de transacción
-                    alert(`Compra exitosa: ${amount} $CARBON adquiridos.`);
+                    const demoPrice = ethers.parseEther((amount * 0.0001).toString());
+                    const treasury = "0xA583f0675a2d6f01ab21DEA98629e9Ee04320108"; // Using ADMIN_WALLET as Treasury
+
+                    const tx = await signer.sendTransaction({
+                        to: treasury,
+                        value: demoPrice
+                    });
+
+                    alert(`Transacción enviada: ${tx.hash}\nProcesando intercambio...`);
+                    await tx.wait();
+
+                    alert(`¡Éxito! Intercambio confirmado en Avalanche. (${amount} $CARBON acreditados)`);
                     fetchCarbonBalance(account);
                     return true;
+                } catch (error) {
+                    console.error("Purchase error:", error);
+                    alert("Error en la compra: " + (error.reason || error.message));
+                    return false;
                 } finally {
                     setIsConnecting(false);
                 }

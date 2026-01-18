@@ -21,13 +21,18 @@ const CarbonMarketplace = ({ projects }) => {
     const [amount, setAmount] = useState(1);
     const [isBuying, setIsBuying] = useState(false);
 
-    // Filter only verified projects
-    const verifiedProjects = projects.filter(p => p.status === 'Verificado' || p.status === 'verified');
+    // Filter only verified or tokenized projects
+    const verifiedProjects = projects.filter(p =>
+        p.status === 'Verificado' ||
+        p.status === 'verified' ||
+        p.status === 'Tokenizado'
+    );
 
     // Price calculation (Target: 25 USD per ton)
     const pricePerTonUSD = 25;
     const pricePerTonCOP = pricePerTonUSD * prices.usdCop;
-    const pricePerTonAVAX = pricePerTonUSD / (prices.avax || 35); // Fallback to 35 if 0
+    const demoPriceAVAX = 0.0001; // For Demo purposes on Mainnet
+    const pricePerTonAVAX = pricePerTonUSD / (prices.avax || 35);
 
     const handlePurchase = async () => {
         if (!account) {
@@ -192,12 +197,12 @@ const CarbonMarketplace = ({ projects }) => {
                                     </div>
                                     <div className="h-px bg-white/10" />
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Total en AVAX</span>
+                                        <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Total en AVAX (Demo Mode)</span>
                                         <div className="text-right">
                                             <div className="text-2xl font-black text-emerald-400 italic">
-                                                {(amount * pricePerTonAVAX).toFixed(6)} AVAX
+                                                {(amount * demoPriceAVAX).toFixed(6)} AVAX
                                             </div>
-                                            <div className="text-[8px] text-gray-500 font-bold uppercase italic">Tarifa de red no incluida</div>
+                                            <div className="text-[8px] text-gray-500 font-bold uppercase italic">Precio especial para Hackathon</div>
                                         </div>
                                     </div>
                                 </div>
