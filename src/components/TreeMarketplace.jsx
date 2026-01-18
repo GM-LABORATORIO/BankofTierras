@@ -23,6 +23,8 @@ const TreeMarketplace = ({ species, setSpecies, resetSpecies, myForest, setMyFor
     const isAdmin = account?.toLowerCase() === ADMIN_WALLET.toLowerCase();
     const [selectedTree, setSelectedTree] = useState(null);
     const [isAdopted, setIsAdopted] = useState(false);
+    const [editingItem, setEditingItem] = useState(null);
+    const [isAdding, setIsAdding] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const [guardianName, setGuardianName] = useState('');
 
