@@ -24,9 +24,16 @@ const CarbonMarketplace = ({ projects }) => {
     const getImageUrl = (image) => {
         if (!image) return "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=2000";
         if (image.startsWith('http')) return image;
-        if (image.includes('/')) return image;
-        if (image.startsWith('ipfs://')) return `https://gateway.pinata.cloud/ipfs/${image.split('//')[1]}`;
-        return `https://gateway.pinata.cloud/ipfs/${image}`;
+
+        // Handle IPFS variants
+        let cid = image;
+        if (image.startsWith('ipfs://')) {
+            cid = image.split('//')[1];
+        } else if (image.includes('ipfs/')) {
+            cid = image.split('ipfs/')[1];
+        }
+
+        return `https://gateway.pinata.cloud/ipfs/${cid}`;
     };
 
     // Filter only verified or tokenized projects
@@ -158,16 +165,81 @@ const CarbonMarketplace = ({ projects }) => {
                             <div className="p-8 space-y-6">
                                 <div className="flex justify-between items-start">
                                     <div>
-                                        <h4 className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.3em] mb-1">Simulador de Inversión</h4>
-                                        <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">{selectedProject.name}</h3>
+                                        <h4 className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.3em] mb-1">Detalles del Activo</h4>
+                                        <h3 className="text-3xl font-black text-white uppercase italic tracking-tighter leading-tight">{selectedProject.name}</h3>
                                     </div>
                                     <button
                                         onClick={() => setSelectedProject(null)}
-                                        className="p-2 bg-white/5 rounded-xl text-gray-500 hover:text-white transition-colors"
+                                        className="p-3 bg-white/5 rounded-2xl text-gray-500 hover:text-white transition-all hover:scale-110"
                                     >
                                         <ChevronRight className="rotate-90" />
                                     </button>
                                 </div>
+
+                                <div className="grid grid-cols-2 gap-y-6 gap-x-8">
+                                    <div className="space-y-1">
+                                        <div className="text-[8px] font-black text-gray-600 uppercase tracking-widest">Ubicación</div>
+                                        <div className="text-xs font-bold text-gray-300 flex items-center gap-1.5 line-clamp-1">
+                                            <MapPin size={12} className="text-emerald-500" /> {selectedProject.location}
+                                        </div>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <div className="text-[8px] font-black text-gray-600 uppercase tracking-widest">Área Total</div>
+                                        <div className="text-xs font-bold text-gray-300 flex items-center gap-1.5">
+                                            <Globe size={12} className="text-emerald-500" /> {selectedProject.area} Hectáreas
+                                        </div>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <div className="text-[8px] font-black text-gray-600 uppercase tracking-widest">Coordenadas</div>
+                                        <div className="text-xs font-mono text-emerald-400/80">{selectedProject.coordinates || "No disp."}</div>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <div className="text-[8px] font-black text-gray-600 uppercase tracking-widest">ID RENARE</div>
+                                        <div className="text-xs font-mono text-emerald-400/80 tracking-tighter truncate">{selectedProject.regid || "Pendiente"}</div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-3xl p-5">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <TrendingUp size={14} className="text-emerald-500" />
+                                        <span className="text-[10px] font-black text-emerald-500/80 uppercase tracking-widest italic">Predicción de Economía Circular</span>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="bg-black/40 border border-white/5 rounded-2xl p-4">
+                                            <div className="text-[7px] font-black text-gray-500 uppercase mb-1">CO2 Capturado Est.</div>
+                                            <div className="text-lg font-black text-white">{(parseFloat(selectedProject.area) * 2.5).toLocaleString()} <span className="text-[8px] text-gray-500">t/año</span></div>
+                                        </div>
+                                        <div className="bg-black/40 border border-white/5 rounded-2xl p-4">
+                                            <div className="text-[7px] font-black text-gray-500 uppercase mb-1">Emisión de $CARBON</div>
+                                            <div className="text-lg font-black text-emerald-400">{(parseFloat(selectedProject.area) * 2.5).toLocaleString()} <span className="text-[8px] text-emerald-900">Tokens</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-2 text-[8px] font-black text-gray-500 uppercase tracking-[0.2em]">
+                                        <ShieldCheck size={12} /> Vista Previa Certificado RENARE
+                                    </div>
+                                    <div className="aspect-[21/9] bg-white/5 border border-white/10 rounded-2xl overflow-hidden relative group/img">
+                                        <img
+                                            src={getImageUrl(selectedProject.reportipfs)}
+                                            className="w-full h-full object-cover opacity-60 group-hover/img:opacity-100 transition-opacity duration-500"
+                                            alt="Certificado RENARE"
+                                        />
+                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity">
+                                            <a
+                                                href={getImageUrl(selectedProject.reportipfs)}
+                                                target="_blank"
+                                                className="bg-white text-black px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest shadow-2xl"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                Ver Pantalla Completa
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="h-px bg-white/5 mx-2" />
 
                                 <div className="space-y-4">
                                     <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Cantidad de Toneladas (tCO2)</label>

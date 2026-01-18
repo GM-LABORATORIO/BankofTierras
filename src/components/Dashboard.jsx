@@ -183,6 +183,7 @@ const Dashboard = ({ onBack }) => {
                             status: latest.status,
                             image: latest.image,
                             reportipfs: latest.reportipfs,
+                            coordinates: latest.coordinates,
                             owner_wallet: account
                         });
 
