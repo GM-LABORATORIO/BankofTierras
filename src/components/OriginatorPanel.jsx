@@ -120,11 +120,11 @@ const OriginatorPanel = ({ projects, onProjectsChange }) => {
                 coordinates: formData.coords,
                 area: parseFloat(formData.area), // Store as pure number
                 standard: "RENARE Colombia",
-                regId: metadata.attributes[4].value,
+                regid: metadata.attributes[4].value,
                 status: "Pendiente",
                 image: imgResult.pinataURL, // Real image URL
                 description: metadata.description,
-                reportIpfs: ipfsResult.pinataURL
+                reportipfs: ipfsResult.pinataURL
             };
 
             await onProjectsChange([newProject, ...projects]);

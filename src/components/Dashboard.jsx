@@ -179,10 +179,10 @@ const Dashboard = ({ onBack }) => {
                             name: latest.name,
                             location: latest.location,
                             area: latest.area,
-                            regId: latest.regId,
+                            regid: latest.regid,
                             status: latest.status,
                             image: latest.image,
-                            reportIpfs: latest.reportIpfs,
+                            reportipfs: latest.reportipfs,
                             owner_wallet: account
                         });
 

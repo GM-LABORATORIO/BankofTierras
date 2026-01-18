@@ -128,7 +128,7 @@ const AuditorPanel = ({ projects, onProjectsChange }) => {
                                 </div>
                                 <div className="space-y-1">
                                     <div className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">ID Registro</div>
-                                    <div className="font-mono text-xs text-emerald-400">{viewProject.regId}</div>
+                                    <div className="font-mono text-xs text-emerald-400">{viewProject.regid}</div>
                                 </div>
                             </div>
 
@@ -148,7 +148,7 @@ const AuditorPanel = ({ projects, onProjectsChange }) => {
 
                             <div className="flex gap-4">
                                 <a
-                                    href={`https://gateway.pinata.cloud/ipfs/${viewProject.reportIpfs?.split('//')[1]}`}
+                                    href={`https://gateway.pinata.cloud/ipfs/${viewProject.reportipfs?.split('//')[1]}`}
                                     target="_blank"
                                     className="flex-1 py-4 bg-white/5 border border-white/10 rounded-2xl font-bold text-sm hover:bg-white/10 transition-all flex items-center justify-center gap-2"
                                 >
