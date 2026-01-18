@@ -118,7 +118,7 @@ const OriginatorPanel = ({ projects, setProjects }) => {
                 name: formData.name,
                 location: `${formData.dept}, Colombia`,
                 coordinates: formData.coords,
-                area: `${formData.area} Hectáreas`,
+                area: parseFloat(formData.area), // Store as pure number
                 standard: "RENARE Colombia",
                 regId: metadata.attributes[4].value,
                 status: "Pendiente",

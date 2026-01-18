@@ -124,7 +124,7 @@ const Dashboard = ({ onBack }) => {
                     setSpecies(dbSpecies.length > 0 ? dbSpecies : INITIAL_SPECIES);
                 }
 
-                setProjects(dbProjects.length > 0 ? dbProjects : MOCK_PROJECTS);
+                setProjects(dbProjects); // NO MOCK PROJECTS
 
                 if (account) {
                     const [dbAdoptions, dbCompensations] = await Promise.all([
@@ -172,9 +172,10 @@ const Dashboard = ({ onBack }) => {
             label: 'Originador',
             icon: <Users size={20} />,
             component: <OriginatorPanel projects={projects} setProjects={async (newP) => {
-                const latest = newP[0]; // Assuming new project is at the top
-                if (latest && !latest.id.toString().includes('-')) { // primitive check for new items
-                    await supabaseService.addProject({
+                const latest = newP[0];
+                if (latest && !latest.id.toString().includes('-')) {
+                    // This is a new project (temp ID is numeric)
+                    const savedProject = await supabaseService.addProject({
                         name: latest.name,
                         location: latest.location,
                         area: latest.area,
@@ -184,6 +185,15 @@ const Dashboard = ({ onBack }) => {
                         reportIpfs: latest.reportIpfs,
                         owner_wallet: account
                     });
+
+                    if (savedProject) {
+                        // Replace temp ID with real UUID from DB
+                        const updatedProjects = newP.map((p, i) =>
+                            i === 0 ? { ...p, id: savedProject.id } : p
+                        );
+                        setProjects(updatedProjects);
+                        return;
+                    }
                 }
                 setProjects(newP);
             }} />
