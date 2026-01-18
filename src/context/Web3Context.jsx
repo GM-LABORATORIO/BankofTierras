@@ -37,39 +37,86 @@ export const Web3Provider = ({ children }) => {
     ];
 
     const connectWallet = async () => {
-        if (typeof window.avalanche === 'undefined' && typeof window.ethereum === 'undefined') {
-            alert("Por favor instala Core Wallet de Avalanche");
+        if (isConnecting) return;
+
+        // Detection logic
+        const isCoreInstalled = typeof window.avalanche !== 'undefined';
+        const isEthInstalled = typeof window.ethereum !== 'undefined';
+
+        if (!isCoreInstalled && !isEthInstalled) {
+            alert("No se detectó ninguna wallet. Por favor, instala Core Wallet (Avalanche) o MetaMask.");
+            window.open('https://core.app/', '_blank');
             return;
         }
 
         setIsConnecting(true);
         try {
-            // Prioritize window.avalanche (Core Wallet)
+            // Favor window.avalanche for Core
             const ethProvider = window.avalanche || window.ethereum;
-            const browserProvider = new ethers.BrowserProvider(ethProvider);
 
-            const accounts = await ethProvider.request({ method: 'eth_requestAccounts' });
-            const network = await browserProvider.getNetwork();
+            // Check if it's already connecting (some wallets don't allow multiple requests)
+            try {
+                const accounts = await ethProvider.request({ method: 'eth_requestAccounts' });
+                if (!accounts || accounts.length === 0) {
+                    throw new Error("No se devolvieron cuentas.");
+                }
 
-            setAccount(accounts[0]);
-            setProvider(browserProvider);
-            setSigner(await browserProvider.getSigner());
-            setChainId(network.chainId);
+                const browserProvider = new ethers.BrowserProvider(ethProvider);
+                const network = await browserProvider.getNetwork();
 
-            fetchCarbonBalance(accounts[0], browserProvider);
+                // Force Avalanche Mainnet (43114) if possible
+                const AVALANCHE_MAINNET_ID = "0xa86a"; // 43114
+                if (network.chainId !== 43114n) {
+                    try {
+                        await ethProvider.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: AVALANCHE_MAINNET_ID }],
+                        });
+                    } catch (switchError) {
+                        // This error code indicates that the chain has not been added to MetaMask.
+                        if (switchError.code === 4902) {
+                            await ethProvider.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: AVALANCHE_MAINNET_ID,
+                                    chainName: 'Avalanche Mainnet',
+                                    nativeCurrency: { name: 'AVAX', symbol: 'AVAX', decimals: 18 },
+                                    rpcUrls: ['https://api.avax.network/ext/bc/C/rpc'],
+                                    blockExplorerUrls: ['https://snowtrace.io/']
+                                }],
+                            });
+                        }
+                    }
+                }
 
-            // Listen for changes
-            ethProvider.on('accountsChanged', (accounts) => {
-                setAccount(accounts[0] || null);
-                if (accounts[0]) fetchCarbonBalance(accounts[0], browserProvider);
-            });
+                setAccount(accounts[0]);
+                setProvider(browserProvider);
+                setSigner(await browserProvider.getSigner());
+                setChainId(network.chainId);
 
-            ethProvider.on('chainChanged', (chainId) => {
-                window.location.reload();
-            });
+                fetchCarbonBalance(accounts[0], browserProvider);
+
+                // Listeners
+                ethProvider.on('accountsChanged', (newAccounts) => {
+                    setAccount(newAccounts[0] || null);
+                    if (newAccounts[0]) fetchCarbonBalance(newAccounts[0], browserProvider);
+                });
+
+                ethProvider.on('chainChanged', () => window.location.reload());
+
+            } catch (innerError) {
+                if (innerError.code === 4001) {
+                    alert("Conexión rechazada por el usuario.");
+                } else if (innerError.code === -32002) {
+                    alert("Ya hay una solicitud de conexión pendiente en tu wallet. Por favor, ábrela manualmente.");
+                } else {
+                    alert("Error en la wallet: " + (innerError.message || "Desconocido"));
+                }
+                throw innerError;
+            }
 
         } catch (error) {
-            console.error("Error connecting wallet:", error);
+            console.error("Detailed connection error:", error);
         } finally {
             setIsConnecting(false);
         }
