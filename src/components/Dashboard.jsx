@@ -378,6 +378,15 @@ const Dashboard = ({ onBack }) => {
                     </div>
 
                     <div className="flex items-center gap-4 lg:gap-8">
+                        {!account && (
+                            <button
+                                onClick={connectWallet}
+                                disabled={isConnecting}
+                                className="px-4 py-2 bg-emerald-500 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-600 transition-all flex items-center gap-2 shadow-lg sm:px-6 sm:py-3 sm:text-xs"
+                            >
+                                {isConnecting ? <Loader2 size={14} className="animate-spin" /> : "Conectar"}
+                            </button>
+                        )}
                         <div className="hidden md:flex flex-col items-end">
                             <span className="text-[9px] font-black text-gray-600 uppercase tracking-widest leading-none mb-1">Red</span>
                             <span className="text-[10px] text-emerald-400 font-black font-mono leading-none tracking-tighter">AVALANCHE MAINNET</span>
