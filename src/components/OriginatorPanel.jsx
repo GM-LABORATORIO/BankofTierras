@@ -3,13 +3,15 @@ import { Upload, Plus, FileText, MapPin, CheckCircle2, Clock, Leaf, Loader2 } fr
 import { MOCK_PROJECTS } from '../constants/mockData';
 import { useWeb3 } from '../context/Web3Context';
 import { ethers } from 'ethers';
-import { uploadJSONToIPFS } from '../services/pinataService';
+import { uploadJSONToIPFS, uploadFileToIPFS } from '../services/pinataService';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const OriginatorPanel = ({ projects, setProjects }) => {
     const { signer, contractAddresses, AMAZONAS_NFT_ABI, account } = useWeb3();
     const fileInputRef = React.useRef(null);
+    const imageInputRef = React.useRef(null);
     const [selectedFile, setSelectedFile] = useState(null);
+    const [selectedImage, setSelectedImage] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [viewProject, setViewProject] = useState(null);
     const [formData, setFormData] = useState({
@@ -42,13 +44,22 @@ const OriginatorPanel = ({ projects, setProjects }) => {
             return;
         }
 
+        if (!selectedImage) {
+            alert("Por favor selecciona una imagen de portada para el proyecto");
+            return;
+        }
+
         setIsSubmitting(true);
         try {
-            // 1. Prepare Metadata (Matching User's technical requirement)
+            // 1. Upload Cover Image to IPFS
+            const imgResult = await uploadFileToIPFS(selectedImage);
+            if (!imgResult.success) throw new Error("Error subiendo imagen a IPFS");
+
+            // 2. Prepare Metadata (Matching User's technical requirement)
             const metadata = {
                 name: formData.name,
                 description: `Créditos de carbono generados mediante conservación de bosque primario en el departamento de ${formData.dept}, Amazonas Colombia.`,
-                image: "ipfs://QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco", // Generic forest image
+                image: imgResult.pinataURL, // Real image from IPFS
                 attributes: [
                     { trait_type: "Ubicación", value: `${formData.dept}, Colombia` },
                     { trait_type: "Coordenadas", value: formData.coords },
@@ -111,7 +122,7 @@ const OriginatorPanel = ({ projects, setProjects }) => {
                 standard: "RENARE Colombia",
                 regId: metadata.attributes[4].value,
                 status: "Pendiente",
-                image: "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&q=80&w=800",
+                image: imgResult.pinataURL, // Real image URL
                 description: metadata.description,
                 reportIpfs: ipfsResult.pinataURL
             };
@@ -119,6 +130,7 @@ const OriginatorPanel = ({ projects, setProjects }) => {
             setProjects([newProject, ...projects]);
             alert("¡Proyecto Minteado con Éxito! Vinculado a IPFS permanentemente.");
             setSelectedFile(null);
+            setSelectedImage(null);
             setFormData({ name: '', coords: '', area: '', dept: 'Amazonas' });
 
         } catch (error) {
@@ -291,6 +303,37 @@ const OriginatorPanel = ({ projects, setProjects }) => {
                                         <option>Guainía</option>
                                     </select>
                                 </div>
+                            </div>
+                        </div>
+
+                        {/* Image Upload for Cover */}
+                        <div className="mt-6">
+                            <label className="text-xs font-bold text-gray-500 uppercase block mb-2">Foto de Portada del Proyecto (Visibilidad en Mercado)</label>
+                            <input
+                                type="file"
+                                ref={imageInputRef}
+                                onChange={(e) => setSelectedImage(e.target.files[0])}
+                                className="hidden"
+                                accept="image/*"
+                            />
+                            <div
+                                onClick={() => imageInputRef.current.click()}
+                                className={`border-2 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center text-center transition-all cursor-pointer bg-white/[0.02] ${selectedImage ? 'border-emerald-500' : 'border-white/10 hover:border-emerald-500/50'}`}
+                            >
+                                {selectedImage ? (
+                                    <div className="flex items-center gap-4">
+                                        <img src={URL.createObjectURL(selectedImage)} className="w-16 h-16 object-cover rounded-lg" alt="Preview" />
+                                        <div className="text-left">
+                                            <p className="text-xs text-white font-bold">{selectedImage.name}</p>
+                                            <p className="text-[10px] text-gray-500 uppercase">Lista para subir a IPFS</p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col items-center">
+                                        <Upload className="w-8 h-8 text-gray-500 mb-2" />
+                                        <p className="text-xs text-gray-500">Seleccionar imagen del predio/proyecto</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
 

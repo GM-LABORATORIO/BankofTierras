@@ -21,6 +21,14 @@ const CarbonMarketplace = ({ projects }) => {
     const [amount, setAmount] = useState(1);
     const [isBuying, setIsBuying] = useState(false);
 
+    const getImageUrl = (image) => {
+        if (!image) return "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=2000";
+        if (image.startsWith('http')) return image;
+        if (image.includes('/')) return image;
+        if (image.startsWith('ipfs://')) return `https://gateway.pinata.cloud/ipfs/${image.split('//')[1]}`;
+        return `https://gateway.pinata.cloud/ipfs/${image}`;
+    };
+
     // Filter only verified or tokenized projects
     const verifiedProjects = projects.filter(p =>
         p.status === 'Verificado' ||
@@ -96,7 +104,7 @@ const CarbonMarketplace = ({ projects }) => {
                             className="bg-[#0a0a0a] border border-white/10 rounded-[2rem] overflow-hidden flex flex-col group"
                         >
                             <div className="h-48 relative">
-                                <img src={p.image} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt={p.name} />
+                                <img src={getImageUrl(p.image)} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt={p.name} />
                                 <div className="absolute top-4 left-4 bg-emerald-500 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-tighter shadow-lg">
                                     Verificado
                                 </div>
@@ -110,7 +118,9 @@ const CarbonMarketplace = ({ projects }) => {
                                 <div className="space-y-3 mb-6">
                                     <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
                                         <span className="text-gray-500">Créditos Disponibles</span>
-                                        <span className="text-white">{(p.area * 5).toLocaleString()} tCO2</span>
+                                        <span className="text-white">
+                                            {(parseFloat(p.area) * 2.5 || 0).toLocaleString()} tCO2
+                                        </span>
                                     </div>
                                     <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
                                         <div className="h-full bg-emerald-500" style={{ width: '65%' }} />
