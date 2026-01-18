@@ -171,28 +171,32 @@ const Dashboard = ({ onBack }) => {
             id: 'originator',
             label: 'Originador',
             icon: <Users size={20} />,
-            component: <OriginatorPanel projects={projects} setProjects={async (newP) => {
+            component: <OriginatorPanel projects={projects} onProjectsChange={async (newP) => {
                 const latest = newP[0];
                 if (latest && !latest.id.toString().includes('-')) {
-                    // This is a new project (temp ID is numeric)
-                    const savedProject = await supabaseService.addProject({
-                        name: latest.name,
-                        location: latest.location,
-                        area: latest.area,
-                        regId: latest.regId,
-                        status: latest.status,
-                        image: latest.image,
-                        reportIpfs: latest.reportIpfs,
-                        owner_wallet: account
-                    });
+                    try {
+                        const savedProject = await supabaseService.addProject({
+                            name: latest.name,
+                            location: latest.location,
+                            area: latest.area,
+                            regId: latest.regId,
+                            status: latest.status,
+                            image: latest.image,
+                            reportIpfs: latest.reportIpfs,
+                            owner_wallet: account
+                        });
 
-                    if (savedProject) {
-                        // Replace temp ID with real UUID from DB
-                        const updatedProjects = newP.map((p, i) =>
-                            i === 0 ? { ...p, id: savedProject.id } : p
-                        );
-                        setProjects(updatedProjects);
-                        return;
+                        if (savedProject) {
+                            const updatedProjects = newP.map((p, i) =>
+                                i === 0 ? { ...p, id: savedProject.id } : p
+                            );
+                            setProjects(updatedProjects);
+                            return;
+                        }
+                    } catch (err) {
+                        console.error("Error saving project:", err);
+                        alert("Error guardando en base de datos: " + err.message);
+                        throw err; // Re-throw to be caught by component
                     }
                 }
                 setProjects(newP);
@@ -202,10 +206,8 @@ const Dashboard = ({ onBack }) => {
             id: 'auditor',
             label: 'Auditor',
             icon: <ShieldCheck size={20} />,
-            component: <AuditorPanel projects={projects} setProjects={async (newP) => {
-                // Find what changed and update DB
+            component: <AuditorPanel projects={projects} onProjectsChange={async (newP) => {
                 setProjects(newP);
-                // Implementation note: Auditor updates are handled within AuditorPanel for specific IDs
             }} />
         },
         {

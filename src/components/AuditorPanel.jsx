@@ -6,7 +6,7 @@ import { useWeb3 } from '../context/Web3Context';
 import { ethers } from 'ethers';
 import { supabaseService } from '../services/supabaseService';
 
-const AuditorPanel = ({ projects, setProjects }) => {
+const AuditorPanel = ({ projects, onProjectsChange }) => {
     const { signer, contractAddresses, AMAZONAS_NFT_ABI, CARBON_TOKEN_ABI, account } = useWeb3();
     const [isVerifying, setIsVerifying] = useState(null); // Will store tokenId
     const [viewProject, setViewProject] = useState(null);
@@ -38,7 +38,7 @@ const AuditorPanel = ({ projects, setProjects }) => {
             const updatedProjects = projects.map(p =>
                 p.id === tokenId ? { ...p, status: 'Verificado' } : p
             );
-            setProjects(updatedProjects);
+            await onProjectsChange(updatedProjects);
             if (viewProject && viewProject.id === tokenId) {
                 setViewProject({ ...viewProject, status: 'Verificado' });
             }
@@ -81,7 +81,7 @@ const AuditorPanel = ({ projects, setProjects }) => {
             const updatedProjects = projects.map(p =>
                 p.id === project.id ? { ...p, status: 'Tokenizado' } : p
             );
-            setProjects(updatedProjects);
+            await onProjectsChange(updatedProjects);
             if (viewProject && viewProject.id === project.id) {
                 setViewProject({ ...viewProject, status: 'Tokenizado' });
             }

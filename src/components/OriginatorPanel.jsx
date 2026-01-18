@@ -6,7 +6,7 @@ import { ethers } from 'ethers';
 import { uploadJSONToIPFS, uploadFileToIPFS } from '../services/pinataService';
 import { AnimatePresence, motion } from 'framer-motion';
 
-const OriginatorPanel = ({ projects, setProjects }) => {
+const OriginatorPanel = ({ projects, onProjectsChange }) => {
     const { signer, contractAddresses, AMAZONAS_NFT_ABI, account } = useWeb3();
     const fileInputRef = React.useRef(null);
     const imageInputRef = React.useRef(null);
@@ -127,7 +127,7 @@ const OriginatorPanel = ({ projects, setProjects }) => {
                 reportIpfs: ipfsResult.pinataURL
             };
 
-            setProjects([newProject, ...projects]);
+            await onProjectsChange([newProject, ...projects]);
             alert("¡Proyecto Minteado con Éxito! Vinculado a IPFS permanentemente.");
             setSelectedFile(null);
             setSelectedImage(null);
