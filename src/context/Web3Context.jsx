@@ -12,12 +12,41 @@ export const Web3Provider = ({ children }) => {
     const [chainId, setChainId] = useState(null);
     const [isConnecting, setIsConnecting] = useState(false);
     const [carbonBalance, setCarbonBalance] = useState('0');
+    const [prices, setPrices] = useState({
+        avax: 0,
+        usdCop: 0
+    });
 
     // Contract Addresses from .env
     const [contractAddresses] = useState({
         amazonasNFT: import.meta.env.VITE_AMAZONAS_NFT_ADDRESS,
         carbonToken: import.meta.env.VITE_CARBON_TOKEN_ADDRESS
     });
+
+    // Fetch exchange rates for UI reference
+    useEffect(() => {
+        const fetchPrices = async () => {
+            try {
+                // Fetch AVAX price from CoinGecko
+                const avaxRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=avalanche-2&vs_currencies=usd');
+                const avaxData = await avaxRes.json();
+
+                // Fetch USD/COP rate (using a representative fixed or public API if available)
+                const copRes = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+                const copData = await copRes.json();
+
+                setPrices({
+                    avax: avaxData['avalanche-2'].usd,
+                    usdCop: copData.rates.COP
+                });
+            } catch (error) {
+                console.error("Error fetching price data:", error);
+                // Fallback prices if API fails
+                setPrices({ avax: 35, usdCop: 4000 });
+            }
+        };
+        fetchPrices();
+    }, []);
 
     const AMAZONAS_NFT_ABI = [
         "function mintProject(address to, string memory uri) public returns (uint256)",
@@ -157,6 +186,22 @@ export const Web3Provider = ({ children }) => {
             AMAZONAS_NFT_ABI,
             CARBON_TOKEN_ABI,
             carbonBalance,
+            prices,
+            buyTokens: async (projectId, amount) => {
+                // Simulación de compra en Blockchain
+                // En un Smart Contract real, esto enviaría AVAX al contrato del proyecto
+                // y el contrato emitiría los tokens al usuario.
+                // Aquí simulamos el éxito para el MVP.
+                setIsConnecting(true);
+                try {
+                    await new Promise(r => setTimeout(r, 2000)); // Delay de transacción
+                    alert(`Compra exitosa: ${amount} $CARBON adquiridos.`);
+                    fetchCarbonBalance(account);
+                    return true;
+                } finally {
+                    setIsConnecting(false);
+                }
+            },
             refreshBalance: () => fetchCarbonBalance(account)
         }}>
             {children}

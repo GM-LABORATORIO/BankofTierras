@@ -18,6 +18,7 @@ import AuditorPanel from './AuditorPanel';
 import CorporatePanel from './CorporatePanel';
 import TechnicalPanel from './TechnicalPanel';
 import TreeMarketplace from './TreeMarketplace';
+import CarbonMarketplace from './CarbonMarketplace';
 
 import { MOCK_PROJECTS } from '../constants/mockData';
 import { Heart } from 'lucide-react';
@@ -160,6 +161,12 @@ const Dashboard = ({ onBack }) => {
     const updateSpecies = (newSpecies) => setSpecies(newSpecies);
 
     const tabs = [
+        {
+            id: 'market',
+            label: 'Mercado',
+            icon: <LayoutDashboard size={20} />,
+            component: <CarbonMarketplace projects={projects} />
+        },
         {
             id: 'originator',
             label: 'Originador',

@@ -1,6 +1,17 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Shrub as Tree, Info, Globe, ShieldCheck, MapPin, ExternalLink, QrCode, Download, CheckCircle2, Settings, Search, Loader2 } from 'lucide-react';
+import {
+    Tree,
+    Settings,
+    Download,
+    ShieldCheck,
+    Globe,
+    Heart,
+    ChevronRight,
+    Loader2,
+    AlertCircle,
+    ShoppingCart
+} from 'lucide-react';
 import { useWeb3 } from '../context/Web3Context';
 import { ethers } from 'ethers';
 import { supabaseService } from '../services/supabaseService';
@@ -8,14 +19,17 @@ import { supabaseService } from '../services/supabaseService';
 const ADMIN_WALLET = "0xA583f0675a2d6f01ab21DEA98629e9Ee04320108";
 
 const TreeMarketplace = ({ species, setSpecies, resetSpecies, myForest, setMyForest }) => {
-    const { signer, contractAddresses, CARBON_TOKEN_ABI, account } = useWeb3();
+    const { signer, contractAddresses, CARBON_TOKEN_ABI, account, carbonBalance } = useWeb3();
+    const isAdmin = account?.toLowerCase() === ADMIN_WALLET.toLowerCase();
     const [selectedTree, setSelectedTree] = useState(null);
     const [isAdopted, setIsAdopted] = useState(false);
-    const isAdmin = account?.toLowerCase() === ADMIN_WALLET.toLowerCase();
-    const [editingItem, setEditingItem] = useState(null);
-    const [isAdding, setIsAdding] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const [guardianName, setGuardianName] = useState('');
+
+    // Check if user has enough balance for the current tree
+    const currentBalance = parseFloat(carbonBalance || '0');
+    const treeCost = selectedTree ? parseFloat(selectedTree.cost.replace(/[^0-9.]/g, '')) : 0;
+    const hasEnoughBalance = currentBalance >= treeCost;
 
     const getImageUrl = (image) => {
         if (!image) return "https://images.unsplash.com/photo-1546272446-615729161cb9?auto=format&fit=crop&q=80&w=800";
@@ -409,13 +423,35 @@ const TreeMarketplace = ({ species, setSpecies, resetSpecies, myForest, setMyFor
                                         </div>
                                     </div>
 
-                                    <button
-                                        onClick={() => handleAdopt(selectedTree)}
-                                        disabled={isProcessing}
-                                        className="w-full py-6 bg-white text-black rounded-[1.5rem] font-black text-xl hover:bg-emerald-500 hover:text-white transition-all shadow-[0_20px_40px_rgba(255,255,255,0.05)] uppercase tracking-tighter flex items-center justify-center gap-3"
-                                    >
-                                        {isProcessing ? <Loader2 className="animate-spin" /> : "Firmar Intercambio"}
-                                    </button>
+                                    {hasEnoughBalance ? (
+                                        <button
+                                            onClick={() => handleAdopt(selectedTree)}
+                                            disabled={isProcessing}
+                                            className="w-full py-6 bg-white text-black rounded-[1.5rem] font-black text-xl hover:bg-emerald-500 hover:text-white transition-all shadow-[0_20px_40px_rgba(255,255,255,0.05)] uppercase tracking-tighter flex items-center justify-center gap-3"
+                                        >
+                                            {isProcessing ? <Loader2 className="animate-spin" /> : "Firmar Intercambio"}
+                                        </button>
+                                    ) : (
+                                        <div className="space-y-4">
+                                            <div className="flex items-center gap-3 p-4 bg-orange-500/10 border border-orange-500/20 rounded-2xl text-orange-500 text-xs font-bold text-left">
+                                                <AlertCircle size={20} className="shrink-0" />
+                                                <span>Saldo insuficiente. Necesitas {treeCost} $CARBON para esta adopción.</span>
+                                            </div>
+                                            <button
+                                                onClick={() => {
+                                                    // Trigger a custom event or use a prop-based navigation to switch to Market tab
+                                                    const marketTab = document.querySelector('[data-tab-id="market"]') ||
+                                                        Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('MERCADO'));
+                                                    if (marketTab) marketTab.click();
+                                                    setSelectedTree(null);
+                                                }}
+                                                className="w-full py-6 bg-emerald-500 text-white rounded-[1.5rem] font-black text-xl hover:bg-emerald-600 transition-all shadow-lg uppercase tracking-tighter flex items-center justify-center gap-3"
+                                            >
+                                                <ShoppingCart size={20} />
+                                                Ir al Mercado a Comprar
+                                            </button>
+                                        </div>
+                                    )}
                                 </>
                             ) : (
                                 <div className="py-2 text-center relative">
