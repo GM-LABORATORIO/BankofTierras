@@ -405,7 +405,7 @@ const OriginatorPanel = ({ projects, onProjectsChange }) => {
                                             <FileText size={12} />
                                             Certificado IPFS
                                         </div>
-                                        <div className="font-mono text-emerald-500">ID: {project.regId.split('-').pop()}</div>
+                                        <div className="font-mono text-emerald-500">ID: {project.regid?.split('-').pop() || '...'}</div>
                                     </div>
                                 </div>
                             ))}
