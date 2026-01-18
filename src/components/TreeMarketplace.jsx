@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Tree,
+    Shrub as Tree,
     Settings,
     Download,
     ShieldCheck,
