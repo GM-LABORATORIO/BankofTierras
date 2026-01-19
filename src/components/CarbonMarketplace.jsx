@@ -160,66 +160,63 @@ const CarbonMarketplace = ({ projects }) => {
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.9, opacity: 0 }}
-                            className="bg-[#0a0a0a] border border-white/10 w-full max-w-lg rounded-[2.5rem] overflow-hidden relative"
+                            className="bg-[#0a0a0a] border border-white/10 w-full max-w-lg rounded-[2.5rem] overflow-hidden relative max-h-[90vh] flex flex-col"
                         >
-                            <div className="p-8 space-y-6">
+                            <div className="p-6 md:p-8 space-y-4 overflow-y-auto custom-scrollbar">
                                 <div className="flex justify-between items-start">
                                     <div>
-                                        <h4 className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.3em] mb-1">Detalles del Activo</h4>
-                                        <h3 className="text-3xl font-black text-white uppercase italic tracking-tighter leading-tight">{selectedProject.name}</h3>
+                                        <h4 className="text-[9px] font-black text-emerald-500 uppercase tracking-[0.3em] mb-1">Detalles del Activo</h4>
+                                        <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter leading-tight">{selectedProject.name}</h3>
                                     </div>
                                     <button
                                         onClick={() => setSelectedProject(null)}
-                                        className="p-3 bg-white/5 rounded-2xl text-gray-500 hover:text-white transition-all hover:scale-110"
+                                        className="p-2 bg-white/5 rounded-xl text-gray-500 hover:text-white transition-all hover:scale-110"
                                     >
                                         <ChevronRight className="rotate-90" />
                                     </button>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-y-6 gap-x-8">
-                                    <div className="space-y-1">
-                                        <div className="text-[8px] font-black text-gray-600 uppercase tracking-widest">Ubicación</div>
-                                        <div className="text-xs font-bold text-gray-300 flex items-center gap-1.5 line-clamp-1">
-                                            <MapPin size={12} className="text-emerald-500" /> {selectedProject.location}
+                                <div className="grid grid-cols-2 gap-y-4 gap-x-6">
+                                    <div className="space-y-0.5">
+                                        <div className="text-[7px] font-black text-gray-600 uppercase tracking-widest">Ubicación</div>
+                                        <div className="text-[11px] font-bold text-gray-300 flex items-center gap-1.5 line-clamp-1">
+                                            <MapPin size={11} className="text-emerald-500" /> {selectedProject.location}
                                         </div>
                                     </div>
-                                    <div className="space-y-1">
-                                        <div className="text-[8px] font-black text-gray-600 uppercase tracking-widest">Área Total</div>
-                                        <div className="text-xs font-bold text-gray-300 flex items-center gap-1.5">
-                                            <Globe size={12} className="text-emerald-500" /> {selectedProject.area} Hectáreas
+                                    <div className="space-y-0.5">
+                                        <div className="text-[7px] font-black text-gray-600 uppercase tracking-widest">Área Total</div>
+                                        <div className="text-[11px] font-bold text-gray-300 flex items-center gap-1.5">
+                                            <Globe size={11} className="text-emerald-500" /> {selectedProject.area} Hectáreas
                                         </div>
                                     </div>
-                                    <div className="space-y-1">
-                                        <div className="text-[8px] font-black text-gray-600 uppercase tracking-widest">Coordenadas</div>
-                                        <div className="text-xs font-mono text-emerald-400/80">{selectedProject.coordinates || "Amazonía (Buscando...)"}</div>
+                                    <div className="space-y-0.5">
+                                        <div className="text-[7px] font-black text-gray-600 uppercase tracking-widest">Coordenadas</div>
+                                        <div className="text-[10px] font-mono text-emerald-400/80">{selectedProject.coordinates || "Amazonía (Buscando...)"}</div>
                                     </div>
-                                    <div className="space-y-1">
-                                        <div className="text-[8px] font-black text-gray-600 uppercase tracking-widest">ID RENARE</div>
-                                        <div className="text-xs font-mono text-emerald-400/80 tracking-tighter truncate">{selectedProject.regid && selectedProject.regid !== "" ? selectedProject.regid : "COL-RENARE-PEND"}</div>
+                                    <div className="space-y-0.5">
+                                        <div className="text-[7px] font-black text-gray-600 uppercase tracking-widest">ID RENARE</div>
+                                        <div className="text-[10px] font-mono text-emerald-400/80 tracking-tighter truncate">{selectedProject.regid && selectedProject.regid !== "" ? selectedProject.regid : "COL-RENARE-PEND"}</div>
                                     </div>
                                 </div>
 
-                                <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-3xl p-5">
-                                    <div className="flex items-center gap-2 mb-3">
-                                        <TrendingUp size={14} className="text-emerald-500" />
-                                        <span className="text-[10px] font-black text-emerald-500/80 uppercase tracking-widest italic">Predicción de Economía Circular</span>
-                                    </div>
+                                <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-4">
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div className="bg-black/40 border border-white/5 rounded-2xl p-4">
-                                            <div className="text-[7px] font-black text-gray-500 uppercase mb-1">CO2 Capturado Est.</div>
-                                            <div className="text-lg font-black text-white">{(parseFloat(selectedProject.area) * 2.5).toLocaleString() || 0} <span className="text-[8px] text-gray-500">t/año</span></div>
+                                        <div className="bg-black/40 border border-white/5 rounded-xl p-3">
+                                            <div className="text-[7px] font-black text-gray-500 uppercase mb-0.5">CO2 Capturado Est.</div>
+                                            <div className="text-sm font-black text-white">{(parseFloat(selectedProject.area) * 2.5).toLocaleString() || 0} <span className="text-[7px] text-gray-500 uppercase">t/año</span></div>
                                         </div>
-                                        <div className="bg-black/40 border border-white/5 rounded-2xl p-4">
-                                            <div className="text-lg font-black text-emerald-400">{(parseFloat(selectedProject.area) * 2.5).toLocaleString() || 0} <span className="text-[8px] text-emerald-900">Tokens</span></div>
+                                        <div className="bg-black/40 border border-white/5 rounded-xl p-3 text-right">
+                                            <div className="text-[7px] font-black text-gray-500 uppercase mb-0.5">Tokens Disponibles</div>
+                                            <div className="text-sm font-black text-emerald-400">{(parseFloat(selectedProject.area) * 2.5).toLocaleString() || 0} <span className="text-[7px] text-emerald-900 uppercase">Tokens</span></div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="space-y-3">
-                                    <div className="flex items-center gap-2 text-[8px] font-black text-gray-500 uppercase tracking-[0.2em]">
-                                        <ShieldCheck size={12} /> Vista Previa Certificado RENARE
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2 text-[7px] font-black text-gray-500 uppercase tracking-[0.2em]">
+                                        <ShieldCheck size={11} /> Evidencia de Certificación
                                     </div>
-                                    <div className="aspect-[21/9] bg-white/5 border border-white/10 rounded-2xl overflow-hidden relative group/img">
+                                    <div className="aspect-[21/7] bg-white/5 border border-white/10 rounded-2xl overflow-hidden relative group/img">
                                         <img
                                             src={selectedProject.reportipfs ? getImageUrl(selectedProject.reportipfs) : "https://images.unsplash.com/photo-1586769852836-bc069f19e1b6?auto=format&fit=crop&q=80&w=1000"}
                                             className="w-full h-full object-cover opacity-60 group-hover/img:opacity-100 transition-opacity duration-500"
@@ -234,64 +231,55 @@ const CarbonMarketplace = ({ projects }) => {
                                                 <a
                                                     href={getImageUrl(selectedProject.reportipfs)}
                                                     target="_blank"
-                                                    className="bg-white text-black px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest shadow-2xl"
+                                                    className="bg-white text-black px-3 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest shadow-2xl"
                                                     onClick={(e) => e.stopPropagation()}
                                                 >
-                                                    Ver Pantalla Completa
+                                                    Ver Documento
                                                 </a>
                                             ) : (
-                                                <div className="text-[9px] font-black text-white uppercase tracking-widest bg-black/60 px-4 py-2 rounded-full">Procesando Documento...</div>
+                                                <div className="text-[8px] font-black text-white uppercase tracking-widest bg-black/60 px-3 py-1.5 rounded-full">Procesando...</div>
                                             )}
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="h-px bg-white/5 mx-2" />
-
-                                <div className="space-y-4">
-                                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Cantidad de Toneladas (tCO2)</label>
-                                    <div className="flex gap-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Cantidad (tCO2)</label>
                                         <input
                                             type="number"
                                             value={amount}
                                             onChange={(e) => setAmount(Math.max(1, parseInt(e.target.value) || 1))}
-                                            className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-xl font-black text-white focus:outline-none focus:border-emerald-500 transition-all"
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-lg font-black text-white focus:outline-none focus:border-emerald-500 transition-all"
                                         />
-                                        <div className="flex flex-col gap-2">
-                                            {[10, 50, 100].map(val => (
-                                                <button
-                                                    key={val}
-                                                    onClick={() => setAmount(val)}
-                                                    className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black text-gray-400 hover:text-emerald-500 hover:border-emerald-500 transition-all"
-                                                >
-                                                    +{val}
-                                                </button>
-                                            ))}
-                                        </div>
+                                    </div>
+                                    <div className="flex items-end gap-1.5 pb-0.5">
+                                        {[10, 50, 100].map(val => (
+                                            <button
+                                                key={val}
+                                                onClick={() => setAmount(val)}
+                                                className="flex-1 py-2 bg-white/5 border border-white/10 rounded-lg text-[9px] font-black text-gray-400 hover:text-emerald-500 hover:border-emerald-500 transition-all"
+                                            >
+                                                +{val}
+                                            </button>
+                                        ))}
                                     </div>
                                 </div>
 
-                                <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-[2rem] p-6 space-y-4">
+                                <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-5 space-y-2">
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Inversión en COP</span>
-                                        <span className="text-xl font-black text-white italic tracking-tighter">
+                                        <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Inversión Estimada</span>
+                                        <span className="text-lg font-black text-white italic tracking-tighter">
                                             $ {Math.round(amount * pricePerTonCOP).toLocaleString()} COP
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Inversión en USD</span>
-                                        <span className="text-xl font-black text-white italic tracking-tighter">
-                                            $ {(amount * pricePerTonUSD).toLocaleString()} USD
                                         </span>
                                     </div>
                                     <div className="h-px bg-white/10" />
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Total en AVAX (Demo Mode)</span>
+                                        <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest text-left leading-none">Total en AVAX<br /><span className="text-[7px] text-gray-600">Demo Mode</span></span>
                                         <div className="text-right">
-                                            <div className="text-2xl font-black text-emerald-400 italic">
+                                            <div className="text-xl font-black text-emerald-400 italic">
                                                 {(amount * demoPriceAVAX).toFixed(6)} AVAX
                                             </div>
-                                            <div className="text-[8px] text-gray-500 font-bold uppercase italic">Precio especial para Hackathon</div>
                                         </div>
                                     </div>
                                 </div>
@@ -299,22 +287,22 @@ const CarbonMarketplace = ({ projects }) => {
                                 <button
                                     onClick={handlePurchase}
                                     disabled={isBuying}
-                                    className="w-full py-6 bg-emerald-500 text-white rounded-[1.5rem] font-black text-sm uppercase tracking-[0.2em] shadow-[0_20px_40px_rgba(16,185,129,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+                                    className="w-full py-5 bg-emerald-500 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-[0_10px_20px_rgba(16,185,129,0.2)] hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50 flex items-center justify-center gap-3"
                                 >
                                     {isBuying ? (
                                         <>
-                                            <RefreshCw className="animate-spin" size={18} />
-                                            Procesando en AVAX...
+                                            <RefreshCw className="animate-spin" size={16} />
+                                            Procesando...
                                         </>
                                     ) : (
                                         <>
-                                            <Zap size={18} />
-                                            Confirmar Intercambio
+                                            <Zap size={16} />
+                                            Confirmar Compra
                                         </>
                                     )}
                                 </button>
-                                <p className="text-[9px] text-gray-600 font-bold text-center uppercase tracking-widest leading-relaxed px-4">
-                                    Al confirmar, los fondos se envían directamente al originador del proyecto y recibirás $CARBON tokens en tu wallet.
+                                <p className="text-[8px] text-gray-600 font-bold text-center uppercase tracking-widest leading-relaxed px-4">
+                                    Recibirás $CARBON tokens directamente en tu wallet tras confirmar.
                                 </p>
                             </div>
                         </motion.div>
