@@ -20,7 +20,15 @@ const AuditorPanel = ({ projects, onProjectsChange }) => {
             return;
         }
 
-        const blockchainId = project.tokenId || project.id;
+        // Resilient ID selection
+        const blockchainId = project.tokenId || project.token_id || (!isNaN(project.id) ? project.id : null);
+
+        if (!blockchainId || blockchainId.toString().includes('-')) {
+            alert("ERROR TÉCNICO: Este proyecto (UUID: " + project.id + ") no tiene vinculado un Token ID de la blockchain. Probablemente fue creado antes de la actualización del sistema. Por favor, realiza una nueva prueba emitiendo un proyecto.");
+            return;
+        }
+
+        console.log("Intentando verificar proyecto:", { id: project.id, blockchainId });
         setIsVerifying(project.id);
         try {
             const nftContract = new ethers.Contract(
@@ -43,8 +51,8 @@ const AuditorPanel = ({ projects, onProjectsChange }) => {
 
             alert("¡Proyecto Verificado con Éxito! " + tx.hash);
         } catch (error) {
-            console.error(error);
-            alert("Error: " + error.message);
+            console.error("Error en verifyProject:", error);
+            alert("Error de Blockchain: " + (error.reason || error.message));
         } finally {
             setIsVerifying(null);
         }
@@ -201,6 +209,7 @@ const AuditorPanel = ({ projects, onProjectsChange }) => {
                         {pendingProjects.map(project => (
                             <div
                                 key={`auditor-pending-${project.id}`}
+                                onClick={() => setViewProject(project)}
                                 className="bg-[#0a0a0a] border border-white/5 rounded-2xl overflow-hidden hover:border-emerald-500/30 transition-all cursor-pointer group"
                             >
                                 <div className="p-6">
@@ -214,7 +223,10 @@ const AuditorPanel = ({ projects, onProjectsChange }) => {
                                         <div className="text-[10px] font-black bg-yellow-500/10 text-yellow-500 px-3 py-1 rounded-full border border-yellow-500/20">PENDIENTE</div>
                                     </div>
                                     <div className="flex gap-4">
-                                        <button className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-2">
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); setViewProject(project); }}
+                                            className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-2"
+                                        >
                                             <FileSearch size={14} /> REVISAR DETALLES
                                         </button>
                                         <button
