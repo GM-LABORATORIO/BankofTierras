@@ -16,7 +16,16 @@ const AdminPanel = () => {
     const loadConfig = async () => {
         setIsLoading(true);
         try {
-            const data = await supabaseService.getSystemConfig();
+            let data = await supabaseService.getSystemConfig();
+
+            // Si no hay datos, inicializamos con valores por defecto
+            if (!data || data.length === 0) {
+                console.log("No config found, seeding defaults...");
+                await supabaseService.updateSystemConfig('treasury_wallet', '0xA583f0675a2d6f01ab21DEA98629e9Ee04320108', 'Wallet que recibe el 10% de las comisiones.');
+                await supabaseService.updateSystemConfig('platform_fee_percentage', '10', 'Porcentaje de comisión por cada venta de créditos.');
+                data = await supabaseService.getSystemConfig();
+            }
+
             setConfig(data);
             const initialValues = {};
             data.forEach(item => {

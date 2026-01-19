@@ -136,12 +136,18 @@ export const supabaseService = {
         return data;
     },
 
-    async updateSystemConfig(key, value) {
+    async updateSystemConfig(key, value, description = null) {
         if (!supabase) return null;
+        const payload = {
+            key,
+            value,
+            updated_at: new Date().toISOString()
+        };
+        if (description) payload.description = description;
+
         const { data, error } = await supabase
             .from('system_config')
-            .update({ value, updated_at: new Date().toISOString() })
-            .eq('key', key)
+            .upsert(payload, { onConflict: 'key' })
             .select();
         if (error) throw error;
         return data[0];

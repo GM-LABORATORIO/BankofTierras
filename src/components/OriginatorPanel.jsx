@@ -279,72 +279,72 @@ const OriginatorPanel = ({ projects, onProjectsChange }) => {
                             Nuevo Registro de Conservación
                         </h3>
 
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="text-xs font-bold text-gray-500 uppercase block mb-2">Nombre del Proyecto</label>
-                                    <input
-                                        type="text"
-                                        value={formData.name}
-                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        placeholder="Ej: Amazonía Vital Leticia"
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-emerald-500 transition-colors"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-xs font-bold text-gray-500 uppercase block mb-2">Coordenadas GPS</label>
-                                    <input
-                                        type="text"
-                                        value={formData.coords}
-                                        onChange={(e) => setFormData({ ...formData, coords: e.target.value })}
-                                        placeholder="0°00'00'' N 0°00'00'' W"
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-emerald-500 transition-colors"
-                                    />
-                                </div>
+                        <div className="grid md:grid-cols-2 gap-x-8 gap-y-6">
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-gray-500 uppercase block px-1">Nombre del Proyecto</label>
+                                <input
+                                    type="text"
+                                    value={formData.name}
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    placeholder="Ej: Amazonía Leticia"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-emerald-500 transition-colors"
+                                />
                             </div>
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="text-xs font-bold text-gray-500 uppercase block mb-2">Área (Hectáreas)</label>
-                                    <input
-                                        type="number"
-                                        value={formData.area}
-                                        onChange={(e) => setFormData({ ...formData, area: e.target.value })}
-                                        placeholder="500"
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-emerald-500 transition-colors"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-xs font-bold text-gray-500 uppercase block mb-2">ID RENARE (Opcional)</label>
-                                    <input
-                                        type="text"
-                                        value={formData.regid}
-                                        onChange={(e) => setFormData({ ...formData, regid: e.target.value })}
-                                        placeholder="COL-RENARE-2026-XXXX"
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-emerald-500 transition-colors"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-xs font-bold text-gray-500 uppercase block mb-2">Departamento</label>
-                                    <select
-                                        value={formData.dept}
-                                        onChange={(e) => setFormData({ ...formData, dept: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-emerald-500 transition-colors"
-                                    >
-                                    </select>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-gray-500 uppercase px-1 tracking-widest">Wallet de Recepción (Pago de Beneficios)</label>
-                                    <input
-                                        type="text"
-                                        value={formData.receivingWallet}
-                                        onChange={(e) => setFormData({ ...formData, receivingWallet: e.target.value })}
-                                        placeholder="0x..."
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs font-mono text-emerald-400 focus:border-emerald-500 outline-none transition-all"
-                                    />
-                                    <p className="px-1 text-[8px] text-gray-600 font-bold uppercase italic">
-                                        Esta wallet recibirá el 90% de los fondos de cada venta.
-                                    </p>
-                                </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-gray-500 uppercase block px-1">Área (Hectáreas)</label>
+                                <input
+                                    type="number"
+                                    value={formData.area}
+                                    onChange={(e) => setFormData({ ...formData, area: e.target.value })}
+                                    placeholder="500"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-emerald-500 transition-colors"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-gray-500 uppercase block px-1">Coordenadas GPS</label>
+                                <input
+                                    type="text"
+                                    value={formData.coords}
+                                    onChange={(e) => setFormData({ ...formData, coords: e.target.value })}
+                                    placeholder="0°00'00'' N 0°00'00'' W"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-emerald-500 transition-colors"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-gray-500 uppercase block px-1">ID RENARE (Opcional)</label>
+                                <input
+                                    type="text"
+                                    value={formData.regid}
+                                    onChange={(e) => setFormData({ ...formData, regid: e.target.value })}
+                                    placeholder="COL-RENARE-2026-XXXX"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-emerald-500 transition-colors"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-gray-500 uppercase block px-1">Departamento</label>
+                                <select
+                                    value={formData.dept}
+                                    onChange={(e) => setFormData({ ...formData, dept: e.target.value })}
+                                    className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-emerald-500 transition-colors text-white"
+                                >
+                                    <option value="Amazonas">Amazonas</option>
+                                    <option value="Caquetá">Caquetá</option>
+                                    <option value="Putumayo">Putumayo</option>
+                                    <option value="Guainía">Guainía</option>
+                                </select>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-gray-500 uppercase px-1 tracking-widest">Wallet de Recepción</label>
+                                <input
+                                    type="text"
+                                    value={formData.receivingWallet}
+                                    onChange={(e) => setFormData({ ...formData, receivingWallet: e.target.value })}
+                                    placeholder="0x..."
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs font-mono text-emerald-400 focus:border-emerald-500 outline-none transition-all"
+                                />
+                                <p className="px-1 text-[8px] text-gray-600 font-bold uppercase italic">
+                                    Recibirá el 90% de los fondos de cada venta.
+                                </p>
                             </div>
                         </div>
 
