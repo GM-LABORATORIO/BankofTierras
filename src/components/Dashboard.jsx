@@ -124,7 +124,20 @@ const Dashboard = ({ onBack }) => {
                     setSpecies(dbSpecies.length > 0 ? dbSpecies : INITIAL_SPECIES);
                 }
 
-                setProjects(dbProjects); // NO MOCK PROJECTS
+                const normalizedProjects = dbProjects.map(p => ({
+                    id: p.id,
+                    name: p.name,
+                    location: p.location,
+                    area: p.area,
+                    regid: p.regid || p.regId,
+                    status: p.status,
+                    image: p.image,
+                    reportipfs: p.reportipfs || p.reportIpfs,
+                    coordinates: p.coordinates,
+                    owner_wallet: p.owner_wallet || p.owner_wallet
+                }));
+
+                setProjects(normalizedProjects); // NO MOCK PROJECTS
 
                 if (account) {
                     const [dbAdoptions, dbCompensations] = await Promise.all([

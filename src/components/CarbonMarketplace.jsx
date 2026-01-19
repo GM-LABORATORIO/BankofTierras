@@ -191,11 +191,11 @@ const CarbonMarketplace = ({ projects }) => {
                                     </div>
                                     <div className="space-y-1">
                                         <div className="text-[8px] font-black text-gray-600 uppercase tracking-widest">Coordenadas</div>
-                                        <div className="text-xs font-mono text-emerald-400/80">{selectedProject.coordinates || "No disp."}</div>
+                                        <div className="text-xs font-mono text-emerald-400/80">{selectedProject.coordinates || "Amazonía (Buscando...)"}</div>
                                     </div>
                                     <div className="space-y-1">
                                         <div className="text-[8px] font-black text-gray-600 uppercase tracking-widest">ID RENARE</div>
-                                        <div className="text-xs font-mono text-emerald-400/80 tracking-tighter truncate">{selectedProject.regid || "Pendiente"}</div>
+                                        <div className="text-xs font-mono text-emerald-400/80 tracking-tighter truncate">{selectedProject.regid || "CERT-RENARE-PEND"}</div>
                                     </div>
                                 </div>
 
@@ -207,11 +207,10 @@ const CarbonMarketplace = ({ projects }) => {
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="bg-black/40 border border-white/5 rounded-2xl p-4">
                                             <div className="text-[7px] font-black text-gray-500 uppercase mb-1">CO2 Capturado Est.</div>
-                                            <div className="text-lg font-black text-white">{(parseFloat(selectedProject.area) * 2.5).toLocaleString()} <span className="text-[8px] text-gray-500">t/año</span></div>
+                                            <div className="text-lg font-black text-white">{(parseFloat(selectedProject.area) * 2.5).toLocaleString() || 0} <span className="text-[8px] text-gray-500">t/año</span></div>
                                         </div>
                                         <div className="bg-black/40 border border-white/5 rounded-2xl p-4">
-                                            <div className="text-[7px] font-black text-gray-500 uppercase mb-1">Emisión de $CARBON</div>
-                                            <div className="text-lg font-black text-emerald-400">{(parseFloat(selectedProject.area) * 2.5).toLocaleString()} <span className="text-[8px] text-emerald-900">Tokens</span></div>
+                                            <div className="text-lg font-black text-emerald-400">{(parseFloat(selectedProject.area) * 2.5).toLocaleString() || 0} <span className="text-[8px] text-emerald-900">Tokens</span></div>
                                         </div>
                                     </div>
                                 </div>
@@ -222,19 +221,27 @@ const CarbonMarketplace = ({ projects }) => {
                                     </div>
                                     <div className="aspect-[21/9] bg-white/5 border border-white/10 rounded-2xl overflow-hidden relative group/img">
                                         <img
-                                            src={getImageUrl(selectedProject.reportipfs)}
+                                            src={selectedProject.reportipfs ? getImageUrl(selectedProject.reportipfs) : "https://images.unsplash.com/photo-1586769852836-bc069f19e1b6?auto=format&fit=crop&q=80&w=1000"}
                                             className="w-full h-full object-cover opacity-60 group-hover/img:opacity-100 transition-opacity duration-500"
                                             alt="Certificado RENARE"
+                                            onError={(e) => {
+                                                e.target.src = "https://images.unsplash.com/photo-1586769852836-bc069f19e1b6?auto=format&fit=crop&q=80&w=1000";
+                                                e.target.className = "w-full h-full object-cover opacity-40 grayscale";
+                                            }}
                                         />
                                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity">
-                                            <a
-                                                href={getImageUrl(selectedProject.reportipfs)}
-                                                target="_blank"
-                                                className="bg-white text-black px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest shadow-2xl"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                Ver Pantalla Completa
-                                            </a>
+                                            {selectedProject.reportipfs ? (
+                                                <a
+                                                    href={getImageUrl(selectedProject.reportipfs)}
+                                                    target="_blank"
+                                                    className="bg-white text-black px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest shadow-2xl"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
+                                                    Ver Pantalla Completa
+                                                </a>
+                                            ) : (
+                                                <div className="text-[9px] font-black text-white uppercase tracking-widest bg-black/60 px-4 py-2 rounded-full">Procesando Documento...</div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>

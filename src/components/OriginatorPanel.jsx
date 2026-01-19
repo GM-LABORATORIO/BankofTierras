@@ -210,15 +210,16 @@ const OriginatorPanel = ({ projects, onProjectsChange }) => {
                                     <FileText size={12} className="text-emerald-500" /> Vista Previa Certificado RENARE
                                 </div>
                                 <img
-                                    src="/src/assets/docs/renare_sample.png"
+                                    src={viewProject.reportipfs ? (viewProject.reportipfs.startsWith('http') ? viewProject.reportipfs : `https://gateway.pinata.cloud/ipfs/${viewProject.reportipfs.split('//')[1] || viewProject.reportipfs}`) : "https://images.unsplash.com/photo-1586769852836-bc069f19e1b6?auto=format&fit=crop&q=80&w=1000"}
                                     alt="Certificado RENARE"
                                     className="w-full h-auto filter contrast-125 saturate-125 transition-transform duration-700 group-hover:scale-105"
+                                    onError={(e) => e.target.src = "https://images.unsplash.com/photo-1586769852836-bc069f19e1b6?auto=format&fit=crop&q=80&w=1000"}
                                 />
                             </div>
 
                             <div className="flex gap-4">
                                 <a
-                                    href={`https://gateway.pinata.cloud/ipfs/${viewProject.reportIpfs?.split('//')[1]}`}
+                                    href={`https://gateway.pinata.cloud/ipfs/${viewProject.reportipfs?.split('//')[1]}`}
                                     target="_blank"
                                     className="flex-1 py-4 bg-white/5 border border-white/10 rounded-2xl font-bold text-sm hover:bg-white/10 transition-all flex items-center justify-center gap-2"
                                 >
@@ -405,7 +406,7 @@ const OriginatorPanel = ({ projects, onProjectsChange }) => {
                                             <FileText size={12} />
                                             Certificado IPFS
                                         </div>
-                                        <div className="font-mono text-emerald-500">ID: {project.regid?.split('-').pop() || '...'}</div>
+                                        <div className="font-mono text-emerald-500">ID: {project.regid?.split('-')?.pop() || '...'}</div>
                                     </div>
                                 </div>
                             ))}
