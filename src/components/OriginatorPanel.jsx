@@ -18,7 +18,8 @@ const OriginatorPanel = ({ projects, onProjectsChange }) => {
         name: '',
         coords: '',
         area: '',
-        dept: 'Amazonas'
+        dept: 'Amazonas',
+        regid: ''
     });
 
     const handleFileChange = (e) => {
@@ -55,6 +56,13 @@ const OriginatorPanel = ({ projects, onProjectsChange }) => {
             const imgResult = await uploadFileToIPFS(selectedImage);
             if (!imgResult.success) throw new Error("Error subiendo imagen a IPFS");
 
+            // 1.5 Upload Certificate to IPFS (The proof)
+            let certIpfsUrl = "ipfs://not-provided";
+            if (selectedFile) {
+                const certResult = await uploadFileToIPFS(selectedFile);
+                if (certResult.success) certIpfsUrl = certResult.pinataURL;
+            }
+
             // 2. Prepare Metadata (Matching User's technical requirement)
             const metadata = {
                 name: formData.name,
@@ -65,13 +73,13 @@ const OriginatorPanel = ({ projects, onProjectsChange }) => {
                     { trait_type: "Coordenadas", value: formData.coords },
                     { trait_type: "Área Protegida", value: `${formData.area} Hectáreas` },
                     { trait_type: "Estándar Legal", value: "RENARE Colombia" },
-                    { trait_type: "ID de Registro Nacional", value: `COL-RENARE-2026-${Math.floor(Math.random() * 9000) + 1000}` },
+                    { trait_type: "ID de Registro Nacional", value: formData.regid || `COL-AMZ-${Date.now()}` },
                     { trait_type: "Estado de Auditoría", value: "Pendiente" }
                 ],
                 external_url: `https://amazonas-cero.vercel.app/proyectos/${formData.area}`,
                 provenance: {
                     auditor_signature: "Pendiente de verificación",
-                    verification_report_ipfs: "ipfs://pend",
+                    verification_report_ipfs: certIpfsUrl,
                     legal_owner: `Comunidad Local - ${account.substring(0, 6)}...`,
                     file_attached: selectedFile ? selectedFile.name : "Ninguno"
                 }
@@ -120,18 +128,18 @@ const OriginatorPanel = ({ projects, onProjectsChange }) => {
                 coordinates: formData.coords,
                 area: parseFloat(formData.area), // Store as pure number
                 standard: "RENARE Colombia",
-                regid: metadata.attributes[4].value,
+                regid: formData.regid || `COL-AMZ-${Date.now()}`,
                 status: "Pendiente",
                 image: imgResult.pinataURL, // Real image URL
                 description: metadata.description,
-                reportipfs: ipfsResult.pinataURL
+                reportipfs: certIpfsUrl && certIpfsUrl !== 'ipfs://not-provided' ? certIpfsUrl : "https://images.unsplash.com/photo-1586769852836-bc069f19e1b6?auto=format&fit=crop&q=80&w=1000"
             };
 
             await onProjectsChange([newProject, ...projects]);
             alert("¡Proyecto Minteado con Éxito! Vinculado a IPFS permanentemente.");
             setSelectedFile(null);
             setSelectedImage(null);
-            setFormData({ name: '', coords: '', area: '', dept: 'Amazonas' });
+            setFormData({ name: '', coords: '', area: '', dept: 'Amazonas', regid: '' });
 
         } catch (error) {
             console.error(error);
@@ -181,8 +189,8 @@ const OriginatorPanel = ({ projects, onProjectsChange }) => {
                                     <div className="font-mono text-xs">{viewProject.coordinates}</div>
                                 </div>
                                 <div className="space-y-1">
-                                    <div className="text-[10px] text-gray-500 font-bold uppercase">ID RENARE</div>
-                                    <div className="font-mono text-xs text-emerald-400">{viewProject.regId}</div>
+                                    <div className="text-[8px] font-black text-gray-600 uppercase tracking-widest">ID RENARE</div>
+                                    <div className="text-xs font-mono text-emerald-400/80 tracking-tighter truncate">{viewProject.regid && viewProject.regid !== "" ? viewProject.regid : "PEND-ASIGN"}</div>
                                 </div>
                             </div>
 
@@ -219,11 +227,11 @@ const OriginatorPanel = ({ projects, onProjectsChange }) => {
 
                             <div className="flex gap-4">
                                 <a
-                                    href={`https://gateway.pinata.cloud/ipfs/${viewProject.reportipfs?.split('//')[1]}`}
+                                    href={viewProject.reportipfs ? (viewProject.reportipfs.startsWith('http') ? viewProject.reportipfs : `https://gateway.pinata.cloud/ipfs/${viewProject.reportipfs.split('//')[1] || viewProject.reportipfs}`) : "#"}
                                     target="_blank"
                                     className="flex-1 py-4 bg-white/5 border border-white/10 rounded-2xl font-bold text-sm hover:bg-white/10 transition-all flex items-center justify-center gap-2"
                                 >
-                                    <FileText size={18} /> Ver Evidencia IPFS
+                                    <FileSearch size={18} /> Revisar Evidencia
                                 </a>
                                 <button
                                     onClick={() => setViewProject(null)}
@@ -288,6 +296,16 @@ const OriginatorPanel = ({ projects, onProjectsChange }) => {
                                         value={formData.area}
                                         onChange={(e) => setFormData({ ...formData, area: e.target.value })}
                                         placeholder="500"
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-emerald-500 transition-colors"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-gray-500 uppercase block mb-2">ID RENARE (Opcional)</label>
+                                    <input
+                                        type="text"
+                                        value={formData.regid}
+                                        onChange={(e) => setFormData({ ...formData, regid: e.target.value })}
+                                        placeholder="COL-RENARE-2026-XXXX"
                                         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-emerald-500 transition-colors"
                                     />
                                 </div>

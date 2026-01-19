@@ -195,7 +195,7 @@ const CarbonMarketplace = ({ projects }) => {
                                     </div>
                                     <div className="space-y-1">
                                         <div className="text-[8px] font-black text-gray-600 uppercase tracking-widest">ID RENARE</div>
-                                        <div className="text-xs font-mono text-emerald-400/80 tracking-tighter truncate">{selectedProject.regid || "CERT-RENARE-PEND"}</div>
+                                        <div className="text-xs font-mono text-emerald-400/80 tracking-tighter truncate">{selectedProject.regid && selectedProject.regid !== "" ? selectedProject.regid : "COL-RENARE-PEND"}</div>
                                     </div>
                                 </div>
 

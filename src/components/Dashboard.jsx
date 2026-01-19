@@ -129,10 +129,10 @@ const Dashboard = ({ onBack }) => {
                     name: p.name,
                     location: p.location,
                     area: p.area,
-                    regid: p.regid || p.regId,
+                    regid: (p.regid && p.regid !== "") ? p.regid : (p.regId && p.regId !== "" ? p.regId : null),
                     status: p.status,
                     image: p.image,
-                    reportipfs: p.reportipfs || p.reportIpfs,
+                    reportipfs: (p.reportipfs && p.reportipfs !== "") ? p.reportipfs : (p.reportIpfs && p.reportIpfs !== "" ? p.reportIpfs : null),
                     coordinates: p.coordinates,
                     owner_wallet: p.owner_wallet || p.owner_wallet
                 }));
@@ -371,7 +371,6 @@ const Dashboard = ({ onBack }) => {
                                 <div className="text-[9px] text-emerald-500/50 font-black uppercase mb-1 tracking-[0.2em]">Wallet Activa</div>
                                 <div className="text-[10px] font-mono text-white truncate font-bold">{account}</div>
                             </div>
-
                             <div className="px-5 py-4 bg-white/5 rounded-2xl border border-white/10 group hover:border-emerald-500/30 transition-all">
                                 <div className="text-[9px] text-gray-500 font-black uppercase mb-1 tracking-[0.3em]">Saldo $CARBON</div>
                                 <div className="flex items-baseline gap-2">
