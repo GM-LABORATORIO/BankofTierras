@@ -53,30 +53,39 @@ export const Web3Provider = ({ children }) => {
 
     const fetchPrices = async () => {
         try {
-            const avaxRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=avalanche-2&vs_currencies=usd');
-            const avaxData = await avaxRes.json();
-            const copRes = await fetch('https://api.exchangerate-api.com/api/v4/latest/USD');
-            const copData = await copRes.json();
+            // AVAX price fallback mechanism
+            const avaxRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=avalanche-2&vs_currencies=usd').catch(() => null);
+            let avaxPrice = 35;
+            if (avaxRes && avaxRes.ok) {
+                const avaxData = await avaxRes.json();
+                avaxPrice = avaxData['avalanche-2']?.usd || 35;
+            }
 
-            setPrices({
-                avax: avaxData['avalanche-2']?.usd || 35,
-                usdCop: copData.rates?.COP || 4000
-            });
+            // COP rate fallback mechanism
+            const copRes = await fetch('https://api.exchangerate-api.com/api/v4/latest/USD').catch(() => null);
+            let copPrice = 4000;
+            if (copRes && copRes.ok) {
+                const copData = await copRes.json();
+                copPrice = copData.rates?.COP || 4000;
+            }
+
+            setPrices({ avax: avaxPrice, usdCop: copPrice });
         } catch (error) {
             console.error("Error fetching price data:", error);
+            // Non-blocking error
         }
     };
 
     const fetchSystemConfig = async () => {
         try {
-            const data = await supabaseService.getSystemConfig();
+            const data = await supabaseService.getSystemConfig().catch(() => []);
             const configMap = {};
-            data.forEach(item => { configMap[item.key] = item.value; });
-            if (Object.keys(configMap).length > 0) {
+            if (data && data.length > 0) {
+                data.forEach(item => { configMap[item.key] = item.value; });
                 setSystemConfig(prev => ({ ...prev, ...configMap }));
             }
         } catch (error) {
-            console.error("Error fetching system config:", error);
+            console.warn("Could not load dynamic config, using hardcoded defaults:", error);
         }
     };
 
@@ -159,19 +168,27 @@ export const Web3Provider = ({ children }) => {
                     const platformFee = (demoPrice * feePercentage) / 100n;
                     const sellerAmount = demoPrice - platformFee;
 
-                    alert(`Iniciando compra de ${amount} tokens...\nSplit: ${100n - feePercentage}% Originador / ${feePercentage}% Plataforma.`);
+                    alert(`Paso 1/2: Firma el pago al Originador (${100n - feePercentage}%).`);
 
+                    // Transacción 1: Al Originador
                     const tx1 = await signer.sendTransaction({ to: sellerWallet, value: sellerAmount });
-                    const tx2 = await signer.sendTransaction({ to: platformTreasury, value: platformFee });
+                    alert(`Esperando confirmación del primer pago...`);
+                    await tx1.wait();
 
-                    alert(`Pagos enviados (Tx1: ${tx1.hash.substring(0, 10)}...). Procesando emisión...`);
-                    await Promise.all([tx1.wait(), tx2.wait()]);
+                    alert(`Paso 2/2: Firma el fee de la Plataforma (${feePercentage}%).`);
+
+                    // Transacción 2: A la Tesorería (Fee)
+                    const tx2 = await signer.sendTransaction({ to: platformTreasury, value: platformFee });
+                    alert(`Esperando confirmación del fee...`);
+                    await tx2.wait();
+
+                    alert(`¡Pagos confirmados! Emitiendo tokens $CARBON a tu wallet...`);
 
                     const tokenContract = new ethers.Contract(contractAddresses.carbonToken, CARBON_TOKEN_ABI, signer);
                     const mintTx = await tokenContract.mint(account, ethers.parseEther(amount.toString()));
-                    await mintTx.wait();
+                    const receipt = await mintTx.wait();
 
-                    alert(`¡Éxito! Has recibido ${amount} $CARBON.`);
+                    alert(`¡Éxito! Has recibido ${amount} $CARBON.\nHash: ${receipt.hash.substring(0, 10)}...`);
                     fetchCarbonBalance(account);
                     return true;
                 } catch (error) {

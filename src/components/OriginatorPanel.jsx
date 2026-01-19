@@ -174,82 +174,79 @@ const OriginatorPanel = ({ projects, onProjectsChange }) => {
                         <motion.div
                             initial={{ scale: 0.9, y: 20 }}
                             animate={{ scale: 1, y: 0 }}
-                            className="bg-[#0a0a0a] border border-white/10 p-8 rounded-[2.5rem] max-w-2xl w-full shadow-2xl relative overflow-hidden"
+                            className="bg-[#0a0a0a] border border-white/10 p-6 rounded-[2rem] max-w-xl w-full shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]"
                             onClick={e => e.stopPropagation()}
                         >
-                            <div className="flex justify-between items-start mb-8">
+                            <div className="flex justify-between items-start mb-6">
                                 <div>
-                                    <div className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2">Detalles del Activo</div>
-                                    <h3 className="text-3xl font-black text-white">{viewProject.name}</h3>
+                                    <div className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">Detalles del Activo</div>
+                                    <h3 className="text-2xl font-black text-white">{viewProject.name}</h3>
                                 </div>
-                                <button onClick={() => setViewProject(null)} className="text-gray-500 hover:text-white transition-colors text-2xl font-black">×</button>
+                                <button onClick={() => setViewProject(null)} className="text-gray-500 hover:text-white transition-colors text-2xl font-black leading-none">×</button>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-6 mb-8">
-                                <div className="space-y-1">
-                                    <div className="text-[10px] text-gray-500 font-bold uppercase">Ubicación</div>
-                                    <div className="font-bold text-sm flex items-center gap-2"><MapPin size={14} className="text-emerald-500" /> {viewProject.location}</div>
-                                </div>
-                                <div className="space-y-1">
-                                    <div className="text-[10px] text-gray-500 font-bold uppercase">Área Total</div>
-                                    <div className="font-bold text-sm flex items-center gap-2"><Leaf size={14} className="text-emerald-500" /> {viewProject.area}</div>
-                                </div>
-                                <div className="space-y-1">
-                                    <div className="text-[10px] text-gray-500 font-bold uppercase">Coordenadas</div>
-                                    <div className="font-mono text-xs">{viewProject.coordinates || "Buscando..."}</div>
-                                </div>
-                                <div className="space-y-1">
-                                    <div className="text-[8px] font-black text-gray-600 uppercase tracking-widest">ID RENARE</div>
-                                    <div className="text-xs font-mono text-emerald-400/80 tracking-tighter truncate">{viewProject.regid && viewProject.regid !== "" ? viewProject.regid : "COL-RENARE-PEND"}</div>
-                                </div>
-                                <div className="space-y-1 md:col-span-2 pt-2 border-t border-white/5">
-                                    <div className="text-[8px] font-black text-gray-600 uppercase tracking-widest">Wallet de Recepción</div>
-                                    <div className="text-[10px] font-mono text-gray-400 break-all">{viewProject.owner_wallet || "No vinculada"}</div>
-                                </div>
-                            </div>
-
-                            <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-3xl p-6 mb-8">
-                                <h4 className="text-xs font-black text-emerald-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                    <CheckCircle2 size={16} /> Predicción de Economía Circular
-                                </h4>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
-                                        <div className="text-[10px] text-gray-500 font-bold uppercase mb-1">CO2 Capturado Est.</div>
-                                        <div className="text-2xl font-black">{(parseFloat(viewProject.area) || 0) * 2.5} <span className="text-xs text-gray-400">t/año</span></div>
+                            <div className="overflow-y-auto pr-2 custom-scrollbar flex-1">
+                                <div className="grid grid-cols-2 gap-4 mb-6">
+                                    <div className="space-y-1">
+                                        <div className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Ubicación</div>
+                                        <div className="font-bold text-xs flex items-center gap-2"><MapPin size={12} className="text-emerald-500" /> {viewProject.location}</div>
                                     </div>
-                                    <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
-                                        <div className="text-[10px] text-gray-500 font-bold uppercase mb-1">Emisión de $CARBON</div>
-                                        <div className="text-2xl font-black text-emerald-500">{(parseFloat(viewProject.area) || 0) * 2.5} <span className="text-xs text-gray-400">Tokens</span></div>
+                                    <div className="space-y-1">
+                                        <div className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Área Total</div>
+                                        <div className="font-bold text-xs flex items-center gap-2"><Leaf size={12} className="text-emerald-500" /> {viewProject.area} Ha</div>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <div className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Coordenadas</div>
+                                        <div className="font-mono text-[10px] text-gray-400">{viewProject.coordinates || "Buscando..."}</div>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <div className="text-[9px] font-black text-gray-600 uppercase tracking-widest">ID RENARE</div>
+                                        <div className="text-[10px] font-mono text-emerald-400/80 tracking-tighter truncate">{viewProject.regid || "PEND"}</div>
                                     </div>
                                 </div>
+
+                                <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-4 mb-6">
+                                    <h4 className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                        <CheckCircle2 size={12} /> Proyección de Impacto
+                                    </h4>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="bg-black/40 p-3 rounded-xl border border-white/5">
+                                            <div className="text-[8px] text-gray-500 font-bold uppercase mb-1">CO2 Capturado Est.</div>
+                                            <div className="text-lg font-black">{((parseFloat(viewProject.area) || 0) * 2.5).toLocaleString()} <span className="text-[10px] text-gray-400">t/año</span></div>
+                                        </div>
+                                        <div className="bg-black/40 p-3 rounded-xl border border-white/5">
+                                            <div className="text-[8px] text-gray-500 font-bold uppercase mb-1">Emisión de $CARBON</div>
+                                            <div className="text-lg font-black text-emerald-500">{((parseFloat(viewProject.area) || 0) * 2.5).toLocaleString()} <span className="text-[10px] text-gray-400">Tokens</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="mb-6 rounded-2xl border border-white/10 group relative overflow-hidden">
+                                    <div className="text-[9px] font-black p-3 bg-white/5 border-b border-white/5 uppercase tracking-widest flex items-center gap-2">
+                                        <FileText size={10} className="text-emerald-500" /> Certificado de Registro
+                                    </div>
+                                    <div className="max-h-[200px] overflow-hidden">
+                                        <img
+                                            src={viewProject.reportipfs ? (viewProject.reportipfs.startsWith('http') ? viewProject.reportipfs : `https://gateway.pinata.cloud/ipfs/${viewProject.reportipfs.split('//')[1] || viewProject.reportipfs}`) : "https://images.unsplash.com/photo-1586769852836-bc069f19e1b6?auto=format&fit=crop&q=80&w=1000"}
+                                            alt="Certificado RENARE"
+                                            className="w-full h-auto filter contrast-125 saturate-125 transition-transform duration-700 group-hover:scale-105"
+                                            onError={(e) => e.target.src = "https://images.unsplash.com/photo-1586769852836-bc069f19e1b6?auto=format&fit=crop&q=80&w=1000"}
+                                        />
+                                    </div>
+                                </div>
                             </div>
 
-                            <div className="mb-8 overflow-y-auto max-h-[400px] rounded-[2rem] border border-white/10 group relative custom-scrollbar">
-                                <div className="absolute inset-0 bg-emerald-500/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm z-10 pointer-events-none">
-                                    <div className="bg-white/10 border border-white/20 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest">Documento Verificado</div>
-                                </div>
-                                <div className="text-[10px] font-black p-4 bg-white/5 border-b border-white/5 uppercase tracking-widest flex items-center gap-2 sticky top-0 z-20 backdrop-blur-md">
-                                    <FileText size={12} className="text-emerald-500" /> Vista Previa Certificado RENARE
-                                </div>
-                                <img
-                                    src={viewProject.reportipfs ? (viewProject.reportipfs.startsWith('http') ? viewProject.reportipfs : `https://gateway.pinata.cloud/ipfs/${viewProject.reportipfs.split('//')[1] || viewProject.reportipfs}`) : "https://images.unsplash.com/photo-1586769852836-bc069f19e1b6?auto=format&fit=crop&q=80&w=1000"}
-                                    alt="Certificado RENARE"
-                                    className="w-full h-auto filter contrast-125 saturate-125 transition-transform duration-700 group-hover:scale-105"
-                                    onError={(e) => e.target.src = "https://images.unsplash.com/photo-1586769852836-bc069f19e1b6?auto=format&fit=crop&q=80&w=1000"}
-                                />
-                            </div>
-
-                            <div className="flex gap-4">
+                            <div className="pt-4 border-t border-white/5 flex gap-3">
                                 <a
                                     href={viewProject.reportipfs ? (viewProject.reportipfs.startsWith('http') ? viewProject.reportipfs : `https://gateway.pinata.cloud/ipfs/${viewProject.reportipfs.split('//')[1] || viewProject.reportipfs}`) : "#"}
                                     target="_blank"
-                                    className="flex-1 py-4 bg-white/5 border border-white/10 rounded-2xl font-bold text-sm hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+                                    className="px-6 py-3 bg-white/5 border border-white/10 rounded-xl font-bold text-xs hover:bg-white/10 transition-all flex items-center justify-center gap-2"
                                 >
-                                    <FileSearch size={18} /> Revisar Evidencia
+                                    <FileSearch size={14} /> Revisar Evidencia
                                 </a>
                                 <button
                                     onClick={() => setViewProject(null)}
-                                    className="flex-1 py-4 bg-emerald-500 text-white rounded-2xl font-bold text-sm hover:bg-emerald-600 transition-all"
+                                    className="flex-1 py-3 bg-emerald-500 text-white rounded-xl font-bold text-xs hover:bg-emerald-600 transition-all"
                                 >
                                     Cerrar Vista
                                 </button>
