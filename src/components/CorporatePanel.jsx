@@ -16,8 +16,16 @@ const CorporatePanel = ({ myForest = [], projects = [], totalRetired = 0, onReti
     const getImageUrl = (image) => {
         if (!image) return "https://images.unsplash.com/photo-1546272446-615729161cb9?auto=format&fit=crop&q=80&w=800";
         if (image.startsWith('http')) return image;
-        if (image.includes('/')) return image;
-        return `https://gateway.pinata.cloud/ipfs/${image}`;
+
+        // Handle IPFS variants
+        let cid = image;
+        if (image.startsWith('ipfs://')) {
+            cid = image.split('//')[1];
+        } else if (image.includes('ipfs/')) {
+            cid = image.split('ipfs/')[1];
+        }
+
+        return `https://gateway.pinata.cloud/ipfs/${cid}`;
     };
 
     // El balance ahora se maneja globalmente en Web3Context
@@ -198,13 +206,13 @@ const CorporatePanel = ({ myForest = [], projects = [], totalRetired = 0, onReti
                     <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-[2.5rem]">
                         <h3 className="text-sm font-black text-gray-500 uppercase tracking-widest mb-6">Proyectos de Inversión Sugeridos</h3>
                         <div className="space-y-4">
-                            {/* Proyectos reales del usuario que ya están tokenizados */}
-                            {projects.filter(p => p.status === 'Tokenizado').map(p => (
-                                <div key={`real-${p.id}-${p.regId}`} className="group cursor-pointer">
+                            {/* Proyectos reales del usuario que ya están verificados */}
+                            {projects.filter(p => p.status === 'Verificado' || p.status === 'Tokenizado').map(p => (
+                                <div key={`real-${p.id}-${p.regid}`} className="group cursor-pointer">
                                     <div className="relative h-40 rounded-3xl overflow-hidden mb-3 border border-emerald-500/30">
                                         <img src={getImageUrl(p.image)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
-                                        <div className="absolute top-4 right-4 bg-emerald-500 text-white text-[8px] font-black px-2 py-1 rounded uppercase tracking-widest">REAL: {p.regId}</div>
+                                        <div className="absolute top-4 right-4 bg-emerald-500 text-white text-[8px] font-black px-2 py-1 rounded uppercase tracking-widest">REAL: {p.regid || "PEND"}</div>
                                         <div className="absolute bottom-4 left-4">
                                             <div className="text-xs font-black text-white uppercase tracking-widest mb-1 leading-none">{p.name}</div>
                                             <div className="text-[10px] text-emerald-400 font-black tracking-[0.2em] leading-none">Activo en {p.location}</div>

@@ -19,6 +19,9 @@ import CorporatePanel from './CorporatePanel';
 import TechnicalPanel from './TechnicalPanel';
 import TreeMarketplace from './TreeMarketplace';
 import CarbonMarketplace from './CarbonMarketplace';
+import AdminPanel from './AdminPanel';
+
+const ADMIN_WALLET = "0xA583f0675a2d6f01ab21DEA98629e9Ee04320108";
 
 import { MOCK_PROJECTS } from '../constants/mockData';
 import { Heart } from 'lucide-react';
@@ -200,7 +203,7 @@ const Dashboard = ({ onBack }) => {
                             image: latest.image,
                             reportipfs: latest.reportipfs,
                             coordinates: latest.coordinates,
-                            owner_wallet: account,
+                            owner_wallet: latest.owner_wallet || account,
                             token_id: latest.id // Store blockchain tokenId in token_id column
                         });
 

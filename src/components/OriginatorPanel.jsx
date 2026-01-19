@@ -19,8 +19,16 @@ const OriginatorPanel = ({ projects, onProjectsChange }) => {
         coords: '',
         area: '',
         dept: 'Amazonas',
-        regid: ''
+        regid: '',
+        receivingWallet: '' // New field for fund reception
     });
+
+    // Effect to pre-fill wallet if account is available
+    React.useEffect(() => {
+        if (account && !formData.receivingWallet) {
+            setFormData(prev => ({ ...prev, receivingWallet: account }));
+        }
+    }, [account]);
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -133,7 +141,7 @@ const OriginatorPanel = ({ projects, onProjectsChange }) => {
                 image: imgResult.pinataURL, // Real image URL
                 description: metadata.description,
                 reportipfs: certIpfsUrl && certIpfsUrl !== 'ipfs://not-provided' ? certIpfsUrl : "https://images.unsplash.com/photo-1586769852836-bc069f19e1b6?auto=format&fit=crop&q=80&w=1000",
-                owner_wallet: account, // Guardamos la wallet del originador
+                owner_wallet: formData.receivingWallet || account, // Wallet especificada o cuenta actual
                 total_quota: parseFloat(formData.area) * 2.5, // Cuota inicial
             };
 
@@ -141,7 +149,7 @@ const OriginatorPanel = ({ projects, onProjectsChange }) => {
             alert("¡Proyecto Minteado con Éxito! Vinculado a IPFS permanentemente.");
             setSelectedFile(null);
             setSelectedImage(null);
-            setFormData({ name: '', coords: '', area: '', dept: 'Amazonas', regid: '' });
+            setFormData({ name: '', coords: '', area: '', dept: 'Amazonas', regid: '', receivingWallet: account });
 
         } catch (error) {
             console.error(error);
@@ -193,6 +201,10 @@ const OriginatorPanel = ({ projects, onProjectsChange }) => {
                                 <div className="space-y-1">
                                     <div className="text-[8px] font-black text-gray-600 uppercase tracking-widest">ID RENARE</div>
                                     <div className="text-xs font-mono text-emerald-400/80 tracking-tighter truncate">{viewProject.regid && viewProject.regid !== "" ? viewProject.regid : "COL-RENARE-PEND"}</div>
+                                </div>
+                                <div className="space-y-1 md:col-span-2 pt-2 border-t border-white/5">
+                                    <div className="text-[8px] font-black text-gray-600 uppercase tracking-widest">Wallet de Recepción</div>
+                                    <div className="text-[10px] font-mono text-gray-400 break-all">{viewProject.owner_wallet || "No vinculada"}</div>
                                 </div>
                             </div>
 

@@ -124,5 +124,26 @@ export const supabaseService = {
             const { error } = await supabase.from('species').insert(initialSpecies);
             if (error) console.error("Error seeding species:", error);
         }
+    },
+
+    // --- System Config ---
+    async getSystemConfig() {
+        if (!supabase) return [];
+        const { data, error } = await supabase
+            .from('system_config')
+            .select('*');
+        if (error) throw error;
+        return data;
+    },
+
+    async updateSystemConfig(key, value) {
+        if (!supabase) return null;
+        const { data, error } = await supabase
+            .from('system_config')
+            .update({ value, updated_at: new Date().toISOString() })
+            .eq('key', key)
+            .select();
+        if (error) throw error;
+        return data[0];
     }
 };

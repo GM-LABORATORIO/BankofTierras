@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { ethers } from 'ethers';
+import { supabaseService } from '../services/supabaseService';
 
 const Web3Context = createContext();
 
@@ -12,9 +13,10 @@ export const Web3Provider = ({ children }) => {
     const [chainId, setChainId] = useState(null);
     const [isConnecting, setIsConnecting] = useState(false);
     const [carbonBalance, setCarbonBalance] = useState('0');
-    const [prices, setPrices] = useState({
-        avax: 0,
-        usdCop: 0
+    const [prices, setPrices] = useState({ avax: 35, usdCop: 4000 });
+    const [systemConfig, setSystemConfig] = useState({
+        treasury_wallet: '0xA583f0675a2d6f01ab21DEA98629e9Ee04320108',
+        platform_fee_percentage: '10'
     });
 
     // Contract Addresses from .env
@@ -22,31 +24,6 @@ export const Web3Provider = ({ children }) => {
         amazonasNFT: import.meta.env.VITE_AMAZONAS_NFT_ADDRESS,
         carbonToken: import.meta.env.VITE_CARBON_TOKEN_ADDRESS
     });
-
-    // Fetch exchange rates for UI reference
-    useEffect(() => {
-        const fetchPrices = async () => {
-            try {
-                // Fetch AVAX price from CoinGecko
-                const avaxRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=avalanche-2&vs_currencies=usd');
-                const avaxData = await avaxRes.json();
-
-                // Fetch USD/COP rate (using a representative fixed or public API if available)
-                const copRes = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
-                const copData = await copRes.json();
-
-                setPrices({
-                    avax: avaxData['avalanche-2'].usd,
-                    usdCop: copData.rates.COP
-                });
-            } catch (error) {
-                console.error("Error fetching price data:", error);
-                // Fallback prices if API fails
-                setPrices({ avax: 35, usdCop: 4000 });
-            }
-        };
-        fetchPrices();
-    }, []);
 
     const AMAZONAS_NFT_ABI = [
         "function mintProject(address to, string memory uri) public returns (uint256)",
@@ -65,87 +42,74 @@ export const Web3Provider = ({ children }) => {
         "event CarbonRetired(address indexed user, uint256 amount, string nitEmpresa, uint256 timestamp)"
     ];
 
+    useEffect(() => {
+        if (window.ethereum) {
+            const browserProvider = new ethers.BrowserProvider(window.ethereum);
+            setProvider(browserProvider);
+        }
+        fetchPrices();
+        fetchSystemConfig();
+    }, []);
+
+    const fetchPrices = async () => {
+        try {
+            const avaxRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=avalanche-2&vs_currencies=usd');
+            const avaxData = await avaxRes.json();
+            const copRes = await fetch('https://api.exchangerate-api.com/api/v4/latest/USD');
+            const copData = await copRes.json();
+
+            setPrices({
+                avax: avaxData['avalanche-2']?.usd || 35,
+                usdCop: copData.rates?.COP || 4000
+            });
+        } catch (error) {
+            console.error("Error fetching price data:", error);
+        }
+    };
+
+    const fetchSystemConfig = async () => {
+        try {
+            const data = await supabaseService.getSystemConfig();
+            const configMap = {};
+            data.forEach(item => { configMap[item.key] = item.value; });
+            if (Object.keys(configMap).length > 0) {
+                setSystemConfig(prev => ({ ...prev, ...configMap }));
+            }
+        } catch (error) {
+            console.error("Error fetching system config:", error);
+        }
+    };
+
     const connectWallet = async () => {
         if (isConnecting) return;
+        const ethProvider = window.avalanche || window.ethereum;
 
-        // Detection logic
-        const isCoreInstalled = typeof window.avalanche !== 'undefined';
-        const isEthInstalled = typeof window.ethereum !== 'undefined';
-
-        if (!isCoreInstalled && !isEthInstalled) {
-            alert("No se detectó ninguna wallet. Por favor, instala Core Wallet (Avalanche) o MetaMask.");
-            window.open('https://core.app/', '_blank');
+        if (!ethProvider) {
+            alert("No se detectó ninguna wallet.");
             return;
         }
 
         setIsConnecting(true);
         try {
-            // Favor window.avalanche for Core
-            const ethProvider = window.avalanche || window.ethereum;
+            const accounts = await ethProvider.request({ method: 'eth_requestAccounts' });
+            const browserProvider = new ethers.BrowserProvider(ethProvider);
+            const network = await browserProvider.getNetwork();
 
-            // Check if it's already connecting (some wallets don't allow multiple requests)
-            try {
-                const accounts = await ethProvider.request({ method: 'eth_requestAccounts' });
-                if (!accounts || accounts.length === 0) {
-                    throw new Error("No se devolvieron cuentas.");
-                }
+            setAccount(accounts[0]);
+            setProvider(browserProvider);
+            setSigner(await browserProvider.getSigner());
+            setChainId(network.chainId);
 
-                const browserProvider = new ethers.BrowserProvider(ethProvider);
-                const network = await browserProvider.getNetwork();
+            fetchCarbonBalance(accounts[0], browserProvider);
 
-                // Force Avalanche Mainnet (43114) if possible
-                const AVALANCHE_MAINNET_ID = "0xa86a"; // 43114
-                if (network.chainId !== 43114n) {
-                    try {
-                        await ethProvider.request({
-                            method: 'wallet_switchEthereumChain',
-                            params: [{ chainId: AVALANCHE_MAINNET_ID }],
-                        });
-                    } catch (switchError) {
-                        // This error code indicates that the chain has not been added to MetaMask.
-                        if (switchError.code === 4902) {
-                            await ethProvider.request({
-                                method: 'wallet_addEthereumChain',
-                                params: [{
-                                    chainId: AVALANCHE_MAINNET_ID,
-                                    chainName: 'Avalanche Mainnet',
-                                    nativeCurrency: { name: 'AVAX', symbol: 'AVAX', decimals: 18 },
-                                    rpcUrls: ['https://api.avax.network/ext/bc/C/rpc'],
-                                    blockExplorerUrls: ['https://snowtrace.io/']
-                                }],
-                            });
-                        }
-                    }
-                }
-
-                setAccount(accounts[0]);
-                setProvider(browserProvider);
-                setSigner(await browserProvider.getSigner());
-                setChainId(network.chainId);
-
-                fetchCarbonBalance(accounts[0], browserProvider);
-
-                // Listeners
-                ethProvider.on('accountsChanged', (newAccounts) => {
-                    setAccount(newAccounts[0] || null);
-                    if (newAccounts[0]) fetchCarbonBalance(newAccounts[0], browserProvider);
-                });
-
-                ethProvider.on('chainChanged', () => window.location.reload());
-
-            } catch (innerError) {
-                if (innerError.code === 4001) {
-                    alert("Conexión rechazada por el usuario.");
-                } else if (innerError.code === -32002) {
-                    alert("Ya hay una solicitud de conexión pendiente en tu wallet. Por favor, ábrela manualmente.");
-                } else {
-                    alert("Error en la wallet: " + (innerError.message || "Desconocido"));
-                }
-                throw innerError;
-            }
+            ethProvider.on('accountsChanged', (newAccounts) => {
+                setAccount(newAccounts[0] || null);
+                if (newAccounts[0]) fetchCarbonBalance(newAccounts[0], browserProvider);
+            });
+            ethProvider.on('chainChanged', () => window.location.reload());
 
         } catch (error) {
-            console.error("Detailed connection error:", error);
+            console.error("Connection error:", error);
         } finally {
             setIsConnecting(false);
         }
@@ -155,11 +119,7 @@ export const Web3Provider = ({ children }) => {
         const p = customProvider || provider;
         if (!userAddress || !p) return;
         try {
-            const tokenContract = new ethers.Contract(
-                contractAddresses.carbonToken,
-                CARBON_TOKEN_ABI,
-                p
-            );
+            const tokenContract = new ethers.Contract(contractAddresses.carbonToken, CARBON_TOKEN_ABI, p);
             const bal = await tokenContract.balanceOf(userAddress);
             setCarbonBalance(ethers.formatEther(bal));
         } catch (error) {
@@ -189,47 +149,29 @@ export const Web3Provider = ({ children }) => {
             prices,
             buyTokens: async (projectId, amount, ownerWallet) => {
                 if (!signer) throw new Error("Wallet no conectada");
-
                 setIsConnecting(true);
                 try {
                     const demoPrice = ethers.parseEther((amount * 0.0001).toString());
-                    const platformTreasury = "0xA583f0675a2d6f01ab21DEA98629e9Ee04320108"; // Fees
+                    const platformTreasury = systemConfig.treasury_wallet;
+                    const feePercentage = BigInt(systemConfig.platform_fee_percentage);
 
-                    // Si no hay wallet del dueño, todo va a la tesorería (fallback)
                     const sellerWallet = ownerWallet || platformTreasury;
-
-                    // Calcular split 90/10
-                    const platformFee = (demoPrice * 10n) / 100n;
+                    const platformFee = (demoPrice * feePercentage) / 100n;
                     const sellerAmount = demoPrice - platformFee;
 
-                    alert(`Iniciando compra de ${amount} tokens...\nDivisión de pago: 90% Originador / 10% Plataforma.`);
+                    alert(`Iniciando compra de ${amount} tokens...\nSplit: ${100n - feePercentage}% Originador / ${feePercentage}% Plataforma.`);
 
-                    // 1. Pago al Originador (90%)
-                    const tx1 = await signer.sendTransaction({
-                        to: sellerWallet,
-                        value: sellerAmount
-                    });
+                    const tx1 = await signer.sendTransaction({ to: sellerWallet, value: sellerAmount });
+                    const tx2 = await signer.sendTransaction({ to: platformTreasury, value: platformFee });
 
-                    // 2. Pago a la Plataforma (10% Fee)
-                    const tx2 = await signer.sendTransaction({
-                        to: platformTreasury,
-                        value: platformFee
-                    });
-
-                    alert(`Pagos enviados. Procesando emisión de tokens en la blockchain...`);
+                    alert(`Pagos enviados (Tx1: ${tx1.hash.substring(0, 10)}...). Procesando emisión...`);
                     await Promise.all([tx1.wait(), tx2.wait()]);
 
-                    // 3. Emisión de tokens (MINT) al comprador
-                    const tokenContract = new ethers.Contract(
-                        contractAddresses.carbonToken,
-                        CARBON_TOKEN_ABI,
-                        signer
-                    );
-
+                    const tokenContract = new ethers.Contract(contractAddresses.carbonToken, CARBON_TOKEN_ABI, signer);
                     const mintTx = await tokenContract.mint(account, ethers.parseEther(amount.toString()));
                     await mintTx.wait();
 
-                    alert(`¡Éxito! Has recibido ${amount} $CARBON. El pago ha sido repartido correctamente.`);
+                    alert(`¡Éxito! Has recibido ${amount} $CARBON.`);
                     fetchCarbonBalance(account);
                     return true;
                 } catch (error) {
