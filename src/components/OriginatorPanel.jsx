@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, Plus, FileText, MapPin, CheckCircle2, Clock, Leaf, Loader2 } from 'lucide-react';
+import { Upload, Plus, FileText, MapPin, CheckCircle2, Clock, Leaf, Loader2, FileSearch } from 'lucide-react';
 import { MOCK_PROJECTS } from '../constants/mockData';
 import { useWeb3 } from '../context/Web3Context';
 import { ethers } from 'ethers';
