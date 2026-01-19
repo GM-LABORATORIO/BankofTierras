@@ -186,11 +186,11 @@ const OriginatorPanel = ({ projects, onProjectsChange }) => {
                                 </div>
                                 <div className="space-y-1">
                                     <div className="text-[10px] text-gray-500 font-bold uppercase">Coordenadas</div>
-                                    <div className="font-mono text-xs">{viewProject.coordinates}</div>
+                                    <div className="font-mono text-xs">{viewProject.coordinates || "Buscando..."}</div>
                                 </div>
                                 <div className="space-y-1">
                                     <div className="text-[8px] font-black text-gray-600 uppercase tracking-widest">ID RENARE</div>
-                                    <div className="text-xs font-mono text-emerald-400/80 tracking-tighter truncate">{viewProject.regid && viewProject.regid !== "" ? viewProject.regid : "PEND-ASIGN"}</div>
+                                    <div className="text-xs font-mono text-emerald-400/80 tracking-tighter truncate">{viewProject.regid && viewProject.regid !== "" ? viewProject.regid : "COL-RENARE-PEND"}</div>
                                 </div>
                             </div>
 
@@ -201,11 +201,11 @@ const OriginatorPanel = ({ projects, onProjectsChange }) => {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
                                         <div className="text-[10px] text-gray-500 font-bold uppercase mb-1">CO2 Capturado Est.</div>
-                                        <div className="text-2xl font-black">{parseInt(viewProject.area) * 2.5} <span className="text-xs text-gray-400">t/año</span></div>
+                                        <div className="text-2xl font-black">{(parseFloat(viewProject.area) || 0) * 2.5} <span className="text-xs text-gray-400">t/año</span></div>
                                     </div>
                                     <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
                                         <div className="text-[10px] text-gray-500 font-bold uppercase mb-1">Emisión de $CARBON</div>
-                                        <div className="text-2xl font-black text-emerald-500">{parseInt(viewProject.area) * 2.5} <span className="text-xs text-gray-400">Tokens</span></div>
+                                        <div className="text-2xl font-black text-emerald-500">{(parseFloat(viewProject.area) || 0) * 2.5} <span className="text-xs text-gray-400">Tokens</span></div>
                                     </div>
                                 </div>
                             </div>

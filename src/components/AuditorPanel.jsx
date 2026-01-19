@@ -137,11 +137,11 @@ const AuditorPanel = ({ projects, onProjectsChange }) => {
                                 <div className="space-y-3">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-400">Captura de Carbono (Est.)</span>
-                                        <span className="font-bold">{parseInt(viewProject.area) * 2.5} tCO2/año</span>
+                                        <span className="font-bold">{(parseFloat(viewProject.area) || 0) * 2.5} tCO2/año</span>
                                     </div>
                                     <div className="flex justify-between text-sm border-t border-white/5 pt-3">
                                         <span className="text-gray-400">Tokens a Emitir ($CARBON)</span>
-                                        <span className="font-black text-emerald-500 text-lg">{parseInt(viewProject.area) * 2.5} AMZ-CO2</span>
+                                        <span className="font-black text-emerald-500 text-lg">{(parseFloat(viewProject.area) || 0) * 2.5} AMZ-CO2</span>
                                     </div>
                                 </div>
                             </div>
