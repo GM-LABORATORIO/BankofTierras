@@ -323,6 +323,13 @@ const Dashboard = ({ onBack }) => {
                 }}
             />
         },
+        // --- Admin Tab (Only for Admin Wallet) ---
+        ...(account?.toLowerCase() === ADMIN_WALLET.toLowerCase() ? [{
+            id: 'admin',
+            label: 'Panel Admin',
+            icon: <ShieldCheck size={20} className="text-emerald-500" />,
+            component: <AdminPanel />
+        }] : [])
     ];
 
     return (

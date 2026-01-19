@@ -330,11 +330,20 @@ const OriginatorPanel = ({ projects, onProjectsChange }) => {
                                         onChange={(e) => setFormData({ ...formData, dept: e.target.value })}
                                         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-emerald-500 transition-colors"
                                     >
-                                        <option>Amazonas</option>
-                                        <option>Caquetá</option>
-                                        <option>Putumayo</option>
-                                        <option>Guainía</option>
                                     </select>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-gray-500 uppercase px-1 tracking-widest">Wallet de Recepción (Pago de Beneficios)</label>
+                                    <input
+                                        type="text"
+                                        value={formData.receivingWallet}
+                                        onChange={(e) => setFormData({ ...formData, receivingWallet: e.target.value })}
+                                        placeholder="0x..."
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs font-mono text-emerald-400 focus:border-emerald-500 outline-none transition-all"
+                                    />
+                                    <p className="px-1 text-[8px] text-gray-600 font-bold uppercase italic">
+                                        Esta wallet recibirá el 90% de los fondos de cada venta.
+                                    </p>
                                 </div>
                             </div>
                         </div>
