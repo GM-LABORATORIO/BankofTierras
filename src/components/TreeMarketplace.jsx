@@ -10,7 +10,9 @@ import {
     ChevronRight,
     Loader2,
     AlertCircle,
-    ShoppingCart
+    ShoppingCart,
+    QrCode,
+    ExternalLink
 } from 'lucide-react';
 import { useWeb3 } from '../context/Web3Context';
 import { ethers } from 'ethers';
