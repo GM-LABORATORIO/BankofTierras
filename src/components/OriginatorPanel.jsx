@@ -132,7 +132,9 @@ const OriginatorPanel = ({ projects, onProjectsChange }) => {
                 status: "Pendiente",
                 image: imgResult.pinataURL, // Real image URL
                 description: metadata.description,
-                reportipfs: certIpfsUrl && certIpfsUrl !== 'ipfs://not-provided' ? certIpfsUrl : "https://images.unsplash.com/photo-1586769852836-bc069f19e1b6?auto=format&fit=crop&q=80&w=1000"
+                reportipfs: certIpfsUrl && certIpfsUrl !== 'ipfs://not-provided' ? certIpfsUrl : "https://images.unsplash.com/photo-1586769852836-bc069f19e1b6?auto=format&fit=crop&q=80&w=1000",
+                owner_wallet: account, // Guardamos la wallet del originador
+                total_quota: parseFloat(formData.area) * 2.5, // Cuota inicial
             };
 
             await onProjectsChange([newProject, ...projects]);

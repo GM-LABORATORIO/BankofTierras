@@ -58,46 +58,6 @@ const AuditorPanel = ({ projects, onProjectsChange }) => {
         }
     };
 
-    const handleMintTokens = async (project) => {
-        if (!signer) {
-            alert("Conecta tu wallet");
-            return;
-        }
-
-        setIsVerifying(`tokens-${project.id}`);
-        try {
-            const tokenContract = new ethers.Contract(
-                contractAddresses.carbonToken,
-                CARBON_TOKEN_ABI,
-                signer
-            );
-
-            // Cálculo: 1 Token = 1 Tonelada de CO2
-            // Factor: 2.5 tCO2 por Hectárea al año
-            const tonAmount = (parseInt(project.area) * 2.5).toFixed(0);
-            const amount = ethers.parseEther(tonAmount);
-
-            const tx = await tokenContract.mint(account, amount);
-            await tx.wait();
-
-            // Actualizar estado local
-            const updatedProjects = projects.map(p =>
-                p.id === project.id ? { ...p, status: 'Tokenizado' } : p
-            );
-            await onProjectsChange(updatedProjects);
-            if (viewProject && viewProject.id === project.id) {
-                setViewProject({ ...viewProject, status: 'Tokenizado' });
-            }
-
-            alert(`¡Tokens $CARBON emitidos con éxito! (${tonAmount} tokens para el proyecto ${project.name})`);
-        } catch (error) {
-            console.error(error);
-            alert("Error emitiendo tokens: " + error.message);
-        } finally {
-            setIsVerifying(null);
-        }
-    };
-
     return (
         <div className="space-y-8">
             {/* Modal de Detalle para Auditor */}
@@ -157,7 +117,7 @@ const AuditorPanel = ({ projects, onProjectsChange }) => {
                                 >
                                     <FileSearch size={18} /> Revisar Evidencia
                                 </a>
-                                {viewProject.status === 'Pendiente' ? (
+                                {viewProject.status === 'Pendiente' && (
                                     <button
                                         onClick={() => handleVerify(viewProject)}
                                         disabled={isVerifying === viewProject.id}
@@ -165,14 +125,6 @@ const AuditorPanel = ({ projects, onProjectsChange }) => {
                                     >
                                         {isVerifying === viewProject.id ? <Loader2 className="animate-spin" /> : <ShieldCheck size={18} />}
                                         FIRMAR Y VERIFICAR
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={() => handleMintTokens(viewProject)}
-                                        disabled={isVerifying === `tokens-${viewProject.id}`}
-                                        className="flex-1 py-4 bg-white text-black rounded-2xl font-black text-sm hover:bg-gray-200 transition-all"
-                                    >
-                                        {isVerifying === `tokens-${viewProject.id}` ? "EMITIENDO..." : "EMITIR $CARBON"}
                                     </button>
                                 )}
                             </div>
@@ -245,7 +197,7 @@ const AuditorPanel = ({ projects, onProjectsChange }) => {
 
                     <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2 mt-12">
                         <CheckCircle2 size={16} className="text-emerald-500" />
-                        Proyectos Listos para Emisión ({verifiedProjects.length})
+                        Proyectos Verificados ({verifiedProjects.length})
                     </h3>
 
                     <div className="grid md:grid-cols-2 gap-4">
@@ -256,17 +208,11 @@ const AuditorPanel = ({ projects, onProjectsChange }) => {
                                 className="bg-[#0a0a0a] border border-emerald-500/20 rounded-2xl overflow-hidden cursor-pointer hover:bg-emerald-500/[0.02] transition-colors"
                             >
                                 <div className="p-6">
-                                    <div className="flex justify-between items-center mb-4">
+                                    <div className="flex justify-between items-center mb-2">
                                         <h4 className="font-bold text-sm">{project.name}</h4>
                                         <CheckCircle2 size={16} className="text-emerald-500" />
                                     </div>
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); handleMintTokens(project); }}
-                                        disabled={isVerifying === `tokens-${project.id}`}
-                                        className="w-full py-3 bg-white text-black rounded-xl font-black text-xs hover:bg-emerald-500 hover:text-white transition-all shadow-xl shadow-white/5"
-                                    >
-                                        {isVerifying === `tokens-${project.id}` ? "EMITIENDO..." : "EMITIR $CARBON"}
-                                    </button>
+                                    <div className="text-[10px] text-gray-500 italic">Lista para el mercado de carbono</div>
                                 </div>
                             </div>
                         ))}

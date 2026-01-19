@@ -187,26 +187,49 @@ export const Web3Provider = ({ children }) => {
             CARBON_TOKEN_ABI,
             carbonBalance,
             prices,
-            buyTokens: async (projectId, amount) => {
-                // REAL TRANSACTION FOR DEMO (Mainnet Ready)
-                // We'll use a symbolic price (e.g. 0.0001 AVAX per token) for the demo
-                // so the user can show real wallet interaction without spending much.
+            buyTokens: async (projectId, amount, ownerWallet) => {
                 if (!signer) throw new Error("Wallet no conectada");
 
                 setIsConnecting(true);
                 try {
                     const demoPrice = ethers.parseEther((amount * 0.0001).toString());
-                    const treasury = "0xA583f0675a2d6f01ab21DEA98629e9Ee04320108"; // Using ADMIN_WALLET as Treasury
+                    const platformTreasury = "0xA583f0675a2d6f01ab21DEA98629e9Ee04320108"; // Fees
 
-                    const tx = await signer.sendTransaction({
-                        to: treasury,
-                        value: demoPrice
+                    // Si no hay wallet del dueño, todo va a la tesorería (fallback)
+                    const sellerWallet = ownerWallet || platformTreasury;
+
+                    // Calcular split 90/10
+                    const platformFee = (demoPrice * 10n) / 100n;
+                    const sellerAmount = demoPrice - platformFee;
+
+                    alert(`Iniciando compra de ${amount} tokens...\nDivisión de pago: 90% Originador / 10% Plataforma.`);
+
+                    // 1. Pago al Originador (90%)
+                    const tx1 = await signer.sendTransaction({
+                        to: sellerWallet,
+                        value: sellerAmount
                     });
 
-                    alert(`Transacción enviada: ${tx.hash}\nProcesando intercambio...`);
-                    await tx.wait();
+                    // 2. Pago a la Plataforma (10% Fee)
+                    const tx2 = await signer.sendTransaction({
+                        to: platformTreasury,
+                        value: platformFee
+                    });
 
-                    alert(`¡Éxito! Intercambio confirmado en Avalanche. (${amount} $CARBON acreditados)`);
+                    alert(`Pagos enviados. Procesando emisión de tokens en la blockchain...`);
+                    await Promise.all([tx1.wait(), tx2.wait()]);
+
+                    // 3. Emisión de tokens (MINT) al comprador
+                    const tokenContract = new ethers.Contract(
+                        contractAddresses.carbonToken,
+                        CARBON_TOKEN_ABI,
+                        signer
+                    );
+
+                    const mintTx = await tokenContract.mint(account, ethers.parseEther(amount.toString()));
+                    await mintTx.wait();
+
+                    alert(`¡Éxito! Has recibido ${amount} $CARBON. El pago ha sido repartido correctamente.`);
                     fetchCarbonBalance(account);
                     return true;
                 } catch (error) {

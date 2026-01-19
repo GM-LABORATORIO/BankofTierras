@@ -126,6 +126,7 @@ const Dashboard = ({ onBack }) => {
 
                 const normalizedProjects = dbProjects.map(p => ({
                     id: p.id,
+                    tokenId: p.token_id,
                     name: p.name,
                     location: p.location,
                     area: p.area,
@@ -134,7 +135,9 @@ const Dashboard = ({ onBack }) => {
                     image: p.image,
                     reportipfs: (p.reportipfs && p.reportipfs !== "") ? p.reportipfs : (p.reportIpfs && p.reportIpfs !== "" ? p.reportIpfs : null),
                     coordinates: p.coordinates,
-                    owner_wallet: p.owner_wallet || p.owner_wallet
+                    owner_wallet: p.owner_wallet, // Wallet del dueño del proyecto
+                    total_quota: p.total_quota || 0, // Cuota total de tokens
+                    sold_tokens: p.sold_tokens || 0  // Tokens ya vendidos
                 }));
 
                 setProjects(normalizedProjects); // NO MOCK PROJECTS

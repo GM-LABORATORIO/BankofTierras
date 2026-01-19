@@ -56,13 +56,25 @@ const CarbonMarketplace = ({ projects }) => {
         }
         setIsBuying(true);
         try {
-            const success = await buyTokens(selectedProject.id, amount);
+            // Pasamos el owner_wallet del proyecto para el split 90/10
+            const success = await buyTokens(selectedProject.id, amount, selectedProject.owner_wallet);
             if (success) {
+                // Actualizar Supabase: incrementar sold_tokens
+                const newSold = (selectedProject.sold_tokens || 0) + amount;
+                await supabaseService.updateProject(selectedProject.id, {
+                    sold_tokens: newSold
+                });
+
+                // Notificar al Dashboard del cambio si es necesario (asumimos que Dashboard refrescará o el usuario recargará)
+                // Para una mejor UX, podrías llamar a una prop onPurchaseSuccess
+
                 setSelectedProject(null);
                 setAmount(1);
+                alert("¡Compra completada! Los tokens han sido emitidos a tu wallet.");
             }
         } catch (error) {
             console.error(error);
+            alert("Error en la compra: " + error.message);
         } finally {
             setIsBuying(false);
         }
@@ -126,11 +138,14 @@ const CarbonMarketplace = ({ projects }) => {
                                     <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
                                         <span className="text-gray-500">Créditos Disponibles</span>
                                         <span className="text-white">
-                                            {(parseFloat(p.area) * 2.5 || 0).toLocaleString()} tCO2
+                                            {(p.total_quota - (p.sold_tokens || 0)).toLocaleString()} tCO2
                                         </span>
                                     </div>
                                     <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                        <div className="h-full bg-emerald-500" style={{ width: '65%' }} />
+                                        <div
+                                            className="h-full bg-emerald-500 transition-all duration-1000"
+                                            style={{ width: `${Math.max(0, Math.min(100, ((p.total_quota - p.sold_tokens) / p.total_quota) * 100))}%` }}
+                                        />
                                     </div>
                                 </div>
                                 <button
