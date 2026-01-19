@@ -14,6 +14,7 @@ import {
     RefreshCw
 } from 'lucide-react';
 import { useWeb3 } from '../context/Web3Context';
+import { supabaseService } from '../services/supabaseService';
 
 const CarbonMarketplace = ({ projects }) => {
     const { prices, buyTokens, account } = useWeb3();
