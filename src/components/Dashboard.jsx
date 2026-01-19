@@ -197,12 +197,13 @@ const Dashboard = ({ onBack }) => {
                             image: latest.image,
                             reportipfs: latest.reportipfs,
                             coordinates: latest.coordinates,
-                            owner_wallet: account
+                            owner_wallet: account,
+                            token_id: latest.id // Store blockchain tokenId in token_id column
                         });
 
                         if (savedProject) {
                             const updatedProjects = newP.map((p, i) =>
-                                i === 0 ? { ...p, id: savedProject.id } : p
+                                i === 0 ? { ...p, id: savedProject.id, tokenId: latest.id } : p
                             );
                             setProjects(updatedProjects);
                             return;
@@ -221,6 +222,19 @@ const Dashboard = ({ onBack }) => {
             label: 'Auditor',
             icon: <ShieldCheck size={20} />,
             component: <AuditorPanel projects={projects} onProjectsChange={async (newP) => {
+                // Find what changed to update Supabase
+                const changed = newP.find(p => {
+                    const old = projects.find(op => op.id === p.id);
+                    return old && old.status !== p.status;
+                });
+
+                if (changed) {
+                    try {
+                        await supabaseService.updateProject(changed.id, { status: changed.status });
+                    } catch (err) {
+                        console.error("Error updating project status:", err);
+                    }
+                }
                 setProjects(newP);
             }} />
         },

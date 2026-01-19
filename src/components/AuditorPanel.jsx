@@ -14,13 +14,14 @@ const AuditorPanel = ({ projects, onProjectsChange }) => {
     const pendingProjects = projects.filter(p => p.status === 'Pendiente');
     const verifiedProjects = projects.filter(p => p.status === 'Verificado');
 
-    const handleVerify = async (tokenId) => {
+    const handleVerify = async (project) => {
         if (!signer) {
             alert("Conecta tu wallet");
             return;
         }
 
-        setIsVerifying(tokenId);
+        const blockchainId = project.tokenId || project.id;
+        setIsVerifying(project.id);
         try {
             const nftContract = new ethers.Contract(
                 contractAddresses.amazonasNFT,
@@ -28,18 +29,15 @@ const AuditorPanel = ({ projects, onProjectsChange }) => {
                 signer
             );
 
-            const tx = await nftContract.verifyProject(tokenId);
+            const tx = await nftContract.verifyProject(blockchainId);
             await tx.wait();
 
-            // Actualizar en Supabase
-            await supabaseService.updateProject(tokenId, { status: 'Verificado' });
-
-            // Actualizar estado local para demo
+            // Actualizar estado local (Dashboard se encarga de Supabase)
             const updatedProjects = projects.map(p =>
-                p.id === tokenId ? { ...p, status: 'Verificado' } : p
+                p.id === project.id ? { ...p, status: 'Verificado' } : p
             );
             await onProjectsChange(updatedProjects);
-            if (viewProject && viewProject.id === tokenId) {
+            if (viewProject && viewProject.id === project.id) {
                 setViewProject({ ...viewProject, status: 'Verificado' });
             }
 
@@ -74,10 +72,7 @@ const AuditorPanel = ({ projects, onProjectsChange }) => {
             const tx = await tokenContract.mint(account, amount);
             await tx.wait();
 
-            // Actualizar en Supabase
-            await supabaseService.updateProject(project.id, { status: 'Tokenizado' });
-
-            // Actualizar estado local para que desaparezca de "Listos para Emisión"
+            // Actualizar estado local
             const updatedProjects = projects.map(p =>
                 p.id === project.id ? { ...p, status: 'Tokenizado' } : p
             );
@@ -156,7 +151,7 @@ const AuditorPanel = ({ projects, onProjectsChange }) => {
                                 </a>
                                 {viewProject.status === 'Pendiente' ? (
                                     <button
-                                        onClick={() => handleVerify(viewProject.id)}
+                                        onClick={() => handleVerify(viewProject)}
                                         disabled={isVerifying === viewProject.id}
                                         className="flex-1 py-4 bg-emerald-500 text-white rounded-2xl font-black text-sm hover:bg-emerald-600 transition-all flex items-center justify-center gap-2"
                                     >
@@ -223,7 +218,7 @@ const AuditorPanel = ({ projects, onProjectsChange }) => {
                                             <FileSearch size={14} /> REVISAR DETALLES
                                         </button>
                                         <button
-                                            onClick={(e) => { e.stopPropagation(); handleVerify(project.id); }}
+                                            onClick={(e) => { e.stopPropagation(); handleVerify(project); }}
                                             disabled={isVerifying === project.id}
                                             className="flex-1 py-3 bg-emerald-500 text-white rounded-xl font-black text-xs hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2"
                                         >
