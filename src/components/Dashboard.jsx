@@ -10,8 +10,11 @@ import {
     ChevronLeft,
     Menu,
     X,
-    Loader2
+    Loader2,
+    User,
+    Globe
 } from 'lucide-react';
+
 import { useWeb3 } from '../context/Web3Context';
 import OriginatorPanel from './OriginatorPanel';
 import AuditorPanel from './AuditorPanel';
@@ -20,6 +23,9 @@ import TechnicalPanel from './TechnicalPanel';
 import TreeMarketplace from './TreeMarketplace';
 import CarbonMarketplace from './CarbonMarketplace';
 import AdminPanel from './AdminPanel';
+import UserProfile from './UserProfile';
+import EcoTokenPurchase from './EcoTokenPurchase';
+import logoBot from '../assets/logo_bot.png';
 
 const ADMIN_WALLET = "0xA583f0675a2d6f01ab21DEA98629e9Ee04320108";
 
@@ -33,7 +39,7 @@ const INITIAL_SPECIES = [
         scientific: "Panthera onca",
         description: "El felino más grande de América. Tu adopción financia corredores biológicos y cámaras trampa.",
         impact: "Protección de 100ha",
-        cost: "500 $CARBON",
+        cost: "500 EcoToken",
         category: "Fauna",
         status: "Casi Amenazado",
         image: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=800"
@@ -44,7 +50,7 @@ const INITIAL_SPECIES = [
         scientific: "Inia geoffrensis",
         description: "Ser mitológico del Amazonas. Protegemos las cuencas hídricas contra la minería de mercurio.",
         impact: "Limpieza de Cuenca",
-        cost: "250 $CARBON",
+        cost: "250 EcoToken",
         category: "Fauna",
         status: "En Peligro",
         image: "https://images.unsplash.com/photo-1570710891163-6d3b5c47248b?auto=format&fit=crop&q=80&w=800"
@@ -55,7 +61,7 @@ const INITIAL_SPECIES = [
         scientific: "Harpia harpyja",
         description: "La reina del dosel. Protegemos los árboles más altos donde anidan estas majestuosas aves.",
         impact: "Protección de Nidos",
-        cost: "350 $CARBON",
+        cost: "350 EcoToken",
         category: "Fauna",
         status: "Vulnerable",
         image: "https://images.unsplash.com/photo-1621533031496-e24c6530324c?auto=format&fit=crop&q=80&w=800"
@@ -66,7 +72,7 @@ const INITIAL_SPECIES = [
         scientific: "Ara macao",
         description: "Dispersor de semillas vital para el Amazonas. Protegemos sus nidos en los huecos de los árboles.",
         impact: "Reforestación Natural",
-        cost: "150 $CARBON",
+        cost: "150 EcoToken",
         category: "Fauna",
         status: "Protegido",
         image: "https://images.unsplash.com/photo-1552728089-57bdde30fc3b?auto=format&fit=crop&q=80&w=800"
@@ -77,7 +83,7 @@ const INITIAL_SPECIES = [
         scientific: "Ceiba pentandra",
         description: "El gigante sagrado del Amazonas. Estos árboles son refugio para cientos de especies.",
         impact: "450kg CO2 / año",
-        cost: "50 $CARBON",
+        cost: "50 EcoToken",
         category: "Flora",
         status: "Protegido",
         image: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&q=80&w=800"
@@ -88,7 +94,7 @@ const INITIAL_SPECIES = [
         scientific: "Cattleya luteola",
         description: "Símbolo de la biodiversidad floral. Tu apoyo financia viveros de especies nativas.",
         impact: "Conservación Genética",
-        cost: "75 $CARBON",
+        cost: "75 EcoToken",
         category: "Flora",
         status: "Vulnerable",
         image: "https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?auto=format&fit=crop&q=80&w=800"
@@ -97,9 +103,9 @@ const INITIAL_SPECIES = [
 
 import { supabaseService } from '../services/supabaseService';
 
-const Dashboard = ({ onBack }) => {
-    const { account, connectWallet, isConnecting, carbonBalance } = useWeb3();
-    const [activeTab, setActiveTab] = useState('originator');
+const Dashboard = ({ onBack, onDiscovery }) => {
+    const { account, connectWallet, isConnecting, carbonBalance, botBalance } = useWeb3();
+    const [activeTab, setActiveTab] = useState('profile');
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -108,6 +114,45 @@ const Dashboard = ({ onBack }) => {
     const [species, setSpecies] = useState([]);
     const [myForest, setMyForest] = useState([]);
     const [totalRetired, setTotalRetired] = useState(0);
+    const [userProfile, setUserProfile] = useState(null);
+
+    // Function to load projects from Supabase
+    const loadProjects = async () => {
+        try {
+            const dbProjects = await supabaseService.getProjects();
+            const normalizedProjects = dbProjects.map(p => ({
+                id: p.id,
+                tokenId: p.token_id,
+                name: p.name,
+                location: p.location,
+                area: p.area,
+                regid: (p.regid && p.regid !== "") ? p.regid : (p.regId && p.regId !== "" ? p.regId : null),
+                status: p.status,
+                image: p.image,
+                reportipfs: (p.reportipfs && p.reportipfs !== "") ? p.reportipfs : (p.reportIpfs && p.reportIpfs !== "" ? p.reportIpfs : null),
+                coordinates: p.coordinates,
+                owner_wallet: p.owner_wallet,
+                total_quota: p.total_quota || 0,
+                sold_tokens: p.sold_tokens || 0
+            }));
+            setProjects(normalizedProjects);
+        } catch (error) {
+            console.error("Error loading projects:", error);
+        }
+    };
+
+    // Function to load profile from Supabase
+    const loadProfile = async () => {
+        if (!account) return;
+        try {
+            const profile = await supabaseService.getProfile(account);
+            if (profile) {
+                setUserProfile(profile);
+            }
+        } catch (error) {
+            console.error("Error loading profile:", error);
+        }
+    };
 
     // Initial Data Fetch
     useEffect(() => {
@@ -146,10 +191,15 @@ const Dashboard = ({ onBack }) => {
                 setProjects(normalizedProjects); // NO MOCK PROJECTS
 
                 if (account) {
-                    const [dbAdoptions, dbCompensations] = await Promise.all([
+                    const [dbAdoptions, dbCompensations, profile] = await Promise.all([
                         supabaseService.getAdoptions(account),
-                        supabaseService.getCompensations(account)
+                        supabaseService.getCompensations(account),
+                        supabaseService.getProfile(account)
                     ]);
+
+                    if (profile) {
+                        setUserProfile(profile);
+                    }
 
                     setMyForest(dbAdoptions.map(a => ({
                         ...a.species,
@@ -181,10 +231,22 @@ const Dashboard = ({ onBack }) => {
 
     const tabs = [
         {
+            id: 'profile',
+            label: 'Mi Perfil',
+            icon: <User size={20} />,
+            component: <UserProfile myForest={myForest} onProfileUpdate={loadProfile} />
+        },
+        {
+            id: 'buy-ecotoken',
+            label: 'Comprar EcoToken',
+            icon: <Heart size={20} />,
+            component: <EcoTokenPurchase />
+        },
+        {
             id: 'market',
-            label: 'Mercado',
+            label: 'Mercado Carbono',
             icon: <LayoutDashboard size={20} />,
-            component: <CarbonMarketplace projects={projects} />
+            component: <CarbonMarketplace projects={projects} onPurchaseSuccess={loadProjects} />
         },
         {
             id: 'originator',
@@ -204,7 +266,8 @@ const Dashboard = ({ onBack }) => {
                             reportipfs: latest.reportipfs,
                             coordinates: latest.coordinates,
                             owner_wallet: latest.owner_wallet || account,
-                            token_id: latest.id // Store blockchain tokenId in token_id column
+                            token_id: latest.id, // Store blockchain tokenId in token_id column
+                            total_quota: latest.total_quota || (parseFloat(latest.area) * 2.5)
                         });
 
                         if (savedProject) {
@@ -252,6 +315,7 @@ const Dashboard = ({ onBack }) => {
                 myForest={myForest}
                 projects={projects}
                 totalRetired={totalRetired}
+                userProfile={userProfile}
                 onRetire={async (amount, certData) => {
                     setTotalRetired(prev => prev + parseFloat(amount));
                     await supabaseService.addCompensation({
@@ -355,11 +419,11 @@ const Dashboard = ({ onBack }) => {
                 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
             `}>
                 <div className="p-6 flex items-center justify-between border-b border-white/5">
-                    <div className="flex items-center gap-3">
-                        <button onClick={onBack} className="p-2 hover:bg-white/5 rounded-lg transition-colors">
+                    <div className="flex items-center gap-4">
+                        <button onClick={onBack} className="p-2 hover:bg-white/5 rounded-lg transition-colors shrink-0">
                             <ChevronLeft size={20} className="text-gray-400" />
                         </button>
-                        <span className="font-black tracking-tighter text-emerald-500 italic uppercase">AmazonasCero</span>
+                        <img src={logoBot} className="h-12 w-auto brightness-0 invert opacity-95" alt="Bank of Tierras" />
                     </div>
                     <button
                         onClick={() => setIsMenuOpen(false)}
@@ -389,6 +453,16 @@ const Dashboard = ({ onBack }) => {
                             {tab.label}
                         </button>
                     ))}
+
+                    <div className="mt-8 px-4">
+                        <button
+                            onClick={onDiscovery}
+                            className="w-full flex items-center justify-center gap-3 py-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-500 font-black text-[10px] uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all group shadow-2xl"
+                        >
+                            <Globe size={16} className="group-hover:rotate-12 transition-transform" />
+                            Explorar Globo BoT
+                        </button>
+                    </div>
                 </nav>
 
                 <div className="p-6 border-t border-white/5">
@@ -398,11 +472,20 @@ const Dashboard = ({ onBack }) => {
                                 <div className="text-[9px] text-emerald-500/50 font-black uppercase mb-1 tracking-[0.2em]">Wallet Activa</div>
                                 <div className="text-[10px] font-mono text-white truncate font-bold">{account}</div>
                             </div>
-                            <div className="px-5 py-4 bg-white/5 rounded-2xl border border-white/10 group hover:border-emerald-500/30 transition-all">
-                                <div className="text-[9px] text-gray-500 font-black uppercase mb-1 tracking-[0.3em]">Saldo $CARBON</div>
-                                <div className="flex items-baseline gap-2">
-                                    <span className="text-xl font-black text-white italic tracking-tighter">{parseFloat(carbonBalance).toLocaleString()}</span>
-                                    <span className="text-[10px] font-black text-emerald-500 tracking-widest uppercase mb-1">tCO2</span>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="px-4 py-3 bg-white/5 rounded-2xl border border-white/10 group hover:border-emerald-500/30 transition-all">
+                                    <div className="text-[8px] text-gray-500 font-black uppercase mb-1 tracking-wider">EcoToken</div>
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-lg font-black text-emerald-400 italic">{parseFloat(botBalance || 0).toLocaleString()}</span>
+                                        <span className="text-[9px] font-black text-emerald-500/70">$BoT</span>
+                                    </div>
+                                </div>
+                                <div className="px-4 py-3 bg-white/5 rounded-2xl border border-white/10 group hover:border-blue-500/30 transition-all">
+                                    <div className="text-[8px] text-gray-500 font-black uppercase mb-1 tracking-wider">Carbon</div>
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-lg font-black text-blue-400 italic">{parseFloat(carbonBalance || 0).toLocaleString()}</span>
+                                        <span className="text-[9px] font-black text-blue-500/70">tCO2</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -468,13 +551,23 @@ const Dashboard = ({ onBack }) => {
                             {isLoading ? (
                                 <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
                                     <Loader2 className="w-12 h-12 text-emerald-500 animate-spin" />
-                                    <p className="text-gray-500 font-black uppercase tracking-widest text-xs italic">Sincronizando con Amazonas Cero Cloud...</p>
+                                    <p className="text-gray-500 font-black uppercase tracking-widest text-xs italic">Sincronizando con Bank of Tierras Cloud...</p>
                                 </div>
                             ) : (
                                 tabs.find(t => t.id === activeTab)?.component
                             )}
                         </motion.div>
                     </AnimatePresence>
+
+                    {/* Dashboard Footer Footprint */}
+                    <footer className="mt-20 pt-12 border-t border-white/5 pb-12 text-center">
+                        <div className="flex flex-col items-center gap-4">
+                            <img src={logoBot} className="h-8 brightness-0 invert opacity-30" alt="Bank of Tierras" />
+                            <p className="text-[8px] font-black text-gray-700 uppercase tracking-[0.4em]">
+                                &copy; 2024 BANK OF TIERRAS PROTOCOL • SUSTAINABLE WEB3 INFRASTRUCTURE
+                            </p>
+                        </div>
+                    </footer>
                 </div>
             </main>
         </div>

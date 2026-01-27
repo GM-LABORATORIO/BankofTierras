@@ -21,7 +21,7 @@ import { supabaseService } from '../services/supabaseService';
 const ADMIN_WALLET = "0xA583f0675a2d6f01ab21DEA98629e9Ee04320108";
 
 const TreeMarketplace = ({ species, setSpecies, resetSpecies, myForest, setMyForest }) => {
-    const { signer, contractAddresses, CARBON_TOKEN_ABI, account, carbonBalance } = useWeb3();
+    const { signer, contractAddresses, BOT_TOKEN_ABI, account, botBalance } = useWeb3();
     const isAdmin = account?.toLowerCase() === ADMIN_WALLET.toLowerCase();
     const [selectedTree, setSelectedTree] = useState(null);
     const [isAdopted, setIsAdopted] = useState(false);
@@ -31,7 +31,7 @@ const TreeMarketplace = ({ species, setSpecies, resetSpecies, myForest, setMyFor
     const [guardianName, setGuardianName] = useState('');
 
     // Check if user has enough balance for the current tree
-    const currentBalance = parseFloat(carbonBalance || '0');
+    const currentBalance = parseFloat(botBalance || '0');
     const treeCost = selectedTree ? parseFloat(selectedTree.cost.replace(/[^0-9.]/g, '')) : 0;
     const hasEnoughBalance = currentBalance >= treeCost;
 
@@ -51,18 +51,17 @@ const TreeMarketplace = ({ species, setSpecies, resetSpecies, myForest, setMyFor
         setIsProcessing(true);
         try {
             const tokenContract = new ethers.Contract(
-                contractAddresses.carbonToken,
-                CARBON_TOKEN_ABI,
+                contractAddresses.botToken,
+                BOT_TOKEN_ABI,
                 signer
             );
 
-            // Extraer valor numérico del costo (ej: "500 $CARBON" -> 500)
+            // Extraer valor numérico del costo (ej: "500 EcoToken" -> 500)
             const costValue = tree.cost.split(' ')[0].replace(/,/g, '');
             const amount = ethers.parseUnits(costValue, 18);
 
-            // En este flujo, el usuario transfiere los tokens al "Fondo de Conservación" (el dueño del contrato)
-            // Para el demo, los enviamos a una dirección de tesorería o al mismo admin que emitió
-            const treasuryAddress = "0x71C7656EC7ab88b098defB751B7401B5f6d8976F"; // Dirección de ejemplo para el fondo
+            // Transferir EcoTokens al Treasury
+            const treasuryAddress = contractAddresses.botTreasury;
 
             const tx = await tokenContract.transfer(treasuryAddress, amount);
             await tx.wait();
@@ -109,7 +108,7 @@ const TreeMarketplace = ({ species, setSpecies, resetSpecies, myForest, setMyFor
             scientific: '',
             description: '',
             impact: '',
-            cost: '100 $CARBON',
+            cost: '100 EcoToken',
             category: 'Fauna',
             status: 'Protegido',
             image: ''
@@ -133,7 +132,7 @@ const TreeMarketplace = ({ species, setSpecies, resetSpecies, myForest, setMyFor
                             <div className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.3em] mb-4">Adopt a Tree Initiative</div>
                             <h2 className="text-3xl lg:text-5xl font-black text-white mb-2 italic leading-tight uppercase tracking-tighter">Adopta un Respiro</h2>
                             <p className="text-gray-300 max-w-md text-sm font-medium hidden md:block">
-                                Cada contribución en $CARBON financia la protección inmediata de estas especies emblemáticas y su hábitat primario en el Amazonas.
+                                Cada contribución en EcoToken financia la protección inmediata de estas especies emblemáticas y su hábitat primario en el Amazonas.
                             </p>
                         </div>
                         <div className="flex gap-2">
@@ -326,13 +325,13 @@ const TreeMarketplace = ({ species, setSpecies, resetSpecies, myForest, setMyFor
 
                             <div className="grid grid-cols-2 gap-4 relative z-10">
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-gray-500 uppercase px-1 tracking-widest">Costo ($CARBON)</label>
+                                    <label className="text-[10px] font-black text-gray-500 uppercase px-1 tracking-widest">Costo (EcoToken)</label>
                                     <input
                                         required
                                         value={editingItem.cost}
                                         onChange={e => setEditingItem({ ...editingItem, cost: e.target.value })}
                                         className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm focus:border-emerald-500 outline-none transition-colors text-emerald-500 font-black"
-                                        placeholder="Ej: 100 $CARBON"
+                                        placeholder="Ej: 100 EcoToken"
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -439,7 +438,7 @@ const TreeMarketplace = ({ species, setSpecies, resetSpecies, myForest, setMyFor
                                         <div className="space-y-4">
                                             <div className="flex items-center gap-3 p-4 bg-orange-500/10 border border-orange-500/20 rounded-2xl text-orange-500 text-xs font-bold text-left">
                                                 <AlertCircle size={20} className="shrink-0" />
-                                                <span>Saldo insuficiente. Necesitas {treeCost} $CARBON para esta adopción.</span>
+                                                <span>Saldo insuficiente. Necesitas {treeCost} EcoToken para esta adopción.</span>
                                             </div>
                                             <button
                                                 onClick={() => {
@@ -533,7 +532,7 @@ const TreeMarketplace = ({ species, setSpecies, resetSpecies, myForest, setMyFor
                                                 </div>
                                                 <div className="text-left">
                                                     <div className="text-[8px] font-black uppercase text-gray-400">Verificado por</div>
-                                                    <div className="text-[10px] font-bold text-white uppercase tracking-widest">Amazonas Cero Protocol</div>
+                                                    <div className="text-[10px] font-bold text-white uppercase tracking-widest">Bank of Tierras Protocol</div>
                                                 </div>
                                             </div>
                                         </div>

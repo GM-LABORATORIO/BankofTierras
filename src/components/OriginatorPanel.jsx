@@ -259,8 +259,8 @@ const OriginatorPanel = ({ projects, onProjectsChange }) => {
             {/* Welcome Header */}
             <div className="bg-emerald-500/10 border border-emerald-500/20 p-8 rounded-3xl relative overflow-hidden">
                 <div className="relative z-10">
-                    <h2 className="text-3xl font-black mb-2 text-white">Gestiona tu Proyecto Amazonía</h2>
-                    <p className="text-gray-400 max-w-xl">Registra nuevas hectáreas, sube pruebas de conservación y monitorea el estado de tus créditos de CO2.</p>
+                    <h2 className="text-3xl font-black mb-2 text-white">Gestiona tu Proyecto de Impacto Global</h2>
+                    <p className="text-gray-400 max-w-xl">Registra nuevas áreas de conservación, sube pruebas de regeneración y monitorea el estado de tus activos de biodiversidad en todo el mundo.</p>
                 </div>
                 <div className="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-emerald-500/20 to-transparent flex items-center justify-center">
                     <Leaf className="w-32 h-32 text-emerald-500/20 rotate-12" />
@@ -422,32 +422,34 @@ const OriginatorPanel = ({ projects, onProjectsChange }) => {
                     <div className="bg-[#0a0a0a] border border-white/5 p-6 rounded-2xl">
                         <h3 className="text-lg font-bold mb-6">Tus Proyectos</h3>
                         <div className="space-y-4">
-                            {projects.map(project => (
-                                <div
-                                    key={project.id}
-                                    onClick={() => setViewProject(project)}
-                                    className="p-4 rounded-xl bg-white/5 border border-white/10 hover:border-emerald-500/50 transition-colors cursor-pointer group"
-                                >
-                                    <div className="flex justify-between items-start mb-3">
-                                        <div className="font-bold text-sm group-hover:text-emerald-500 transition-colors">{project.name}</div>
-                                        <span className={`text-[10px] font-black px-2 py-1 rounded-full uppercase ${project.status === 'Verificado' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-yellow-500/20 text-yellow-400'
-                                            }`}>
-                                            {project.status}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-xs text-gray-500 mb-4">
-                                        <MapPin size={12} />
-                                        {project.location}
-                                    </div>
-                                    <div className="flex items-center justify-between text-[10px] text-gray-400 pt-3 border-t border-white/5">
-                                        <div className="flex items-center gap-1">
-                                            <FileText size={12} />
-                                            Certificado IPFS
+                            {projects
+                                .filter(p => !p.owner_wallet || p.owner_wallet.toLowerCase() === account?.toLowerCase())
+                                .map(project => (
+                                    <div
+                                        key={project.id}
+                                        onClick={() => setViewProject(project)}
+                                        className="p-4 rounded-xl bg-white/5 border border-white/10 hover:border-emerald-500/50 transition-colors cursor-pointer group"
+                                    >
+                                        <div className="flex justify-between items-start mb-3">
+                                            <div className="font-bold text-sm group-hover:text-emerald-500 transition-colors">{project.name}</div>
+                                            <span className={`text-[10px] font-black px-2 py-1 rounded-full uppercase ${project.status === 'Verificado' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-yellow-500/20 text-yellow-400'
+                                                }`}>
+                                                {project.status}
+                                            </span>
                                         </div>
-                                        <div className="font-mono text-emerald-500">ID: {project.regid?.split('-')?.pop() || '...'}</div>
+                                        <div className="flex items-center gap-2 text-xs text-gray-500 mb-4">
+                                            <MapPin size={12} />
+                                            {project.location}
+                                        </div>
+                                        <div className="flex items-center justify-between text-[10px] text-gray-400 pt-3 border-t border-white/5">
+                                            <div className="flex items-center gap-1">
+                                                <FileText size={12} />
+                                                Certificado IPFS
+                                            </div>
+                                            <div className="font-mono text-emerald-500">ID: {project.regid?.split('-')?.pop() || '...'}</div>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))}
                         </div>
                     </div>
                 </div>

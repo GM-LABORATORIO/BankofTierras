@@ -1,0 +1,303 @@
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+
+export const supabase = (supabaseUrl && supabaseAnonKey)
+    ? createClient(supabaseUrl, supabaseAnonKey)
+    : null;
+
+export const supabaseService = {
+    // --- Species ---
+    async getSpecies() {
+        if (!supabase) return [];
+        const { data, error } = await supabase
+            .from('species')
+            .select('*')
+            .order('created_at', { ascending: false });
+        if (error) throw error;
+        return data;
+    },
+
+    async addSpecies(speciesItem) {
+        if (!supabase) return null;
+        const { data, error } = await supabase
+            .from('species')
+            .insert([speciesItem])
+            .select();
+        if (error) throw error;
+        return data[0];
+    },
+
+    async updateSpecies(id, updates) {
+        if (!supabase) return null;
+        const { data, error } = await supabase
+            .from('species')
+            .update(updates)
+            .eq('id', id)
+            .select();
+        if (error) throw error;
+        return data[0];
+    },
+
+    // --- Projects ---
+    async getProjects() {
+        if (!supabase) return [];
+        const { data, error } = await supabase
+            .from('projects')
+            .select('*')
+            .order('created_at', { ascending: false });
+        if (error) throw error;
+        return data;
+    },
+
+    async addProject(project) {
+        if (!supabase) return null;
+        const { data, error } = await supabase
+            .from('projects')
+            .insert([project])
+            .select();
+        if (error) throw error;
+        return data[0];
+    },
+
+    async updateProject(id, updates) {
+        if (!supabase) return null;
+        const { data, error } = await supabase
+            .from('projects')
+            .update(updates)
+            .eq('id', id)
+            .select();
+        if (error) throw error;
+        return data[0];
+    },
+
+    // --- Adoptions ---
+    async getAdoptions(walletAddress) {
+        if (!supabase || !walletAddress) return [];
+        const { data, error } = await supabase
+            .from('adoptions')
+            .select(`
+                *,
+                species:species_id (*)
+            `)
+            .eq('wallet_address', walletAddress);
+        if (error) throw error;
+        return data;
+    },
+
+    async addAdoption(adoption) {
+        if (!supabase) return null;
+        const { data, error } = await supabase
+            .from('adoptions')
+            .insert([adoption])
+            .select();
+        if (error) throw error;
+        return data[0];
+    },
+
+    // --- Compensations ---
+    async getCompensations(walletAddress) {
+        if (!supabase || !walletAddress) return [];
+        const { data, error } = await supabase
+            .from('compensations')
+            .select('*')
+            .eq('wallet_address', walletAddress);
+        if (error) throw error;
+        return data;
+    },
+
+    async addCompensation(compensation) {
+        if (!supabase) return null;
+        const { data, error } = await supabase
+            .from('compensations')
+            .insert([compensation])
+            .select();
+        if (error) throw error;
+        return data[0];
+    },
+
+    async seedSpecies(initialSpecies) {
+        if (!supabase) return;
+        const { data: existing } = await supabase.from('species').select('id').limit(1);
+        if (existing && existing.length === 0) {
+            const { error } = await supabase.from('species').insert(initialSpecies);
+            if (error) console.error("Error seeding species:", error);
+        }
+    },
+
+    // --- System Config ---
+    async getSystemConfig() {
+        if (!supabase) return [];
+        const { data, error } = await supabase
+            .from('system_config')
+            .select('*');
+        if (error) throw error;
+        return data;
+    },
+
+    async updateSystemConfig(key, value, description = null) {
+        if (!supabase) return null;
+        const payload = {
+            key,
+            value,
+            updated_at: new Date().toISOString()
+        };
+        if (description) payload.description = description;
+
+        const { data, error } = await supabase
+            .from('system_config')
+            .upsert(payload, { onConflict: 'key' })
+            .select();
+        if (error) throw error;
+        return data[0];
+    },
+
+    // --- User Profiles ---
+    async getProfile(walletAddress) {
+        if (!supabase || !walletAddress) return null;
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('wallet_address', walletAddress)
+            .single();
+
+        if (error && error.code !== 'PGRST116') { // PGRST116 is "Row not found"
+            console.error("Error getting profile:", error);
+            throw error;
+        }
+        return data; // returns null if not found
+    },
+
+    async upsertProfile(profile) {
+        if (!supabase) return null;
+        // Ensure wallet_address is present
+        if (!profile.wallet_address) throw new Error("Wallet address is required for profile");
+
+        const { data, error } = await supabase
+            .from('profiles')
+            .upsert(profile, { onConflict: 'wallet_address' })
+            .select();
+
+        if (error) throw error;
+        return data[0];
+    },
+
+    // --- Species Listings ---
+    async getSpeciesListings(filters = {}) {
+        if (!supabase) return [];
+        let query = supabase
+            .from('species_listings')
+            .select('*, originator:profiles!originator_wallet(name, wallet_address)')
+            .eq('status', 'active');
+
+        if (filters.category) query = query.eq('category', filters.category);
+        if (filters.region) query = query.eq('region', filters.region);
+        if (filters.originator) query = query.eq('originator_wallet', filters.originator);
+
+        const { data, error } = await query.order('created_at', { ascending: false });
+        if (error) throw error;
+        return data;
+    },
+
+    async addSpeciesListing(listing) {
+        if (!supabase) return null;
+        const { data, error } = await supabase
+            .from('species_listings')
+            .insert([listing])
+            .select();
+        if (error) throw error;
+        return data[0];
+    },
+
+    // --- Adoptions ---
+    async getAdoptionsByWallet(walletAddress) {
+        if (!supabase || !walletAddress) return [];
+        const { data, error } = await supabase
+            .from('adoptions')
+            .select(`
+                *,
+                species:species_listings(*)
+            `)
+            .eq('adopter_wallet', walletAddress)
+            .eq('status', 'active');
+        if (error) throw error;
+        return data;
+    },
+
+    async createAdoption(adoption) {
+        if (!supabase) return null;
+        const { data, error } = await supabase
+            .from('adoptions')
+            .insert([adoption])
+            .select();
+        if (error) throw error;
+
+        // Update total adoptions count
+        if (data[0]) {
+            await supabase.rpc('increment_species_adoptions', {
+                species_id: adoption.species_listing_id
+            });
+        }
+
+        return data[0];
+    },
+
+    // --- Donations ---
+    async getDonationsByDonor(walletAddress) {
+        if (!supabase || !walletAddress) return [];
+        const { data, error } = await supabase
+            .from('donations')
+            .select(`
+                *,
+                originator:profiles!originator_wallet(name, wallet_address)
+            `)
+            .eq('donor_wallet', walletAddress);
+        if (error) throw error;
+        return data;
+    },
+
+    async getDonationsByOriginator(walletAddress) {
+        if (!supabase || !walletAddress) return [];
+        const { data, error } = await supabase
+            .from('donations')
+            .select('*')
+            .eq('originator_wallet', walletAddress);
+        if (error) throw error;
+        return data;
+    },
+
+    async createDonation(donation) {
+        if (!supabase) return null;
+        const { data, error } = await supabase
+            .from('donations')
+            .insert([donation])
+            .select();
+        if (error) throw error;
+        return data[0];
+    },
+
+    // --- Carbon Purchases (using compensations table) ---
+    async createCarbonPurchase(purchase) {
+        if (!supabase) return null;
+        const { data, error } = await supabase
+            .from('compensations')
+            .insert([purchase])
+            .select();
+        if (error) throw error;
+        return data[0];
+    },
+
+    async getCarbonPurchasesByWallet(walletAddress) {
+        if (!supabase || !walletAddress) return [];
+        const { data, error } = await supabase
+            .from('compensations')
+            .select(`
+                *,
+                project:projects(*)
+            `)
+            .eq('buyer_wallet', walletAddress);
+        if (error) throw error;
+        return data;
+    }
+};

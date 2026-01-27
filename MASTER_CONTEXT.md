@@ -1,0 +1,1229 @@
+# 🌍 Bank of Tierras - Master Context
+
+## 📋 Resumen del Proyecto
+
+**Bank of Tierras** es una plataforma Web3 de adopción temporal de píxeles de tierra que combina:
+- 🗺️ Mapa interactivo global con biomas reales
+- 🌱 Sistema de conservación ambiental
+- 💎 NFTs con tiers dinámicos (BASIC, COMMON, RARE, EPIC)
+- 📸 Galería de medios (fotos + live-streams)
+- 🎯 Experiencias premium (viajes, webinars, live-cams)
+- 📊 Tracking de impacto ambiental (CO2, árboles, fondos)
+
+---
+
+## 🗂️ Arquitectura del Sistema
+
+### 🗺️ Mapa Mundial Pixelado
+
+**Sistema de Grilla Global**:
+- **Proyección**: GeoMercator
+- **Resolución**: 1.0° por píxel (GRID_STEP)
+- **Dimensiones**: 360 (Longitud) × 180 (Latitud)
+- **Total de Nodos**: **64,800 píxeles**
+  - 🌍 Nodos Terrestres: ~18,792 (29%)
+  - 🌊 Nodos Marítimos: ~46,008 (71%)
+
+**Características del Mapa**:
+- Detección de biomas en tiempo real
+- Sistema de coordenadas determinista
+- Precios procedurales con volatilidad de mercado
+- Hover interactivo con throttling (100ms)
+- Zoom optimizado (0.5x - 12x)
+- Visualización de tiers con colores dinámicos
+
+**Archivo**: `src/components/LifeMap.jsx`
+
+---
+
+### 💎 Sistema de Tiers y Economía
+
+**4 Niveles de Exclusividad**:
+
+| Tier | Nombre | % del Mapa | Cantidad | Precio (USD) | Multiplicador |
+|------|--------|------------|----------|--------------|---------------|
+| **1 - EPIC** | Santuario Crítico | 1% | 648 px | $1,000 - $3,500 | 1.5x |
+| **2 - RARE** | Hotspot Biótico | 9% | 5,832 px | $500 - $1,000 | 1.3x |
+| **3 - COMMON** | Reserva Forestal | 20% | 12,960 px | $250 - $500 | 1.1x |
+| **4 - BASIC** | Sumidero Oceánico | 70% | 45,360 px | $100 - $250 | 1.0x |
+
+**Potencial de Recaudación Total**: **$17,334,000 USD**
+
+**Beneficios por Tier**:
+
+#### EPIC ($1,000+)
+- 🏆 NFT 3D Voxelizado de especie protegida
+- 📹 Acceso a Live-Cams 24/7 con control PTZ
+- 🗳️ Votación en gobernanza del proyecto
+- ✈️ Viaje guiado de 7-10 días al bioma
+- 🎓 Webinar mensual con expertos
+- 💰 ROI estimado: 25%
+
+#### RARE ($500-$999)
+- 📊 Reportes de especies en tiempo real
+- 📜 Certificado de Impacto Premium
+- 🌐 Acceso a zona VIP de Discord
+- 🎥 Webinar trimestral exclusivo
+- 💰 ROI estimado: 18%
+
+#### COMMON ($250-$499)
+- ⚡ Generación acelerada de EcoTokens
+- 📈 Pool de recompensas de carbono
+- 🌱 Certificado digital de adopción
+- 💰 ROI estimado: 12%
+
+#### BASIC ($100-$249)
+- 🛡️ Membresía de Guardián
+- 🌊 Participación en proyectos de limpieza
+- 📱 Badge de perfil
+- 💰 ROI estimado: 8%
+
+**Archivo**: `src/data/globalBiomes.jsx` (ADOPTION_PLANS)
+
+---
+
+### 👤 Sistema de Perfiles de Usuario
+
+**Componente**: `UserProfile.jsx`
+
+**Funcionalidades**:
+- 📝 Información personal (nombre, email, empresa)
+- 🏢 Tipo de usuario (Individual, Corporativo, Originador, Auditor)
+- 🗺️ Mapa de píxeles adoptados
+- 📊 Estadísticas de impacto (CO2, árboles, fondos)
+- 🎖️ Badges y logros
+- 📜 Historial de transacciones
+- 🔔 Notificaciones y alertas
+- ⚙️ Configuración de cuenta
+
+**Tipos de Usuario**:
+1. **Individual** - Adoptante regular
+2. **Corporativo** - Empresas con panel especial
+3. **Originador** - Creadores de proyectos de conservación
+4. **Auditor** - Verificadores de impacto
+5. **Admin** - Administradores del sistema
+
+---
+
+### 🏢 Panel Corporativo
+
+**Componente**: `CorporatePanel.jsx`
+
+**Funcionalidades Clave**:
+- 💼 Dashboard ejecutivo con métricas
+- 🌍 Portafolio de píxeles adoptados
+- 📊 Reportes de impacto corporativo
+- 🔥 Sistema de "quema" de tokens (burn)
+- 📜 Certificados de compensación ambiental
+- 💰 Re-inversión en créditos de carbono
+- 👥 Gestión de equipo corporativo
+- 📈 Análisis de ROI ambiental
+
+**Beneficios Corporativos**:
+- Reducción de impuestos por compensación ambiental
+- Certificados legales para reportes ESG
+- Branding verde en el mapa global
+- Acceso a eventos corporativos exclusivos
+- Prioridad en proyectos de conservación
+
+**Archivo**: `src/components/CorporatePanel.jsx`
+
+---
+
+### 🌱 Panel de Originadores
+
+**Componente**: `OriginatorPanel.jsx`
+
+**¿Qué es un Originador?**
+Creadores de proyectos de conservación que tokenizen sus iniciativas en la plataforma.
+
+**Funcionalidades**:
+- 📋 Crear proyectos de conservación
+- 📸 Subir certificados e imágenes (IPFS via Pinata)
+- 🗺️ Asignar proyectos a píxeles específicos
+- 💰 Definir metas de financiamiento
+- 📊 Dashboard de proyectos activos
+- 👥 Gestión de colaboradores
+- 📈 Tracking de fondos recaudados
+- 🔍 Verificación de impacto
+
+**Flujo de Creación de Proyecto**:
+1. Registrar proyecto (nombre, descripción, ubicación)
+2. Subir certificado de validación (PDF/imagen)
+3. Definir meta de financiamiento
+4. Asignar a píxeles del mapa
+5. Publicar en marketplace
+6. Recibir fondos de adoptantes
+7. Reportar impacto mensual
+
+**Archivo**: `src/components/OriginatorPanel.jsx`
+
+---
+
+### 🔍 Panel de Auditores
+
+**Componente**: `AuditorPanel.jsx`
+
+**Rol del Auditor**:
+Verificadores independientes que validan el impacto real de los proyectos.
+
+**Funcionalidades**:
+- 📋 Lista de proyectos pendientes de auditoría
+- ✅ Aprobar/Rechazar proyectos
+- 📊 Verificar métricas de impacto
+- 📸 Validar evidencia fotográfica
+- 📝 Generar reportes de auditoría
+- 🏅 Sistema de reputación de originadores
+- 🔔 Alertas de proyectos sospechosos
+
+**Criterios de Validación**:
+- Documentación legal completa
+- Evidencia fotográfica geolocalizada
+- Métricas de impacto verificables
+- Transparencia financiera
+- Cumplimiento de estándares internacionales
+
+**Archivo**: `src/components/AuditorPanel.jsx`
+
+---
+
+### 🪙 Sistema de EcoToken
+
+**Componente**: `EcoTokenPurchase.jsx`
+
+**¿Qué es el EcoToken?**
+Token nativo de la plataforma que representa créditos de carbono y servicios ecosistémicos.
+
+**Características**:
+- 💰 Precio dinámico basado en TRM (Tasa Representativa del Mercado)
+- 🔄 Convertible a créditos de carbono
+- 🌱 Generado por píxeles adoptados
+- 💸 Comercializable en marketplace
+- 🔥 Quemable para certificados ambientales
+
+**Generación de EcoTokens**:
+- **EPIC**: 10 tokens/mes por píxel
+- **RARE**: 5 tokens/mes por píxel
+- **COMMON**: 2 tokens/mes por píxel
+- **BASIC**: 1 token/mes por píxel
+
+**Usos del EcoToken**:
+1. Comprar más píxeles con descuento
+2. Acceder a experiencias premium
+3. Votar en gobernanza
+4. Comercializar en marketplace
+5. Quemar para certificados legales
+
+**Archivo**: `src/components/EcoTokenPurchase.jsx`
+
+---
+
+### 🌳 Marketplace de Carbono
+
+**Componente**: `CarbonMarketplace.jsx`
+
+**Funcionalidades**:
+- 📊 Listado de proyectos de conservación
+- 🔍 Filtros por bioma, tier, precio, impacto
+- 💰 Compra de créditos de carbono
+- 📈 Gráficos de impacto en tiempo real
+- 🏆 Ranking de proyectos más impactantes
+- 💬 Sistema de reviews y ratings
+- 🔔 Alertas de nuevos proyectos
+
+**Tipos de Proyectos**:
+1. **Reforestación** - Plantación de árboles nativos
+2. **Conservación** - Protección de bosques existentes
+3. **Restauración** - Recuperación de ecosistemas degradados
+4. **Energía Renovable** - Proyectos solares/eólicos
+5. **Limpieza Oceánica** - Remoción de plásticos
+
+**Archivo**: `src/components/CarbonMarketplace.jsx`
+
+---
+
+### 🌲 Marketplace de Árboles
+
+**Componente**: `TreeMarketplace.jsx`
+
+**Concepto**:
+Marketplace especializado en adopción de árboles individuales con NFTs únicos.
+
+**Funcionalidades**:
+- 🌳 Catálogo de especies nativas por bioma
+- 📍 Geolocalización exacta del árbol
+- 📸 Fotos del árbol adoptado
+- 📊 Tracking de crecimiento (altura, diámetro)
+- 🎁 NFT 3D del árbol
+- 📜 Certificado de adopción
+- 🔔 Actualizaciones mensuales
+
+**Especies Disponibles** (ejemplos):
+- Ceiba (Amazonía)
+- Alerce (Patagonia)
+- Palma de Cera (Eje Cafetero)
+- Araucaria (Chile)
+- Caoba (Perú)
+
+**Archivo**: `src/components/TreeMarketplace.jsx`
+
+---
+
+### 🛠️ Panel de Administración
+
+**Componente**: `AdminPanel.jsx`
+
+**Funcionalidades**:
+- 👥 Gestión de usuarios
+- 🗺️ Gestión de biomas y píxeles
+- 💰 Configuración de precios y tiers
+- 📊 Métricas globales del sistema
+- 🔧 Configuración de sistema
+- 📜 Logs de auditoría
+- 🚨 Moderación de contenido
+- 💸 Gestión de tesorería
+
+**Métricas del Dashboard**:
+- Total de usuarios registrados
+- Píxeles adoptados vs disponibles
+- Fondos recaudados
+- CO2 capturado total
+- Árboles plantados
+- Proyectos activos
+
+**Archivo**: `src/components/AdminPanel.jsx`
+
+---
+
+### 🔧 Panel Técnico
+
+**Componente**: `TechnicalPanel.jsx`
+
+**Funcionalidades**:
+- 🔍 Monitoreo de smart contracts
+- 📊 Métricas de blockchain
+- 🔐 Gestión de wallets del sistema
+- 📈 Gas tracker
+- 🔄 Sincronización con Supabase
+- 🐛 Logs de errores
+- ⚡ Performance monitoring
+
+**Archivo**: `src/components/TechnicalPanel.jsx`
+
+---
+
+### 💼 Gestor de Beneficios por Tier
+
+**Componente**: `TierBenefitsManager.jsx`
+
+**Funcionalidades**:
+- ➕ Crear nuevos beneficios
+- ✏️ Editar beneficios existentes
+- 🗑️ Eliminar beneficios
+- 🎯 Asignar beneficios a tiers
+- 📊 Visualizar matriz de beneficios
+- 💰 Definir precios de beneficios
+- 🔄 Sincronización con Supabase
+
+**Tipos de Beneficios**:
+1. **Viajes** - Experiencias en el bioma
+2. **Webinars** - Sesiones educativas
+3. **Live-Cams** - Acceso a cámaras en vivo
+4. **Merchandising** - Productos físicos
+5. **NFTs** - Coleccionables digitales
+6. **Certificados** - Documentos legales
+7. **Eventos** - Acceso a eventos exclusivos
+
+**Archivo**: `src/components/TierBenefitsManager.jsx`
+
+---
+
+### 💳 Sistema de Wallet
+
+**Componente**: `BotWallet.jsx`
+
+**Funcionalidades**:
+- 💰 Balance de EcoTokens
+- 📊 Historial de transacciones
+- 💸 Enviar/Recibir tokens
+- 🔄 Swap de tokens
+- 📈 Gráfico de balance histórico
+- 🔐 Gestión de claves privadas
+- 🌐 Conexión con MetaMask/WalletConnect
+
+**Archivo**: `src/components/BotWallet.jsx`
+
+---
+
+### 🏆 Sistema de Certificados NFT
+
+**Concepto**:
+Certificados digitales únicos que prueban la adopción de píxeles y el impacto ambiental generado.
+
+**Tipos de Certificados NFT**:
+
+1. **Certificado de Adopción de Píxel**
+   - Metadata: Coordenadas, bioma, tier, fecha de adopción
+   - Imagen generada dinámicamente con mapa del píxel
+   - QR code de verificación on-chain
+   - Actualización automática de impacto (CO2, árboles)
+   - Transferible entre wallets
+
+2. **Certificado de Compensación Ambiental**
+   - Para corporativos que "queman" tokens
+   - Válido para reportes ESG y reducción de impuestos
+   - Firmado digitalmente por auditores
+   - Incluye métricas verificables de impacto
+   - Formato PDF + NFT
+
+3. **Certificado de Adopción de Especie**
+   - NFT 3D de la especie adoptada
+   - Foto real del animal (si disponible)
+   - Tracking de salud y ubicación
+   - Actualizaciones mensuales
+   - Coleccionable y comercializable
+
+4. **Certificado de Proyecto de Carbono**
+   - Emitido por originadores de proyectos
+   - Validado por auditores
+   - Incluye créditos de carbono generados
+   - Metadata: ubicación, tipo de proyecto, impacto
+   - Comercializable en marketplace
+
+**Características Técnicas**:
+- **Estándar**: ERC-721 (NFT único) o ERC-1155 (semi-fungible)
+- **Metadata**: Almacenada en IPFS via Pinata
+- **Actualización**: Metadata dinámica que se actualiza con impacto real
+- **Verificación**: QR code que apunta a blockchain explorer
+- **Transferencia**: Transferible pero con historial inmutable
+
+**Generación Automática**:
+- Al adoptar píxel → Certificado de Adopción
+- Al quemar tokens → Certificado de Compensación
+- Al adoptar especie → Certificado de Especie
+- Al completar proyecto → Certificado de Proyecto
+
+---
+
+### 💰 Token $CARBON
+
+**¿Qué es $CARBON?**
+Token específico que representa créditos de carbono verificados, separado del EcoToken.
+
+**Diferencias con EcoToken**:
+
+| Característica | EcoToken | $CARBON |
+|----------------|----------|---------|
+| **Propósito** | Utilidad general de la plataforma | Créditos de carbono verificados |
+| **Generación** | Por adopción de píxeles | Por proyectos de conservación auditados |
+| **Valor** | Dinámico según TRM | Fijo según estándares internacionales |
+| **Uso** | Compras, experiencias, gobernanza | Compensación de huella de carbono |
+| **Quemable** | Sí, para certificados | Sí, para compensación corporativa |
+| **Comercializable** | Marketplace interno | Marketplace externo (Verra, Gold Standard) |
+
+**Generación de $CARBON**:
+- **Reforestación**: 1 $CARBON = 1 tonelada CO2 capturada
+- **Conservación**: 1 $CARBON = 1 tonelada CO2 evitada
+- **Energía Renovable**: 1 $CARBON = 1 tonelada CO2 no emitida
+- **Restauración**: 1 $CARBON = 0.5 toneladas CO2 capturada
+
+**Validación**:
+- Proyectos auditados por terceros certificados
+- Cumplimiento de estándares Verra VCS o Gold Standard
+- Verificación anual de impacto
+- Emisión de tokens solo después de validación
+
+**Usos del $CARBON**:
+1. **Compensación Corporativa** - Empresas compensan su huella
+2. **Retiro Permanente** - Quemar para certificado legal
+3. **Trading** - Comercializar en mercados secundarios
+4. **Staking** - Generar rendimientos pasivos
+5. **Donación** - Transferir a ONGs o proyectos
+
+**Precio del $CARBON**:
+- Basado en mercados internacionales de carbono
+- Rango típico: $15-$50 USD por tonelada
+- Actualización diaria según índices globales
+- Premium por proyectos de alta calidad (+20-30%)
+
+---
+
+### 🌱 Sistema de Proyectos de Créditos de Carbono
+
+**Estructura de un Proyecto**:
+
+1. **Información Básica**
+   - Nombre del proyecto
+   - Ubicación geográfica (píxeles asignados)
+   - Tipo de proyecto (reforestación, conservación, etc.)
+   - Originador (organización responsable)
+   - Meta de financiamiento
+   - Duración del proyecto
+
+2. **Documentación Legal**
+   - Certificado de propiedad de tierra
+   - Permisos gubernamentales
+   - Plan de manejo forestal
+   - Estudio de línea base (baseline)
+   - Metodología de cálculo de carbono
+
+3. **Métricas de Impacto**
+   - CO2 capturado/evitado (toneladas)
+   - Árboles plantados
+   - Hectáreas restauradas
+   - Especies protegidas
+   - Empleos generados
+   - Comunidades beneficiadas
+
+4. **Evidencia Verificable**
+   - Fotos geolocalizadas (IPFS)
+   - Reportes mensuales de progreso
+   - Mediciones de campo (altura árboles, diámetro)
+   - Imágenes satelitales (antes/después)
+   - Testimonios de comunidades locales
+
+5. **Auditoría y Validación**
+   - Auditor asignado
+   - Fecha de última auditoría
+   - Estado de validación (pendiente, aprobado, rechazado)
+   - Reputación del originador (1-5 estrellas)
+   - Historial de cumplimiento
+
+**Ciclo de Vida del Proyecto**:
+
+```
+1. Creación → 2. Revisión → 3. Aprobación → 4. Financiamiento → 
+5. Ejecución → 6. Monitoreo → 7. Auditoría → 8. Emisión de $CARBON → 
+9. Distribución → 10. Reporte Final
+```
+
+**Tipos de Proyectos**:
+
+1. **Reforestación** (REDD+)
+   - Plantación de árboles nativos
+   - Restauración de bosques degradados
+   - Captura activa de CO2
+
+2. **Conservación** (Avoided Deforestation)
+   - Protección de bosques existentes
+   - Prevención de tala ilegal
+   - Evitar emisiones futuras
+
+3. **Agroforestería**
+   - Sistemas silvopastoriles
+   - Cultivos bajo sombra
+   - Agricultura regenerativa
+
+4. **Manglares y Humedales**
+   - Restauración de manglares costeros
+   - Protección de turberas
+   - "Blue Carbon" (carbono azul)
+
+5. **Energía Renovable**
+   - Proyectos solares comunitarios
+   - Parques eólicos
+   - Biodigestores
+
+**Financiamiento**:
+- Crowdfunding de adoptantes de píxeles
+- Inversión corporativa
+- Fondos de impacto
+- Donaciones de ONGs
+- Venta anticipada de créditos de carbono
+
+---
+
+### 🦁 Sistema de Adopción de Especies
+
+**Concepto**:
+Adopción individual de animales en peligro de extinción con seguimiento personalizado.
+
+**Especies Disponibles por Bioma**:
+
+**Colombia**:
+- Oso de Anteojos (Andes)
+- Delfín Rosado (Amazonía)
+- Loro Orejiamarillo (Eje Cafetero)
+- Jaguar (Amazonía/Pacífico)
+- Manatí (Caribe)
+
+**Brasil**:
+- Mono León Dorado (Mata Atlántica)
+- Guacamayo Azul (Pantanal)
+- Guacamayo de Spix (Caatinga)
+- Delfín Rotador (Fernando de Noronha)
+
+**Argentina**:
+- Ballena Franca Austral (Península Valdés)
+- Pingüino de Magallanes (Patagonia)
+- Venado de las Pampas (Pampas)
+
+**Chile**:
+- Pudú (Bosque Valdiviano)
+- Puma (Patagonia)
+- Flamenco Andino (Atacama)
+
+**Perú**:
+- Gallito de las Rocas (Machu Picchu)
+- Delfín Rosado (Amazonía)
+
+**Ecuador**:
+- Tortuga Gigante (Galápagos)
+- Iguana Marina (Galápagos)
+- Pingüino de Galápagos (Galápagos)
+
+**Paquetes de Adopción**:
+
+1. **Básico** ($50/año)
+   - Certificado digital de adopción
+   - Foto del animal
+   - Actualización trimestral
+   - Badge de perfil
+
+2. **Estándar** ($150/año)
+   - Todo lo de Básico +
+   - NFT 3D del animal
+   - Actualizaciones mensuales con fotos
+   - Acceso a live-cam del hábitat
+   - Kit de bienvenida (peluche, stickers)
+
+3. **Premium** ($500/año)
+   - Todo lo de Estándar +
+   - Collar GPS en el animal (si aplica)
+   - Tracking en tiempo real
+   - Video personalizado del animal
+   - Visita guiada al hábitat (1 vez)
+   - Nombre del adoptante en placa del santuario
+
+**Tracking de Especies**:
+- **Ubicación GPS**: Mapa en tiempo real
+- **Salud**: Reportes veterinarios mensuales
+- **Comportamiento**: Observaciones de biólogos
+- **Reproducción**: Alertas de crías nacidas
+- **Alimentación**: Tipo de dieta y frecuencia
+
+**Impacto de la Adopción**:
+- 100% de fondos va a conservación de la especie
+- Financiamiento de collares GPS y monitoreo
+- Apoyo a rangers y guardaparques
+- Educación ambiental en comunidades locales
+- Investigación científica
+
+---
+
+### 🗳️ Sistema de Gobernanza y DAO
+
+**Concepto**:
+Organización Autónoma Descentralizada (DAO) donde los holders de píxeles votan en decisiones clave.
+
+**Poder de Voto**:
+- **EPIC**: 10 votos por píxel
+- **RARE**: 5 votos por píxel
+- **COMMON**: 2 votos por píxel
+- **BASIC**: 1 voto por píxel
+
+**Tipos de Propuestas**:
+
+1. **Expansión de Biomas**
+   - Qué regiones agregar al mapa
+   - Priorización de continentes
+   - Votación comunitaria
+
+2. **Distribución de Fondos**
+   - Qué proyectos financiar
+   - Porcentaje de tesorería a asignar
+   - Aprobación de originadores
+
+3. **Cambios en Tiers**
+   - Ajustes de precios
+   - Nuevos beneficios
+   - Modificación de multiplicadores
+
+4. **Partnerships**
+   - Aprobación de alianzas estratégicas
+   - Integración con otras plataformas
+   - Colaboraciones con ONGs
+
+5. **Mejoras Técnicas**
+   - Nuevas funcionalidades
+   - Upgrades de smart contracts
+   - Cambios en tokenomics
+
+**Proceso de Votación**:
+1. Propuesta creada por holder con >100 votos
+2. Período de discusión (7 días)
+3. Votación abierta (5 días)
+4. Quórum mínimo: 10% de votos totales
+5. Aprobación: >50% de votos a favor
+6. Implementación: 14 días después de aprobación
+
+**Incentivos por Participación**:
+- Bonus de EcoTokens por votar
+- NFT de "Gobernador Activo"
+- Acceso a propuestas tempranas
+- Influencia en roadmap
+
+---
+
+### 🎮 Sistema de Recompensas y Gamificación
+
+**Niveles de Usuario**:
+
+| Nivel | Nombre | Requisitos | Beneficios |
+|-------|--------|------------|------------|
+| 1 | Explorador | 1 píxel adoptado | Badge básico |
+| 2 | Guardián | 5 píxeles | +5% EcoTokens |
+| 3 | Protector | 10 píxeles | +10% EcoTokens, acceso VIP |
+| 4 | Embajador | 25 píxeles | +15% EcoTokens, webinars gratis |
+| 5 | Leyenda | 50+ píxeles | +25% EcoTokens, viaje gratis |
+
+**Logros Desbloqueables**:
+
+🌍 **Explorador Global**
+- Adoptar píxeles en 3+ continentes
+- Recompensa: NFT de Mapa Mundial
+
+🌳 **Reforestador**
+- Plantar 100+ árboles
+- Recompensa: 50 $CARBON
+
+🦁 **Protector de Especies**
+- Adoptar 5+ especies diferentes
+- Recompensa: NFT de Especie Rara
+
+💰 **Inversor de Impacto**
+- Invertir $1,000+ en proyectos
+- Recompensa: Certificado Premium
+
+🏆 **Gobernador Activo**
+- Votar en 10+ propuestas
+- Recompensa: Poder de voto 2x
+
+**Misiones Diarias/Semanales**:
+- Visitar el mapa (5 EcoTokens)
+- Compartir en redes sociales (10 EcoTokens)
+- Invitar amigos (50 EcoTokens por referido)
+- Subir foto al bioma (20 EcoTokens)
+- Votar en propuesta (15 EcoTokens)
+
+**Leaderboard**:
+- Top adoptantes por cantidad de píxeles
+- Top generadores de impacto (CO2)
+- Top votantes en gobernanza
+- Top contribuidores de contenido
+
+---
+
+### 📦 Integración con IPFS y Pinata
+
+**¿Qué se almacena en IPFS?**
+
+1. **Certificados de Proyectos**
+   - PDFs de validación legal
+   - Permisos gubernamentales
+   - Estudios de impacto ambiental
+
+2. **Fotos de Evidencia**
+   - Imágenes de proyectos de conservación
+   - Fotos de especies adoptadas
+   - Galería de usuarios
+
+3. **Metadata de NFTs**
+   - JSON con datos del certificado
+   - Imágenes generadas de píxeles
+   - Modelos 3D de especies
+
+4. **Reportes de Impacto**
+   - Informes mensuales de originadores
+   - Auditorías de terceros
+   - Mediciones de campo
+
+**Flujo de Subida a IPFS**:
+```javascript
+1. Usuario sube archivo → 
+2. Validación de formato y tamaño → 
+3. Compresión (si es imagen) → 
+4. Upload a Pinata → 
+5. Obtener CID (Content Identifier) → 
+6. Guardar CID en Supabase → 
+7. Generar URL pública (ipfs.io/ipfs/{CID})
+```
+
+**Ventajas**:
+- Inmutabilidad de evidencia
+- Descentralización de datos
+- Resistencia a censura
+- Verificación criptográfica
+- Permanencia de archivos
+
+---
+
+### 🔔 Sistema de Notificaciones
+
+**Tipos de Notificaciones**:
+
+1. **Adopción y Renovación**
+   - Confirmación de adopción de píxel
+   - Recordatorio de renovación (30 días antes)
+   - Expiración de adopción
+   - Renovación exitosa
+
+2. **Impacto Ambiental**
+   - Nuevo árbol plantado en tu píxel
+   - Milestone de CO2 capturado (100t, 500t, 1000t)
+   - Especie avistada en tu bioma
+   - Actualización de salud del ecosistema
+
+3. **Comunidad**
+   - Nuevo evento en tu bioma
+   - Alguien comentó tu foto
+   - Nuevo holder en tu píxel
+   - Invitación a evento exclusivo
+
+4. **Gobernanza**
+   - Nueva propuesta disponible para votar
+   - Propuesta que votaste fue aprobada/rechazada
+   - Resultado de votación
+   - Implementación de cambio aprobado
+
+5. **Marketplace**
+   - Nuevo proyecto de carbono en tu región
+   - Experiencia premium disponible
+   - Descuento en píxeles cercanos
+   - Precio de $CARBON cambió significativamente
+
+6. **Logros**
+   - Nuevo nivel desbloqueado
+   - Logro completado
+   - Subiste en el leaderboard
+   - Recompensa disponible
+
+**Canales de Notificación**:
+- 🔔 In-app (badge en campana)
+- 📧 Email (configurable)
+- 📱 Push notifications (móvil)
+- 💬 Discord (integración)
+- 🐦 Twitter (menciones)
+
+---
+
+### 🌐 Landing Page
+
+**Componente**: `LandingPage.jsx`
+
+**Secciones**:
+
+1. **Hero Section**
+   - Título impactante: "Adopta un Píxel. Salva el Planeta."
+   - Mapa interactivo de fondo
+   - CTA: "Explorar Mapa" / "Adoptar Ahora"
+   - Contador en tiempo real: Píxeles adoptados, CO2 capturado
+
+2. **¿Cómo Funciona?**
+   - 3 pasos simples con iconos
+   - Animaciones de Framer Motion
+   - Video explicativo (YouTube embed)
+
+3. **Biomas Destacados**
+   - Carrusel de 6 biomas premium
+   - Fotos espectaculares
+   - Precios y disponibilidad
+   - Link a modal de adopción
+
+4. **Impacto en Números**
+   - Métricas globales animadas
+   - CO2 capturado, árboles plantados, fondos recaudados
+   - Gráficos de impacto por continente
+
+5. **Testimonios**
+   - Historias de adoptantes
+   - Fotos de visitas a biomas
+   - Ratings de 5 estrellas
+
+6. **Tiers y Beneficios**
+   - Tabla comparativa de 4 tiers
+   - Beneficios destacados
+   - Calculadora de ROI
+
+7. **Partners**
+   - Logos de ONGs aliadas
+   - Certificaciones (Verra, Gold Standard)
+   - Universidades colaboradoras
+
+8. **FAQ**
+   - Preguntas frecuentes
+   - Acordeón expandible
+   - Links a documentación
+
+9. **Footer**
+   - Redes sociales
+   - Links legales (Términos, Privacidad)
+   - Newsletter signup
+   - Mapa del sitio
+
+**Archivo**: `src/components/LandingPage.jsx`
+
+---
+
+## 🗂️ Estado Actual del Proyecto
+
+### ✅ Completado
+
+#### 1. **Base de Datos de Biomas (27 Regiones)**
+- **Colombia**: 7 regiones naturales
+  - Eje Cafetero (Manizales, Nevado del Ruiz) 🆕
+  - Andes (Nevados y Páramos)
+  - Amazonía Colombiana
+  - Caribe (Costa Dorada)
+  - Pacífico (Selva Húmeda)
+  - Orinoquía (Llanos)
+  - Insular (San Andrés)
+
+- **Brasil**: 5 regiones
+  - Mata Atlántica
+  - Cerrado
+  - Pantanal
+  - Caatinga
+  - Fernando de Noronha
+
+- **Argentina**: 4 regiones
+  - Pampas
+  - Quebrada de Humahuaca
+  - Península Valdés
+  - Iguazú
+
+- **Chile**: 3 regiones
+  - Patagonia (Torres del Paine)
+  - Atacama
+  - Bosque Valdiviano
+
+- **Perú**: 2 regiones
+  - Amazonía Peruana
+  - Machu Picchu
+
+- **Ecuador**: 1 región
+  - Galápagos
+
+**Archivo**: `src/data/globalBiomes.jsx`
+
+Cada bioma incluye:
+- Coordenadas geográficas precisas
+- 3-4 fotos específicas (Unsplash)
+- Especies nativas y en peligro
+- Datos educativos y fun facts
+- Tips de conservación
+- Enlaces de donación
+- Precio base ($100-$380 USD)
+- Live-cam URLs (cuando disponible)
+
+#### 2. **Base de Datos Supabase (9 Tablas)**
+
+**Scripts ejecutados**:
+1. ✅ `supabase_tier_benefits.sql` - Beneficios por tier
+2. ✅ `supabase_premium_experiences.sql` - Viajes, webinars, live-cams
+3. ✅ `supabase_pixel_impact.sql` - Tracking de impacto ambiental
+4. ✅ `supabase_pixel_community.sql` - Adopciones, renovaciones, eventos
+5. ✅ `supabase_user_gallery.sql` - Galería de fotos, likes, comentarios
+
+**Tablas creadas**:
+- `tier_benefits` - 17 beneficios por tier
+- `premium_experiences` - Experiencias premium
+- `pixel_impact` - CO2, árboles, fondos, salud del ecosistema
+- `pixel_community` - Adopciones y renovaciones
+- `community_events` - Eventos de comunidad
+- `event_participants` - Participantes en eventos
+- `user_gallery` - Fotos de usuarios
+- `gallery_likes` - Likes en fotos
+- `gallery_comments` - Comentarios en fotos
+
+**Funciones auxiliares**:
+- `calculate_expiration_date()` - Calcular vencimiento de adopción
+- `renew_adoption()` - Renovar adopción
+- `get_pixel_holders()` - Obtener holders de un píxel
+- `toggle_gallery_like()` - Dar/quitar like
+- `increment_gallery_views()` - Incrementar vistas
+- `approve_gallery_photo()` - Aprobar foto
+
+**Vistas útiles**:
+- `biome_impact_summary` - Resumen de impacto por bioma
+- `biome_community_stats` - Estadísticas de comunidad
+- `expiring_soon` - Adopciones próximas a expirar
+- `popular_gallery_photos` - Fotos más populares
+- `pending_moderation` - Fotos pendientes de moderación
+- `biome_gallery_stats` - Estadísticas de galería por bioma
+
+#### 3. **Sistema de Adopción Temporal**
+**Archivo**: `src/data/globalBiomes.jsx`
+
+4 planes disponibles:
+- **Plan 24m** (2 años): 0% descuento - Badge 🌱 Starter
+- **Plan 36m** (3 años): 10% descuento - Badge 🌿 Guardian
+- **Plan 48m** (4 años): 15% descuento - Badge 🌳 Protector
+- **Plan 60m** (5 años): 20% descuento - Badge 🏆 Champion
+
+#### 4. **Modal Mejorado con Medios**
+**Archivo**: `src/components/EnhancedBiomeModal.jsx`
+
+Características:
+- Carrusel de fotos (4+ imágenes por bioma)
+- Reproductor de YouTube live-stream con fullscreen
+- Selector de plan de adopción (24-60 meses)
+- Cálculo dinámico de precio con descuentos
+- Integración con `GLOBAL_BIOMES`
+
+#### 5. **Mapa Interactivo Optimizado**
+**Archivo**: `src/components/LifeMap.jsx`
+
+Optimizaciones recientes:
+- ✅ Throttling de 100ms en eventos de hover
+- ✅ Prevención de freezing al hacer zoom
+- ✅ Detección de 27 biomas en tiempo real
+- ✅ Sistema de tiers dinámicos (BASIC, COMMON, RARE, EPIC)
+- ✅ Precios procedurales con volatilidad de mercado
+
+#### 6. **Documentación**
+- ✅ `GUIA_EJECUCION_SCRIPTS.md` - Guía paso a paso para ejecutar scripts de Supabase
+- ✅ `implementation_plan.md` - Plan maestro de expansión global
+- ✅ `walkthrough.md` - Documentación de features implementados
+- ✅ `task.md` - Checklist de tareas
+
+---
+
+## 🚧 Pendiente de Implementación
+
+### 1. **Funcionalidades del Modal (8 features)**
+
+#### A. Tab de Experiencias Premium
+- Mostrar viajes, webinars, live-cams desde `premium_experiences`
+- Filtrar por tier del usuario
+- Sistema de reserva/booking
+- Integración con partners
+
+#### B. Historial de Impacto
+- Gráfico de CO2 capturado
+- Contador de árboles plantados
+- Fondos recaudados
+- Timeline de salud del ecosistema
+
+#### C. Comunidad de Holders
+- Lista de holders del píxel
+- Roles (member, moderator, ambassador)
+- Score de contribución
+- Próximos eventos
+
+#### D. Certificado Descargable
+- Generación de PDF con:
+  - Datos del píxel
+  - Información del holder
+  - Duración de adopción
+  - Impacto ambiental
+  - QR code de verificación
+
+#### E. Comparador de Planes
+- Tabla comparativa de 4 planes
+- Cálculo de ahorro
+- Beneficios por plan
+- ROI estimado
+
+#### F. Galería de Usuario
+- Subir fotos del bioma
+- Integración con Instagram
+- Sistema de likes y comentarios
+- Moderación de contenido
+
+#### G. Alertas y Notificaciones
+- Recordatorios de renovación
+- Eventos de la comunidad
+- Nuevas experiencias disponibles
+- Actualizaciones de impacto
+
+#### H. Modo Comparación
+- Comparar 2-3 píxeles lado a lado
+- Diferencias de precio, impacto, beneficios
+- Recomendaciones basadas en preferencias
+
+### 2. **Servicios de Supabase**
+**Archivo a crear**: `src/services/supabaseService.js`
+
+Métodos necesarios:
+```javascript
+// Experiencias Premium
+getPremiumExperiences(biomeKey)
+bookExperience(experienceId, userId)
+
+// Impacto
+getPixelImpact(pixelId)
+updateImpactMetrics(pixelId, metrics)
+
+// Comunidad
+getPixelHolders(pixelId)
+createCommunityEvent(eventData)
+registerForEvent(eventId, userId)
+
+// Galería
+uploadPhoto(photoData)
+likePhoto(photoId, userId)
+commentOnPhoto(photoId, userId, comment)
+moderatePhoto(photoId, status)
+```
+
+### 3. **Expansión de Biomas (100+ regiones)**
+
+#### Prioridad Alta (28 biomas)
+**América del Sur** (15 restantes):
+- Venezuela: Los Roques, Tepuyes, Llanos
+- Bolivia: Salar de Uyuni, Yungas
+- Paraguay: Gran Chaco
+- Uruguay: Cabo Polonio
+- Guyana: Kaieteur Falls
+- Surinam: Selva Central
+- Guayana Francesa: Reserva Natural
+
+**América Central** (13 biomas):
+- Costa Rica: Monteverde, Tortuguero
+- Panamá: Darién, Bocas del Toro
+- Nicaragua: Ometepe
+- Honduras: Roatán
+- Guatemala: Tikal
+- Belice: Barrera de Coral
+- El Salvador: Parque Nacional Montecristo
+
+#### Prioridad Media (45 biomas)
+- **África**: 15 biomas (Madagascar, Kalahari, Okavango, etc.)
+- **Asia**: 15 biomas (Borneo, Sundarbans, Gobi, etc.)
+- **Europa**: 10 biomas (Alpes, Mediterráneo, Fiordos, etc.)
+- **Oceanía**: 5 biomas (Nueva Zelanda, Tasmania, etc.)
+
+#### Prioridad Baja (27 biomas)
+- **América del Norte**: 15 biomas (Everglades, Grand Canyon, etc.)
+- **Islas Remotas**: 12 biomas (Hawái, Maldivas, Seychelles, etc.)
+
+### 4. **Sistema de Partnerships**
+- Integración con operadores turísticos
+- Eco-lodges y hoteles sostenibles
+- Aerolíneas (descuentos en vuelos)
+- ONGs de conservación
+- Universidades y centros de investigación
+
+### 5. **Smart Contracts (Blockchain)**
+- Registro de adopciones en blockchain
+- NFTs con metadata dinámica
+- Sistema de renovación automática
+- Distribución de fondos a proyectos de conservación
+
+---
+
+## 📊 Estadísticas del Proyecto
+
+### Biomas
+- **Total**: 27 regiones
+- **Colombia**: 7 (26%)
+- **Brasil**: 5 (19%)
+- **Argentina**: 4 (15%)
+- **Chile**: 3 (11%)
+- **Perú**: 2 (7%)
+- **Ecuador**: 1 (4%)
+- **Otros continentes**: 5 (18%)
+
+### Precios
+- **Rango**: $100 - $380 USD
+- **Promedio**: ~$280 USD
+- **Premium** (>$350): Galápagos, Fernando de Noronha, Machu Picchu
+
+### Base de Datos
+- **Tablas**: 9
+- **Funciones**: 6
+- **Vistas**: 6
+- **Scripts SQL**: 5
+
+---
+
+## 🛠️ Stack Tecnológico
+
+### Frontend
+- **React** 18.3.1
+- **Vite** 7.3.1
+- **Tailwind CSS** 3.4.17
+- **Framer Motion** 11.15.0
+- **Lucide React** (iconos)
+- **React Simple Maps** (mapas)
+
+### Backend
+- **Supabase** (PostgreSQL)
+- **Supabase Storage** (imágenes)
+- **Supabase Auth** (autenticación)
+
+### APIs Externas
+- **Unsplash API** (fotos de biomas)
+- **YouTube API** (live-streams)
+- **CoinGecko** (precios de crypto - futuro)
+
+### Blockchain (Futuro)
+- **Avalanche C-Chain**
+- **Hardhat** (desarrollo)
+- **Ethers.js** (interacción)
+
+---
+
+## 📁 Estructura de Archivos Clave
+
+```
+AMAZONAS CERO/
+├── src/
+│   ├── components/
+│   │   ├── LifeMap.jsx (Mapa interactivo - OPTIMIZADO)
+│   │   └── EnhancedBiomeModal.jsx (Modal con medios)
+│   ├── data/
+│   │   └── globalBiomes.jsx (27 biomas + planes)
+│   └── services/
+│       └── supabaseService.js (PENDIENTE)
+├── supabase_*.sql (5 scripts ejecutados)
+├── GUIA_EJECUCION_SCRIPTS.md
+├── implementation_plan.md
+└── README.md (este archivo)
+```
+
+---
+
+## 🚀 Próximos Pasos Inmediatos
+
+1. **Crear `supabaseService.js`** con métodos CRUD
+2. **Implementar Tab de Experiencias Premium** en modal
+3. **Agregar Historial de Impacto** con gráficos
+4. **Expandir a 15 biomas más** (Venezuela, Bolivia, Costa Rica, etc.)
+5. **Integrar sistema de certificados** descargables en PDF
+
+---
+
+## 📝 Notas Importantes
+
+### Performance
+- Mapa optimizado con throttling de 100ms
+- Evitar renderizado excesivo de biomas
+- Lazy loading de imágenes recomendado
+
+### Datos de Ejemplo
+- Scripts de Supabase tienen datos comentados
+- Requieren usuarios reales en `auth.users`
+- Descomentar cuando haya usuarios registrados
+
+### Precios
+- Varían de $100 a $380 USD por m²
+- Calculados con volatilidad de mercado (+/- $15)
+- Tiers EPIC tienen multiplicador 1.5x
+
+---
+
+## 🎯 Visión a Largo Plazo
+
+**Bank of Tierras** busca convertirse en la plataforma líder de adopción de tierra con propósito de conservación, conectando:
+- 🌍 **100+ biomas** de todos los continentes
+- 👥 **Millones de adoptantes** comprometidos con el planeta
+- 🏢 **Cientos de partners** (ONGs, eco-lodges, aerolíneas)
+- 💰 **Fondos significativos** para proyectos de conservación
+- 📊 **Impacto medible** (CO2, árboles, especies protegidas)
+
+---
+
+**Última actualización**: 2026-01-27
+**Versión**: 2.0 (Expansión Global + Supabase)

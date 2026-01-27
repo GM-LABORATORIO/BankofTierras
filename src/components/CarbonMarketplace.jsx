@@ -15,12 +15,18 @@ import {
 } from 'lucide-react';
 import { useWeb3 } from '../context/Web3Context';
 import { supabaseService } from '../services/supabaseService';
+import { calculateRequiredEcoToken, calculatePricing, PRICING_CONFIG } from '../constants/pricing';
 
 const CarbonMarketplace = ({ projects }) => {
-    const { prices, buyTokens, account } = useWeb3();
+    const { prices, buyTokens, buyTokensWithBot, account, botBalance } = useWeb3();
     const [selectedProject, setSelectedProject] = useState(null);
     const [amount, setAmount] = useState(1);
     const [isBuying, setIsBuying] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState('avax'); // 'avax' or 'bot'
+
+    // Calculate dynamic pricing based on real AVAX price
+    const dynamicPricing = calculatePricing(prices.avax);
+    const exchangeRate = PRICING_CONFIG.TESTING_MODE ? 1 : dynamicPricing.carbonToEcoToken;
 
     const getImageUrl = (image) => {
         if (!image) return "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=2000";
@@ -55,10 +61,23 @@ const CarbonMarketplace = ({ projects }) => {
             alert("Por favor conecta tu wallet");
             return;
         }
+
+        // Check if user has enough EcoToken if paying with bot
+        if (paymentMethod === 'bot') {
+            const requiredBot = amount * exchangeRate; // Dynamic rate
+            if (parseFloat(botBalance) < requiredBot) {
+                alert(`No tienes suficientes EcoTokens. Necesitas ${requiredBot.toLocaleString()} $BoT pero solo tienes ${parseFloat(botBalance).toFixed(2)} $BoT`);
+                return;
+            }
+        }
+
         setIsBuying(true);
         try {
-            // Pasamos el owner_wallet del proyecto para el split 90/10
-            const success = await buyTokens(selectedProject.id, amount, selectedProject.owner_wallet);
+            // Use appropriate payment method
+            const success = paymentMethod === 'bot'
+                ? await buyTokensWithBot(selectedProject.id, amount, selectedProject.owner_wallet, exchangeRate)
+                : await buyTokens(selectedProject.id, amount, selectedProject.owner_wallet);
+
             if (success) {
                 // Actualizar Supabase: incrementar sold_tokens
                 const newSold = (selectedProject.sold_tokens || 0) + amount;
@@ -66,10 +85,17 @@ const CarbonMarketplace = ({ projects }) => {
                     sold_tokens: newSold
                 });
 
-                // Notificar al Dashboard del cambio si es necesario (asumimos que Dashboard refrescará o el usuario recargará)
-                // Para una mejor UX, podrías llamar a una prop onPurchaseSuccess
+                // Update selectedProject to reflect new sold_tokens
+                setSelectedProject({
+                    ...selectedProject,
+                    sold_tokens: newSold
+                });
 
-                setSelectedProject(null);
+                // Notify parent to refresh projects list
+                if (onPurchaseSuccess) {
+                    onPurchaseSuccess();
+                }
+
                 setAmount(1);
                 alert("¡Compra completada! Los tokens han sido emitidos a tu wallet.");
             }
@@ -139,13 +165,25 @@ const CarbonMarketplace = ({ projects }) => {
                                     <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
                                         <span className="text-gray-500">Créditos Disponibles</span>
                                         <span className="text-white">
-                                            {(p.total_quota - (p.sold_tokens || 0)).toLocaleString()} tCO2
+                                            {(() => {
+                                                const totalQuota = parseFloat(p.total_quota || (p.area || 0) * 2.5);
+                                                const sold = parseFloat(p.sold_tokens || 0);
+                                                const available = Math.max(0, totalQuota - sold);
+                                                return available.toLocaleString();
+                                            })()} tCO2
                                         </span>
                                     </div>
                                     <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
                                         <div
                                             className="h-full bg-emerald-500 transition-all duration-1000"
-                                            style={{ width: `${Math.max(0, Math.min(100, ((p.total_quota - p.sold_tokens) / p.total_quota) * 100))}%` }}
+                                            style={{
+                                                width: `${(() => {
+                                                    const totalQuota = parseFloat(p.total_quota || (p.area || 0) * 2.5);
+                                                    const sold = parseFloat(p.sold_tokens || 0);
+                                                    const percentage = totalQuota > 0 ? ((totalQuota - sold) / totalQuota) * 100 : 0;
+                                                    return Math.max(0, Math.min(100, percentage));
+                                                })()}%`
+                                            }}
                                         />
                                     </div>
                                 </div>
@@ -223,7 +261,14 @@ const CarbonMarketplace = ({ projects }) => {
                                         </div>
                                         <div className="bg-black/40 border border-white/5 rounded-xl p-3 text-right">
                                             <div className="text-[7px] font-black text-gray-500 uppercase mb-0.5">Tokens Disponibles</div>
-                                            <div className="text-sm font-black text-emerald-400">{(parseFloat(selectedProject.area) * 2.5).toLocaleString() || 0} <span className="text-[7px] text-emerald-900 uppercase">Tokens</span></div>
+                                            <div className="text-sm font-black text-emerald-400">
+                                                {(() => {
+                                                    const totalQuota = parseFloat(selectedProject.total_quota || (selectedProject.area || 0) * 2.5);
+                                                    const sold = parseFloat(selectedProject.sold_tokens || 0);
+                                                    const available = Math.max(0, totalQuota - sold);
+                                                    return available.toLocaleString();
+                                                })()} <span className="text-[7px] text-emerald-900 uppercase">Tokens</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -259,6 +304,43 @@ const CarbonMarketplace = ({ projects }) => {
                                     </div>
                                 </div>
 
+                                {/* Payment Method Toggle */}
+                                <div className="space-y-2">
+                                    <div className="flex justify-between items-center">
+                                        <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Método de Pago</label>
+                                        {PRICING_CONFIG.TESTING_MODE && (
+                                            <span className="text-[8px] font-black text-yellow-500 bg-yellow-500/10 px-2 py-1 rounded-full">
+                                                TESTING MODE 1:1
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <button
+                                            onClick={() => setPaymentMethod('avax')}
+                                            className={`py-3 px-4 rounded-xl font-black text-xs uppercase tracking-wider transition-all ${paymentMethod === 'avax'
+                                                ? 'bg-red-500/20 border-2 border-red-500 text-red-400'
+                                                : 'bg-white/5 border border-white/10 text-gray-500 hover:border-red-500/50'
+                                                }`}
+                                        >
+                                            AVAX
+                                        </button>
+                                        <button
+                                            onClick={() => setPaymentMethod('bot')}
+                                            className={`py-3 px-4 rounded-xl font-black text-xs uppercase tracking-wider transition-all ${paymentMethod === 'bot'
+                                                ? 'bg-emerald-500/20 border-2 border-emerald-500 text-emerald-400'
+                                                : 'bg-white/5 border border-white/10 text-gray-500 hover:border-emerald-500/50'
+                                                }`}
+                                        >
+                                            EcoToken
+                                        </button>
+                                    </div>
+                                    {paymentMethod === 'bot' && (
+                                        <div className="text-[9px] text-gray-500 font-bold">
+                                            Balance: <span className="text-emerald-400">{parseFloat(botBalance || 0).toFixed(2)} $BoT</span>
+                                        </div>
+                                    )}
+                                </div>
+
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Cantidad (tCO2)</label>
@@ -291,12 +373,35 @@ const CarbonMarketplace = ({ projects }) => {
                                     </div>
                                     <div className="h-px bg-white/10" />
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest text-left leading-none">Total en AVAX<br /><span className="text-[7px] text-gray-600">Demo Mode</span></span>
-                                        <div className="text-right">
-                                            <div className="text-xl font-black text-emerald-400 italic">
-                                                {(amount * demoPriceAVAX).toFixed(6)} AVAX
-                                            </div>
-                                        </div>
+                                        {paymentMethod === 'bot' ? (
+                                            <>
+                                                <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest text-left leading-none">
+                                                    Total en EcoToken<br />
+                                                    <span className="text-[7px] text-gray-600">
+                                                        {PRICING_CONFIG.TESTING_MODE ? '1:1 Testing' : `1 tCO2 = ${exchangeRate.toLocaleString()} $BoT`}
+                                                    </span>
+                                                </span>
+                                                <div className="text-right">
+                                                    <div className="text-xl font-black text-emerald-400 italic">
+                                                        {(amount * exchangeRate).toLocaleString()} $BoT
+                                                    </div>
+                                                    <div className="text-[9px] text-gray-500">
+                                                        ≈ ${(amount * exchangeRate * dynamicPricing.ecoTokenPriceUSD).toFixed(2)} USD
+                                                    </div>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="text-[9px] font-black text-red-500 uppercase tracking-widest text-left leading-none">
+                                                    Total en AVAX<br /><span className="text-[7px] text-gray-600">Demo Mode</span>
+                                                </span>
+                                                <div className="text-right">
+                                                    <div className="text-xl font-black text-red-400 italic">
+                                                        {(amount * demoPriceAVAX).toFixed(6)} AVAX
+                                                    </div>
+                                                </div>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
 

@@ -59,7 +59,7 @@ const TechnicalPanel = () => {
                     <div className="inline-flex items-center gap-2 py-1.5 px-3 rounded-full bg-white/10 border border-white/20 text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-emerald-400 mb-6">
                         <ShieldCheck size={14} /> Documentation & Transparency
                     </div>
-                    <h2 className="text-3xl lg:text-4xl font-black mb-4 text-white uppercase tracking-tighter">Libro Blanco Amazonas Cero</h2>
+                    <h2 className="text-3xl lg:text-4xl font-black mb-4 text-white uppercase tracking-tighter">Libro Blanco Bank of Tierras</h2>
                     <p className="text-gray-400 max-w-2xl text-base lg:text-lg leading-relaxed antialiased font-medium">
                         Transparencia técnica absoluta sobre los cálculos de carbono y el marco legal que sostiene nuestra economía regenerativa.
                     </p>

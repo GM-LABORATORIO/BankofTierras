@@ -1,0 +1,19 @@
+{
+    "name": "bank-of-tierras-contracts",
+    "version": "1.0.0",
+    "description": "Smart contracts for Bank of Tierras platform",
+    "scripts": {
+        "compile": "hardhat compile",
+        "test": "hardhat test",
+        "deploy:local": "hardhat run scripts/deploy.js --network localhost",
+        "deploy:fuji": "hardhat run scripts/deploy.js --network fuji",
+        "deploy:mainnet": "hardhat run scripts/deploy.js --network mainnet"
+    },
+    "devDependencies": {
+        "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+        "hardhat": "^2.19.0"
+    },
+    "dependencies": {
+        "@openzeppelin/contracts": "^5.0.1"
+    }
+}

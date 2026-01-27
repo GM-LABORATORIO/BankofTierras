@@ -31,7 +31,7 @@ export const MOCK_PROJECTS = [
 
 export const MOCK_CERTIFICATE_TEMPLATE = {
     title: "Certificado de Compensación de Carbono",
-    issuer: "Amazonas Cero Platform",
+    issuer: "Bank of Tierras Platform",
     blockchain: "Avalanche C-Chain",
     law: "Ley 1819 de 2016 - No Causación",
     details: {
