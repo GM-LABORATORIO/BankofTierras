@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup, Graticule } from "react-simple-maps";
-import { Play, Heart, Shield, Radio, MapPin, Zap, Info, X, Camera, Droplets, Trees, Search, ExternalLink, Users, Globe, TrendingUp, DollarSign, Lock, Maximize2, Minimize2, Settings, List, Activity, Anchor, Bird, Wind, CloudSun, ShieldAlert, Mountain, Palmtree, Waves } from 'lucide-react';
+import { Play, Heart, Shield, Radio, MapPin, Zap, Info, X, Camera, Droplets, Trees, Search, ExternalLink, Users, Globe, TrendingUp, DollarSign, Lock, Maximize2, Minimize2, Settings, List, Activity, Anchor, Bird, Wind, CloudSun, ShieldAlert, Mountain, Palmtree, Waves, Book } from 'lucide-react';
 import { GLOBAL_BIOMES, detectBiomeByLocation } from '../data/globalBiomes';
 import EnhancedBiomeModal from './EnhancedBiomeModal';
 import BiomeParticles from './BiomeParticles';
@@ -9,6 +9,7 @@ import { getBiomeIconComponent } from './BiomeIconsSVG';
 import { getCulturalIcon } from './CulturalIcons';
 import { CULTURAL_MONUMENTS, BIOME_ICONS } from '../data/monumentsData';
 import MonumentModal from './MonumentModal';
+import AdventurePassport from './AdventurePassport';
 
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
@@ -113,9 +114,43 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
     const [viewMode, setViewMode] = useState('biologic');
     const [selectedMonument, setSelectedMonument] = useState(null);
     const [isMonumentModalOpen, setIsMonumentModalOpen] = useState(false);
+
+    // 🛂 Adventure Passport State
+    const [isPassportOpen, setIsPassportOpen] = useState(false);
+    const [collectedStamps, setCollectedStamps] = useState([]);
+
     const svgRef = useRef(null);
     const groupRef = useRef(null);
     const lastUpdateTime = useRef(0);
+
+    // Cargar sellos del localStorage al montar
+    useEffect(() => {
+        const savedStamps = localStorage.getItem('bot_adventure_stamps');
+        if (savedStamps) {
+            setCollectedStamps(JSON.parse(savedStamps));
+        }
+    }, []);
+
+    // Desbloquear Sello al Visitar Monumento
+    const handleUnlockStamp = (monument) => {
+        if (!monument) return;
+
+        setCollectedStamps(prev => {
+            const exists = prev.some(stamp => stamp.name === monument.name);
+            if (exists) return prev;
+
+            const newStamp = {
+                name: monument.name,
+                date: new Date().toLocaleDateString(),
+                type: monument.type,
+                // Guardamos solo datos serializables. El icono se genera en el UI del pasaporte.
+            };
+
+            const updatedStamps = [...prev, newStamp];
+            localStorage.setItem('bot_adventure_stamps', JSON.stringify(updatedStamps));
+            return updatedStamps;
+        });
+    };
 
     // Sincronización de Zoom
     const currentZoom = externalZoom || internalZoom;
@@ -261,92 +296,89 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
                             <g ref={groupRef}>
                                 <Graticule stroke="rgba(34,197,94,0.15)" strokeWidth={0.4 / currentZoom} strokeDasharray="2,2" step={[GRID_STEP, GRID_STEP]} />
 
-                                <Geographies geography={geoUrl}>
-                                    {({ geographies, projection }) => (
-                                        <>
-                                            <rect
-                                                x="-2000" y="-2000" width="4000" height="4000" fill="transparent"
-                                                onMouseMove={(e) => handleInteraction(e, projection, false)}
-                                                onClick={(e) => handleInteraction(e, projection, false, true)}
-                                            />
-                                            {geographies.map((geo) => {
-                                                const centroid = projection(geo.geometry.coordinates[0][0]); // Simplificación para demo
-                                                const lat = centroid ? projection.invert(centroid)[1] : 0;
-                                                const absLat = Math.abs(lat);
-
-                                                // 🎨 Asignación de colores VIBRANTES por Bioma
-                                                let geoColor = "rgba(34, 197, 94, 0.4)"; // Default: Verde brillante
-                                                if (absLat > 65) geoColor = "rgba(224, 242, 254, 0.9)"; // Polos: Blanco brillante con azul
-                                                else if (absLat > 45) geoColor = "rgba(16, 185, 129, 0.7)"; // Taiga: Verde esmeralda
-                                                else if (absLat < 15) geoColor = "rgba(34, 197, 94, 0.85)"; // Selva: Verde saturado brillante
-                                                else if (absLat < 25) geoColor = "rgba(132, 204, 22, 0.7)"; // Trópico: Verde-amarillo vibrante
-                                                else if (absLat > 25 && absLat < 35) geoColor = "rgba(245, 158, 11, 0.6)"; // Desiertos: Amarillo/naranja
-
-                                                return (
-                                                    <Geography
-                                                        key={geo.rsmKey} geography={geo}
-                                                        fill={viewMode === 'biologic' ? geoColor : "rgba(34, 197, 94, 0.08)"}
-                                                        stroke="rgba(34, 197, 94, 0.5)" strokeWidth={0.8 / currentZoom}
-                                                        onMouseMove={(e) => { handleInteraction(e, projection, true); e.stopPropagation(); }}
-                                                        onClick={(e) => { handleInteraction(e, projection, true, true); e.stopPropagation(); }}
-                                                        style={{
-                                                            default: { outline: "none" },
-                                                            hover: { fill: "rgba(34, 197, 94, 0.6)", outline: "none" },
-                                                        }}
-                                                    />
-                                                );
-                                            })}
-                                        </>
-                                    )}
-                                </Geographies>
-
-                                {/* 🌊 CAPA DE PARTÍCULAS AMBIENTALES (Solo visible al hacer zoom para rendimiento) */}
-                                {viewMode === 'biologic' && currentZoom > 2 && (
+                                {/* ⚡️ OPTIMIZACIÓN: Memoización de Capas Estáticas */}
+                                {useMemo(() => (
                                     <>
-                                        {/* Partículas Oceánicas - Global */}
-                                        <BiomeParticles biomeType="océano" />
+                                        <Geographies geography={geoUrl}>
+                                            {({ geographies, projection }) => (
+                                                <>
+                                                    <rect
+                                                        x="-2000" y="-2000" width="4000" height="4000" fill="transparent"
+                                                        onMouseMove={(e) => handleInteraction(e, projection, false)}
+                                                        onClick={(e) => handleInteraction(e, projection, false, true)}
+                                                    />
+                                                    {geographies.map((geo) => {
+                                                        const centroid = projection(geo.geometry.coordinates[0][0]);
+                                                        const lat = centroid ? projection.invert(centroid)[1] : 0;
+                                                        const absLat = Math.abs(lat);
 
-                                        {/* Hojas en Selvas - Zona Ecuatorial */}
-                                        <BiomeParticles biomeType="selva tropical" />
+                                                        let geoColor = "rgba(34, 197, 94, 0.4)";
+                                                        if (absLat > 65) geoColor = "rgba(224, 242, 254, 0.9)";
+                                                        else if (absLat > 45) geoColor = "rgba(16, 185, 129, 0.7)";
+                                                        else if (absLat < 15) geoColor = "rgba(34, 197, 94, 0.85)";
+                                                        else if (absLat < 25) geoColor = "rgba(132, 204, 22, 0.7)";
+                                                        else if (absLat > 25 && absLat < 35) geoColor = "rgba(245, 158, 11, 0.6)";
 
-                                        {/* Nieve en Polos */}
-                                        <BiomeParticles biomeType="tundra" />
+                                                        return (
+                                                            <Geography
+                                                                key={geo.rsmKey} geography={geo}
+                                                                fill={viewMode === 'biologic' ? geoColor : "rgba(34, 197, 94, 0.08)"}
+                                                                stroke="rgba(34, 197, 94, 0.5)" strokeWidth={0.8 / currentZoom}
+                                                                onMouseMove={(e) => { handleInteraction(e, projection, true); e.stopPropagation(); }}
+                                                                onClick={(e) => { handleInteraction(e, projection, true, true); e.stopPropagation(); }}
+                                                                style={{
+                                                                    default: { outline: "none" },
+                                                                    hover: { fill: "rgba(34, 197, 94, 0.6)", outline: "none" },
+                                                                }}
+                                                            />
+                                                        );
+                                                    })}
+                                                </>
+                                            )}
+                                        </Geographies>
+
+                                        {/* 🌊 CAPA DE PARTÍCULAS (LOD: Zoom > 2) */}
+                                        {viewMode === 'biologic' && currentZoom > 2 && (
+                                            <>
+                                                <BiomeParticles biomeType="océano" />
+                                                <BiomeParticles biomeType="selva tropical" />
+                                                <BiomeParticles biomeType="tundra" />
+                                            </>
+                                        )}
+
+                                        {/* 🗿 MONUMENTOS CULTURALES */}
+                                        {viewMode === 'biologic' && CULTURAL_MONUMENTS.map((monument, idx) => (
+                                            <Marker
+                                                key={`monument-${idx}`}
+                                                coordinates={monument.coords}
+                                                onClick={() => {
+                                                    setSelectedMonument(monument);
+                                                    setIsMonumentModalOpen(true);
+                                                }}
+                                                style={{ cursor: 'pointer' }}
+                                            >
+                                                <ellipse cy={monument.size * 0.4} rx={monument.size * 0.4} ry={monument.size * 0.15} fill="#000" opacity="0.3" />
+                                                <g className="hover:scale-110 transition-transform duration-300">
+                                                    {getCulturalIcon(monument.type, 0, 0, monument.size)}
+                                                </g>
+                                            </Marker>
+                                        ))}
+
+                                        {/* 🌳 ICONOS DE BIOMA (LOD: Zoom > 2.5) */}
+                                        {viewMode === 'biologic' && currentZoom > 2.5 && BIOME_ICONS.map((icon, idx) => (
+                                            <Marker key={`biome-${idx}`} coordinates={icon.coords}>
+                                                <g>
+                                                    {getBiomeIconComponent(icon.type, 0, 0, icon.size)}
+                                                </g>
+                                            </Marker>
+                                        ))}
                                     </>
-                                )}
+                                ), [currentZoom, viewMode])}  {/* ⚡️ Fin del bloque memorizado */}
 
-                                {/* 🗿 MONUMENTOS CULTURALES - Siempre visibles pero sin filtros pesados */}
-                                {viewMode === 'biologic' && CULTURAL_MONUMENTS.map((monument, idx) => (
-                                    <Marker
-                                        key={`monument-${idx}`}
-                                        coordinates={monument.coords}
-                                        onClick={() => {
-                                            setSelectedMonument(monument);
-                                            setIsMonumentModalOpen(true);
-                                        }}
-                                        style={{ cursor: 'pointer' }}
-                                    >
-                                        {/* Optimización: Sombra simple baked-in en lugar de filtro costoso */}
-                                        <ellipse cy={monument.size * 0.4} rx={monument.size * 0.4} ry={monument.size * 0.15} fill="#000" opacity="0.3" />
-                                        <g className="hover:scale-110 transition-transform duration-300">
-                                            {getCulturalIcon(monument.type, 0, 0, monument.size)}
-                                        </g>
-                                    </Marker>
-                                ))}
-
-                                {/* 🌳 ICONOS DE BIOMA - Solo visibles con zoom > 2.5 (Level of Detail) */}
-                                {viewMode === 'biologic' && currentZoom > 2.5 && BIOME_ICONS.map((icon, idx) => (
-                                    <Marker key={`biome-${idx}`} coordinates={icon.coords}>
-                                        {/* Optimización: Sin sombra o sombra simple */}
-                                        <g>
-                                            {getBiomeIconComponent(icon.type, 0, 0, icon.size)}
-                                        </g>
-                                    </Marker>
-                                ))}
-
+                                {/* 🔥 INTERACTIVE LAYER: Solo esto se re-renderiza con hover */}
                                 {hoveredData && (
                                     <Marker coordinates={hoveredData.coords}>
                                         <g className="pointer-events-none">
-                                            {/* 💥 Glow Effect - Dinámico según Tier */}
                                             <rect
                                                 x={-pixelSize / 2} y={-pixelSize / 2} width={pixelSize} height={pixelSize}
                                                 fill={hoveredData.tier?.level === 1 ? "#fbbf24" :
@@ -360,7 +392,6 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
                                                                 `blur(5px) drop-shadow(0 0 8px ${hoveredData.color})`
                                                 }}
                                             />
-                                            {/* Borde brillante */}
                                             <rect
                                                 x={-pixelSize / 2} y={-pixelSize / 2}
                                                 width={pixelSize} height={pixelSize}
@@ -370,8 +401,7 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
                                                 className="opacity-90"
                                                 style={{ filter: hoveredData.tier?.level === 1 ? 'drop-shadow(0 0 4px #fbbf24)' : 'none' }}
                                             />
-
-                                            {/* 🎯 Smart Hover Label - Glassmorphism Mejorado */}
+                                            {/* Smart Hover Label */}
                                             <foreignObject x={pixelSize / 2 + 5} y={-45} width={180} height={100}>
                                                 <div
                                                     className="p-4 rounded-2xl shadow-2xl backdrop-blur-3xl flex flex-col gap-1.5 transform scale-[0.6] origin-left"
@@ -429,6 +459,27 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
                 {/* Dashboard integral inmersivo */}
                 {isFullscreen && (
                     <div className="absolute right-10 top-1/2 -translate-y-1/2 w-[24rem] z-[250] pointer-events-none space-y-8">
+                        {/* Botón del Pasaporte - Flotante y Destacado */}
+                        <div className="pointer-events-auto flex justify-end">
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => setIsPassportOpen(true)}
+                                className="bg-[#1a1b1e] border border-[#2e2f33] p-4 rounded-2xl shadow-xl flex items-center gap-3 group hover:border-emerald-500/50 transition-colors"
+                            >
+                                <div className="relative">
+                                    <Book className="text-emerald-400" size={24} />
+                                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full shadow-lg">
+                                        {collectedStamps.length}
+                                    </span>
+                                </div>
+                                <div className="text-left">
+                                    <div className="text-[10px] uppercase font-black text-white leading-none">Mi Pasaporte</div>
+                                    <div className="text-[9px] font-medium text-gray-500 group-hover:text-emerald-500/80 transition-colors">Ver Colección</div>
+                                </div>
+                            </motion.button>
+                        </div>
+
                         <motion.div
                             initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }}
                             className="bg-black/95 backdrop-blur-3xl border border-white/10 p-10 rounded-[4.5rem] pointer-events-auto shadow-[0_50px_100px_rgba(0,0,0,1)] space-y-8"
@@ -485,11 +536,19 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
                 onClose={() => setSelectedCell(null)}
             />
 
-            {/* 🗿 MODAL EDUCATIVO DE MONUMENTOS - Info rica y cultural */}
+            {/* 🗿 MODAL EDUCATIVO DE MONUMENTOS - Con Trigger de Sellos */}
             <MonumentModal
                 monument={selectedMonument}
                 isOpen={isMonumentModalOpen}
                 onClose={() => setIsMonumentModalOpen(false)}
+                onVisit={handleUnlockStamp}
+            />
+
+            {/* 🛂 PASAPORTE DE AVENTURAS */}
+            <AdventurePassport
+                isOpen={isPassportOpen}
+                onClose={() => setIsPassportOpen(false)}
+                collectedStamps={collectedStamps}
             />
 
             <style>{`
