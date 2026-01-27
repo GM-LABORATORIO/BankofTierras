@@ -2,6 +2,7 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup, Graticule } from "react-simple-maps";
 import { Play, Heart, Shield, Radio, MapPin, Zap, Info, X, Camera, Droplets, Trees, Search, ExternalLink, Users, Globe, TrendingUp, DollarSign, Lock, Maximize2, Minimize2, Settings, List, Activity, Anchor, Bird, Wind, CloudSun, ShieldAlert, Mountain, Palmtree, Waves, Book } from 'lucide-react';
+import { calculateAdjacencyBonus } from '../utils/adjacencyLogic';
 import { GLOBAL_BIOMES, detectBiomeByLocation } from '../data/globalBiomes';
 import EnhancedBiomeModal from './EnhancedBiomeModal';
 import BiomeParticles from './BiomeParticles';
@@ -107,7 +108,6 @@ const getProceduralBiome = (lon, lat, isLand) => {
 };
 
 const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom }) => {
-    const [selectedCell, setSelectedCell] = useState(null);
     const [hoveredData, setHoveredData] = useState(null);
     const [internalZoom, setInternalZoom] = useState(1);
     const [isFullscreen, setIsFullscreen] = useState(isFullscreenDefault);
@@ -115,9 +115,15 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
     const [selectedMonument, setSelectedMonument] = useState(null);
     const [isMonumentModalOpen, setIsMonumentModalOpen] = useState(false);
 
+    // 🛒 Estado de Selección Múltiple (Carrito)
+    const [selectedCells, setSelectedCells] = useState([]);
+
     // 🛂 Adventure Passport State
     const [isPassportOpen, setIsPassportOpen] = useState(false);
-    const [collectedStamps, setCollectedStamps] = useState([]);
+    const [collectedStamps, setCollectedStamps] = useState(() => {
+        const saved = localStorage.getItem('bot_adventure_stamps');
+        return saved ? JSON.parse(saved) : [];
+    });
 
     const svgRef = useRef(null);
     const groupRef = useRef(null);
@@ -215,8 +221,24 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
 
             if (coords) {
                 const data = getCellData(coords, isLand);
-                setHoveredData(data);
-                if (isClick && data) setSelectedCell(data);
+
+                if (isClick && data) {
+                    // 🖱 Lógica de Selección Múltiple
+                    setSelectedCells(prev => {
+                        const exists = prev.find(p => p.id === data.id);
+                        if (exists) {
+                            // Si ya existe, lo quitamos (Toggle)
+                            return prev.filter(p => p.id !== data.id);
+                        } else {
+                            // Si no existe, lo agregamos
+                            // Limite opcional: Max 20 celdas para evitar crash
+                            if (prev.length >= 20) return prev;
+                            return [...prev, data];
+                        }
+                    });
+                } else {
+                    setHoveredData(data);
+                }
             }
         } catch (err) {
             // Silent catch to prevent UI crash on rapid zoom/render
@@ -376,6 +398,37 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
                                 ), [currentZoom, viewMode])}  {/* ⚡️ Fin del bloque memorizado */}
 
                                 {/* 🔥 INTERACTIVE LAYER: Solo esto se re-renderiza con hover */}
+                                {/* ✅ CELDAS SELECCIONADAS (Selección Múltiple) */}
+                                {selectedCells.map((cell) => (
+                                    <Marker key={cell.id} coordinates={cell.coords}>
+                                        <g>
+                                            <rect
+                                                x={-pixelSize / 2} y={-pixelSize / 2} width={pixelSize} height={pixelSize}
+                                                fill={cell.color}
+                                                className="opacity-50"
+                                            />
+                                            <rect
+                                                x={-pixelSize / 2} y={-pixelSize / 2}
+                                                width={pixelSize} height={pixelSize}
+                                                fill="none"
+                                                stroke="#ef4444" // Rojo vibrante para selección
+                                                strokeWidth={1.5 / currentZoom}
+                                                strokeDasharray="1,1" // Borde punteado estilo selección
+                                            />
+                                            {/* Indicador de Número */}
+                                            {selectedCells.length > 1 && (
+                                                <text
+                                                    textAnchor="middle"
+                                                    y={pixelSize * 0.2}
+                                                    style={{ fontSize: pixelSize * 0.6, fill: 'white', fontWeight: 'bold' }}
+                                                >
+                                                    {selectedCells.indexOf(cell) + 1}
+                                                </text>
+                                            )}
+                                        </g>
+                                    </Marker>
+                                ))}
+
                                 {hoveredData && (
                                     <Marker coordinates={hoveredData.coords}>
                                         <g className="pointer-events-none">
@@ -392,6 +445,7 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
                                                                 `blur(5px) drop-shadow(0 0 8px ${hoveredData.color})`
                                                 }}
                                             />
+                                            {/* Borde brillante */}
                                             <rect
                                                 x={-pixelSize / 2} y={-pixelSize / 2}
                                                 width={pixelSize} height={pixelSize}
@@ -494,7 +548,64 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
                                 </p>
                             </div>
 
-                            {hoveredData?.zone ? (
+                            {/* 🛒 SELECCIÓN MULTIPLE SUMMARY */}
+                            {selectedCells.length > 0 ? (
+                                <div className="space-y-4 animate-in fade-in slide-in-from-right-10 duration-500">
+                                    <div className="p-10 bg-emerald-900/20 border border-emerald-500/30 rounded-[3.5rem] space-y-3 relative overflow-hidden backdrop-blur-3xl shadow-xl">
+
+                                        {(() => {
+                                            const bonusData = calculateAdjacencyBonus(selectedCells, GRID_STEP);
+
+                                            return (
+                                                <>
+                                                    <div className="flex justify-between items-center text-[10px] font-black text-emerald-400 uppercase tracking-widest border-b border-emerald-500/20 pb-2">
+                                                        <span>Carrito Activo</span>
+                                                        <span>{selectedCells.length} Items</span>
+                                                    </div>
+                                                    <div className="space-y-1 max-h-[100px] overflow-y-auto custom-scrollbar">
+                                                        {selectedCells.map((cell, i) => (
+                                                            <div key={cell.id} className="flex justify-between text-[9px] text-gray-300">
+                                                                <span>{i + 1}. {cell.label}</span>
+                                                                <span>${cell.price}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+
+                                                    {/* BONUS SECTION */}
+                                                    {bonusData.discountPercent > 0 && (
+                                                        <div className="mt-2 py-2 px-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <Zap size={12} className="text-yellow-400 animate-pulse" />
+                                                                <span className="text-[9px] font-black text-yellow-400 uppercase">{bonusData.bonusName}</span>
+                                                            </div>
+                                                            <div className="flex justify-between text-[9px] text-emerald-300">
+                                                                <span>Bonus Conexión ({bonusData.connectedCount} cells)</span>
+                                                                <span>-{bonusData.discountPercent * 100}% (-${bonusData.discountAmount})</span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Total Calculation */}
+                                                    <div className="pt-2 border-t border-emerald-500/20 flex justify-between items-center text-lg font-black text-white italic">
+                                                        <span>TOTAL</span>
+                                                        <div className="flex flex-col items-end leading-none">
+                                                            {bonusData.discountPercent > 0 && (
+                                                                <span className="text-[10px] text-gray-500 line-through">${bonusData.finalPrice + bonusData.discountAmount}</span>
+                                                            )}
+                                                            <span>${bonusData.finalPrice}</span>
+                                                        </div>
+                                                    </div>
+                                                </>
+                                            );
+                                        })()}
+
+                                    </div>
+
+                                    <button className="w-full py-9 bg-emerald-500 text-white rounded-[2.5rem] font-black uppercase text-[11px] tracking-[0.4em] hover:bg-emerald-600 transition-all shadow-[0_20px_40px_rgba(16,185,129,0.3)] hover:scale-[1.03] active:scale-95 flex items-center justify-center gap-4">
+                                        PROCESAR ORDEN <Zap size={18} />
+                                    </button>
+                                </div>
+                            ) : hoveredData?.zone ? (
                                 <div className="space-y-4 animate-in fade-in slide-in-from-right-10 duration-500">
                                     <div className="p-10 bg-black/50 border border-emerald-500/20 rounded-[3.5rem] space-y-5 relative overflow-hidden backdrop-blur-3xl shadow-xl">
                                         <div className="absolute -right-4 -top-4 opacity-5 rotate-12 shrink-0">{hoveredData.zone.icon || <Trees />}</div>
@@ -514,6 +625,9 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
                                         </div>
                                         <Zap className="text-emerald-500 group-hover:scale-125 transition-transform" size={24} />
                                     </div>
+                                    <button className="w-full py-9 bg-emerald-500 text-white rounded-[2.5rem] font-black uppercase text-[11px] tracking-[0.4em] hover:bg-emerald-600 transition-all shadow-[0_20px_40px_rgba(16,185,129,0.3)] hover:scale-[1.03] active:scale-95 flex items-center justify-center gap-4">
+                                        AGREGAR AL LOTE <Zap size={18} />
+                                    </button>
                                 </div>
                             ) : (
                                 <div className="p-12 bg-white/5 border border-white/10 rounded-[4rem] text-center space-y-6">
@@ -521,10 +635,6 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
                                     <p className="text-[10px] text-white/40 font-black uppercase tracking-widest leading-relaxed px-4">Detectando coordenadas geodésicas... Evalua el valor de los m² terrestres.</p>
                                 </div>
                             )}
-
-                            <button className="w-full py-9 bg-emerald-500 text-white rounded-[2.5rem] font-black uppercase text-[11px] tracking-[0.4em] hover:bg-emerald-600 transition-all shadow-[0_20px_40px_rgba(16,185,129,0.3)] hover:scale-[1.03] active:scale-95 flex items-center justify-center gap-4">
-                                ADOPTAR AHORA <Zap size={18} />
-                            </button>
                         </motion.div>
                     </div>
                 )}
@@ -532,8 +642,8 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
 
             {/* Enhanced Modal with Gallery + Live Stream */}
             <EnhancedBiomeModal
-                selectedCell={selectedCell}
-                onClose={() => setSelectedCell(null)}
+                selectedCell={selectedCells.length > 0 ? selectedCells[selectedCells.length - 1] : null}
+                onClose={() => setSelectedCells([])}
             />
 
             {/* 🗿 MODAL EDUCATIVO DE MONUMENTOS - Con Trigger de Sellos */}
