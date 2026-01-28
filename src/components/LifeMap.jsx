@@ -1,14 +1,14 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup, Graticule } from "react-simple-maps";
-import { Play, Heart, Shield, Radio, MapPin, Zap, Info, X, Camera, Droplets, Trees, Search, ExternalLink, Users, Globe, TrendingUp, DollarSign, Lock, Maximize2, Minimize2, Settings, List, Activity, Anchor, Bird, Wind, CloudSun, ShieldAlert, Mountain, Palmtree, Waves, Book } from 'lucide-react';
+import { Play, Heart, Shield, Radio, MapPin, Zap, Info, X, Camera, Droplets, Trees, Search, ExternalLink, Users, Globe, TrendingUp, DollarSign, Lock, Maximize2, Minimize2, Settings, List, Activity, Anchor, Bird, Wind, CloudSun, ShieldAlert, Mountain, Palmtree, Waves, Book, Compass, Award } from 'lucide-react';
 import { calculateAdjacencyBonus } from '../utils/adjacencyLogic';
 import { GLOBAL_BIOMES, detectBiomeByLocation } from '../data/globalBiomes';
 import EnhancedBiomeModal from './EnhancedBiomeModal';
 import BiomeParticles from './BiomeParticles';
 import { getBiomeIconComponent } from './BiomeIconsSVG';
 import { getCulturalIcon } from './CulturalIcons';
-import { CULTURAL_MONUMENTS, BIOME_ICONS } from '../data/monumentsData';
+import { CULTURAL_MONUMENTS, BIOME_ICONS, BIODIVERSITY_DATA } from '../data/monumentsData';
 import MonumentModal from './MonumentModal';
 import AdventurePassport from './AdventurePassport';
 
@@ -107,6 +107,146 @@ const getProceduralBiome = (lon, lat, isLand) => {
     return { name: "SABANA Y ESTEPA", species: ["Panthera leo", "Adansonia"], health: 86, status: "Estable", funFact: "Ecosistemas de transición vitales.", icon: <Wind className="text-orange-300" />, basePrice: 150, tier };
 };
 
+// --- Componentes Internos de HUD (Definidos fuera) ---
+const FlashNotification = ({ message }) => {
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed bottom-32 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md px-6 py-3 rounded-full border border-white/20 shadow-2xl z-[500] pointer-events-none flex items-center gap-3"
+        >
+            <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
+            <span className="text-xs font-bold text-white uppercase tracking-widest">{message}</span>
+        </motion.div>
+    );
+};
+
+const DiscoveryCinematic = ({ item, type, onClose }) => {
+    if (!item) return null;
+    return (
+        <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/90 backdrop-blur-xl pointer-events-auto cursor-pointer"
+            onClick={onClose}
+        >
+            <motion.div
+                initial={{ scale: 2, opacity: 0, rotate: -10 }}
+                animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                transition={{ type: "spring", damping: 12, stiffness: 100 }}
+                className="relative w-full max-w-lg aspect-[3/4] bg-[#f4f1ea] rounded-xl shadow-[0_0_100px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col p-10 border-[12px] border-white/10"
+            >
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 pointer-events-none"></div>
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')] opacity-20 pointer-events-none"></div>
+
+                {/* Slamming Stamp Effect */}
+                <motion.div
+                    initial={{ scale: 5, opacity: 0, y: -200 }}
+                    animate={{ scale: 1, opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4, type: "spring", damping: 8 }}
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none z-20"
+                >
+                    <div className="w-80 h-80 border-[12px] border-emerald-600/20 rounded-full flex items-center justify-center rotate-[-25deg]">
+                        <span className="text-5xl font-black text-emerald-600/20 uppercase tracking-tighter border-y-8 border-emerald-600/20 py-4 italic">VERIFICADO</span>
+                    </div>
+                </motion.div>
+
+                <div className="relative z-10 flex-1 flex flex-col items-center text-center">
+                    <div className="text-[10px] font-black text-gray-400 uppercase tracking-[0.6em] mb-6">Discovery Log v.01</div>
+
+                    <div className="w-full aspect-square rounded-[2rem] overflow-hidden mb-8 border-[6px] border-white shadow-2xl rotate-2">
+                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                    </div>
+
+                    <h2 className="text-4xl font-black text-gray-900 uppercase italic leading-none mb-3 tracking-tighter">{item.name}</h2>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mb-8 border-b border-gray-200 pb-4 w-full">
+                        {type === 'monument' ? item.country : item.species}
+                    </p>
+
+                    <div className="flex-1 flex flex-col justify-center">
+                        <div className="text-[11px] font-black text-emerald-600 uppercase tracking-[0.3em] mb-2">Registro de Bitácora</div>
+                        <div className="text-sm font-black text-gray-900 uppercase tracking-[0.2em] px-8 py-3 bg-gray-900 text-white rounded-xl shadow-xl">
+                            {type === 'monument' ? 'SELLO CONCEDIDO' : `NIVEL: ${item.rarity?.toUpperCase()}`}
+                        </div>
+                    </div>
+
+                    <div className="mt-10 text-[9px] font-mono text-gray-400 uppercase tracking-[0.2em]">
+                        LOC: {item.coords?.join(', ') || '0.00, 0.00'}
+                    </div>
+                </div>
+
+                <div className="absolute bottom-6 right-8 opacity-[0.05] rotate-12">
+                    <Globe size={180} className="text-gray-900" />
+                </div>
+            </motion.div>
+
+            <motion.div
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5 }}
+                className="absolute bottom-12 text-white/50 text-[10px] font-black uppercase tracking-[0.4em] flex items-center gap-3"
+            >
+                <Compass size={14} className="animate-spin-slow" /> Haz clic para continuar tu viaje
+            </motion.div>
+        </motion.div>
+    );
+};
+
+const ExplorerHUD = ({ collectedStampsCount, collectedSpeciesCount, onOpenPassport }) => {
+    return (
+        <motion.div
+            initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
+            className="fixed bottom-12 left-1/2 -translate-x-1/2 z-[400] flex items-center p-1 bg-black/80 backdrop-blur-3xl rounded-3xl border border-white/10 shadow-[0_40px_80px_rgba(0,0,0,0.8)] pointer-events-auto"
+        >
+            <button
+                onClick={onOpenPassport}
+                className="flex items-center gap-2 px-1 py-1 rounded-2xl hover:bg-white/5 transition-all group"
+            >
+                <div className="flex items-center gap-4 px-6 py-3 bg-white/5 rounded-[1.25rem] border border-white/5 group-hover:bg-white/10 transition-colors">
+                    <div className="flex items-center gap-3 border-r border-white/10 pr-4">
+                        <div className="relative">
+                            <Award className="text-emerald-400" size={18} />
+                            <AnimatePresence mode="popLayout">
+                                <motion.div
+                                    key={collectedStampsCount}
+                                    initial={{ scale: 2, opacity: 1 }} animate={{ scale: 1, opacity: 0 }}
+                                    className="absolute inset-0 bg-emerald-500 rounded-full blur-md"
+                                />
+                            </AnimatePresence>
+                        </div>
+                        <div className="flex flex-col items-start leading-none gap-1">
+                            <span className="text-[12px] font-black text-white">{collectedStampsCount}</span>
+                            <span className="text-[7px] font-black text-emerald-500/60 uppercase tracking-widest">Sellos</span>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <div className="relative">
+                            <Book className="text-blue-400" size={18} />
+                            <AnimatePresence mode="popLayout">
+                                <motion.div
+                                    key={collectedSpeciesCount}
+                                    initial={{ scale: 2, opacity: 1 }} animate={{ scale: 1, opacity: 0 }}
+                                    className="absolute inset-0 bg-blue-500 rounded-full blur-md"
+                                />
+                            </AnimatePresence>
+                        </div>
+                        <div className="flex flex-col items-start leading-none gap-1">
+                            <span className="text-[12px] font-black text-white">{collectedSpeciesCount}</span>
+                            <span className="text-[7px] font-black text-blue-500/60 uppercase tracking-widest">Especies</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-3 px-6 py-3">
+                    <span className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] group-hover:text-white transition-colors">Bitácora Global</span>
+                    <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-500 group-hover:bg-emerald-500 group-hover:text-black transition-all">
+                        <Compass size={16} className="group-hover:rotate-45 transition-transform" />
+                    </div>
+                </div>
+            </button>
+        </motion.div>
+    );
+};
+
 const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom }) => {
     const [hoveredData, setHoveredData] = useState(null);
     const [internalZoom, setInternalZoom] = useState(1);
@@ -115,6 +255,7 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
     const [selectedMonument, setSelectedMonument] = useState(null);
     const [isMonumentModalOpen, setIsMonumentModalOpen] = useState(false);
     const [lastDiscoveryTime, setLastDiscoveryTime] = useState(0);
+    const [discoveryNotification, setDiscoveryNotification] = useState(null); // { item, type }
 
     // 🛒 Estado de Selección Múltiple (Carrito)
     const [selectedCells, setSelectedCells] = useState([]);
@@ -129,18 +270,26 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
         const saved = localStorage.getItem('bot_biodiversity_album');
         return saved ? JSON.parse(saved) : [];
     });
+    const [flashMsg, setFlashMsg] = useState(null);
+
+    // ✨ Generador de Hotspots (Puntos de Pesca)
+    const HOTSPOTS = useMemo(() => {
+        const spots = [];
+        // Malla de búsqueda para hotspots deterministas
+        for (let lon = -175; lon < 180; lon += 8) {
+            for (let lat = -85; lat < 90; lat += 8) {
+                const seed = getStableSeed(lon, lat);
+                if (seed > 0.85) { // ~15% de las zonas son hotspots (Aumentado para facilitar hallazgos)
+                    spots.push({ id: `hs-${lon}-${lat}`, coords: [lon, lat], seed });
+                }
+            }
+        }
+        return spots;
+    }, []);
 
     const svgRef = useRef(null);
     const groupRef = useRef(null);
     const lastUpdateTime = useRef(0);
-
-    // Cargar sellos del localStorage al montar
-    useEffect(() => {
-        const savedStamps = localStorage.getItem('bot_adventure_stamps');
-        if (savedStamps) {
-            setCollectedStamps(JSON.parse(savedStamps));
-        }
-    }, []);
 
     // Desbloquear Sello al Visitar Monumento
     const handleUnlockStamp = (monument) => {
@@ -150,11 +299,15 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
             const exists = prev.some(stamp => stamp.name === monument.name);
             if (exists) return prev;
 
+            // 🎊 Trigger Cinematic
+            setDiscoveryNotification({ item: monument, type: 'monument' });
+
             const newStamp = {
                 name: monument.name,
                 date: new Date().toLocaleDateString(),
                 type: monument.type,
-                // Guardamos solo datos serializables. El icono se genera en el UI del pasaporte.
+                image: monument.image,
+                coords: monument.coords
             };
 
             const updatedStamps = [...prev, newStamp];
@@ -162,27 +315,40 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
             return updatedStamps;
         });
     };
-    const handleRandomDrop = (isLand) => {
-        // 10% de probabilidad de drop
-        if (Math.random() > 0.1) return;
 
-        const speciesList = isLand ? [
-            { name: "Jaguar de la Selva", icon: "🐆", rarity: "legendary" },
-            { name: "Tucán Real", icon: "🦜", rarity: "rare" },
-            { name: "Mariposa Morpho", icon: "🦋", rarity: "common" },
-            { name: "Puma Andino", icon: "🐈", rarity: "rare" },
-            { name: "Oso de Anteojos", icon: "🐻", rarity: "legendary" }
-        ] : [
-            { name: "Delfín Rosado", icon: "🐬", rarity: "legendary" },
-            { name: "Tortuga Marina", icon: "🐢", rarity: "rare" },
-            { name: "Pez Payaso", icon: "🐠", rarity: "common" },
-            { name: "Ballena Jorobada", icon: "🐋", rarity: "legendary" }
-        ];
+    const handleRandomDrop = (isLand, data) => {
+        // 🎣 Lógica de "Pesca": 
+        // Si hay un hotspot cerca, la probabilidad es mayor (40%)
+        // Si no, es muy baja (2%)
+        const isNearHotspot = HOTSPOTS.some(h =>
+            Math.abs(h.coords[0] - data.coords[0]) < 2 &&
+            Math.abs(h.coords[1] - data.coords[1]) < 2
+        );
+
+
+        const dropProbability = isNearHotspot ? 0.35 : 0.05;
+
+        if (Math.random() > dropProbability) {
+            // "Nada picó": Si es un hotspot, damos feedback educativo
+            if (isNearHotspot) {
+                setFlashMsg("¡Casi! Una especie se escondió... Sigue buscando en los brillos ✨");
+                setTimeout(() => setFlashMsg(null), 3000);
+            }
+            return;
+        }
+
+        const speciesList = isLand ?
+            BIODIVERSITY_DATA.filter(s => s.habitat !== "Océanos tropicales" && s.habitat !== "Cuencas del Amazonas y Orinoco" || s.id === "jaguar") :
+            BIODIVERSITY_DATA.filter(s => s.habitat === "Océanos tropicales" || s.habitat === "Cuencas del Amazonas y Orinoco");
 
         const drop = speciesList[Math.floor(Math.random() * speciesList.length)];
 
         setCollectedSpecies(prev => {
             if (prev.some(s => s.name === drop.name)) return prev;
+
+            // 🎊 Trigger Cinematic
+            setDiscoveryNotification({ item: drop, type: 'species' });
+
             const updated = [...prev, drop];
             localStorage.setItem('bot_biodiversity_album', JSON.stringify(updated));
             return updated;
@@ -223,7 +389,7 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
             label: zoneData.name,
             color: zoneData.tier?.level === 1 ? '#fbbf24' : (isLand ? '#10b981' : '#3b82f6'),
             price: finalPrice,
-            roi: zoneData.tier?.level === 1 ? '25%' : '12%',
+            impactLevel: zoneData.tier?.level === 1 ? 'Máximo' : 'Normal',
             zone: zoneData,
             tier: zoneData.tier,
             live: !!zoneData.liveTag
@@ -253,8 +419,8 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
                 const data = getCellData(coords, isLand);
 
                 if (isClick && data) {
-                    // 🎲 Posibilidad de encontrar especie
-                    handleRandomDrop(isLand);
+                    // 🎲 Posibilidad de encontrar especie (Ahora inyectamos data para hotspots)
+                    handleRandomDrop(isLand, data);
 
                     // 🖱 Lógica de Selección Múltiple
                     setSelectedCells(prev => {
@@ -307,7 +473,12 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
                                     </div>
                                     <div className="flex items-center justify-between pt-1">
                                         <div className="text-[10px] font-black text-white/40 uppercase tracking-widest">{hoveredData?.id || 'Scanning...'}</div>
-                                        <div className="text-[9px] font-black text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">Z: x{currentZoom.toFixed(1)}</div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="text-[9px] font-black text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20 flex items-center gap-1.5">
+                                                <Zap size={10} fill="currentColor" /> {collectedSpecies.length} / {BIODIVERSITY_DATA.length}
+                                            </div>
+                                            <div className="text-[9px] font-black text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">Z: x{currentZoom.toFixed(1)}</div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -341,6 +512,12 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
                         className="w-full h-full relative z-10"
                         ref={svgRef}
                     >
+                        <defs>
+                            <radialGradient id="sparkleGradient">
+                                <stop offset="0%" stopColor="#fff" stopOpacity="1" />
+                                <stop offset="100%" stopColor="#fbbf24" stopOpacity="0" />
+                            </radialGradient>
+                        </defs>
                         <ZoomableGroup
                             center={[0, 0]}
                             zoom={currentZoom}
@@ -411,11 +588,30 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
                                             </Marker>
                                         ))}
 
-                                        {/* 🌳 ICONOS DE BIOMA BASE */}
-                                        {viewMode === 'biologic' && BIOME_ICONS.map((icon, idx) => (
+                                        {/* 🌳 ICONOS DE BIOMA BASE (LOD: Zoom > 1.3) */}
+                                        {viewMode === 'biologic' && currentZoom > 1.3 && BIOME_ICONS.map((icon, idx) => (
                                             <Marker key={`biome-${idx}`} coordinates={icon.coords}>
                                                 <g>
                                                     {getBiomeIconComponent(icon.type, 0, 0, icon.size)}
+                                                </g>
+                                            </Marker>
+                                        ))}
+
+                                        {/* ✨ DESTELLOS DE BIODIVERSIDAD (Hotspots) - LOD: Zoom > 1.8 */}
+                                        {viewMode === 'biologic' && currentZoom > 1.8 && HOTSPOTS.map((hs) => (
+                                            <Marker key={hs.id} coordinates={hs.coords}>
+                                                <g className="pointer-events-none">
+                                                    <circle r={2 / currentZoom} fill="#fff" className="animate-pulse">
+                                                        <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite" />
+                                                    </circle>
+                                                    <path
+                                                        d={`M 0 -${4 / currentZoom} L 0 ${4 / currentZoom} M -${4 / currentZoom} 0 L ${4 / currentZoom} 0`}
+                                                        stroke="#fff"
+                                                        strokeWidth={0.5 / currentZoom}
+                                                        opacity="0.8"
+                                                        className="animate-spin-slow"
+                                                    />
+                                                    <circle r={6 / currentZoom} fill="url(#sparkleGradient)" opacity="0.4" />
                                                 </g>
                                             </Marker>
                                         ))}
@@ -423,7 +619,7 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
                                 ), [viewMode])}  {/* ⚡️ Desacoplado de currentZoom para evitar freeze */}
 
                                 {/* 🌊 CAPA DE EFECTOS DINÁMICOS (LOD: Zoom > 2) */}
-                                {viewMode === 'biologic' && currentZoom > 2 && (
+                                {viewMode === 'biologic' && currentZoom > 2.0 && (
                                     <g style={{ opacity: internalZoom > 8 ? 0.3 : 1 }}>
                                         <BiomeParticles biomeType="océano" />
                                         <BiomeParticles biomeType="selva tropical" />
@@ -586,11 +782,11 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
                         >
                             <div className="space-y-4">
                                 <h2 className="text-4xl md:text-5xl font-black italic tracking-tighter uppercase leading-[0.8] flex flex-col">
-                                    <span className="text-white opacity-40 italic">ECONOMÍA</span>
-                                    <span className="text-emerald-500 drop-shadow-[0_0_20px_rgba(16,185,129,0.3)]">PLANETARIA.</span>
+                                    <span className="text-white opacity-40 italic">ECOSISTEMA</span>
+                                    <span className="text-emerald-500 drop-shadow-[0_0_20px_rgba(16,185,129,0.3)]">DIGITAL.</span>
                                 </h2>
                                 <p className="text-gray-400 font-bold leading-relaxed text-[10px] uppercase tracking-widest opacity-60">
-                                    Valuación en tiempo real basada en servicios ecosistémicos del $BoT.
+                                    Acceso a beneficios y experiencias exclusivas impulsadas por el $BoT.
                                 </p>
                             </div>
 
@@ -678,7 +874,7 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
                             ) : (
                                 <div className="p-12 bg-white/5 border border-white/10 rounded-[4rem] text-center space-y-6">
                                     <div className="w-20 h-20 mx-auto rounded-full bg-white/5 flex items-center justify-center border border-white/10"><Radio className="text-emerald-500 animate-pulse" size={40} /></div>
-                                    <p className="text-[10px] text-white/40 font-black uppercase tracking-widest leading-relaxed px-4">Detectando coordenadas geodésicas... Evalua el valor de los m² terrestres.</p>
+                                    <p className="text-[10px] text-white/40 font-black uppercase tracking-widest leading-relaxed px-4">Plataforma de usabilidad $BoT. Conéctate con experiencias y beneficios de biomas estratégicos.</p>
                                 </div>
                             )}
                         </motion.div>
@@ -708,9 +904,34 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
                 collectedSpecies={collectedSpecies}
             />
 
+            {/* 🛂 HUD DE EXPLORADOR */}
+            <ExplorerHUD
+                collectedStampsCount={collectedStamps.length}
+                collectedSpeciesCount={collectedSpecies.length}
+                onOpenPassport={() => setIsPassportOpen(true)}
+            />
+
+            {/* ⚡ FLASH NOTIFICATION (Near Miss) */}
+            <AnimatePresence>
+                {flashMsg && <FlashNotification message={flashMsg} />}
+            </AnimatePresence>
+
+            {/* 🎊 DISCOVERY CINEMATIC (Stamping Effect) */}
+            <AnimatePresence>
+                {discoveryNotification && (
+                    <DiscoveryCinematic
+                        item={discoveryNotification.item}
+                        type={discoveryNotification.type}
+                        onClose={() => setDiscoveryNotification(null)}
+                    />
+                )}
+            </AnimatePresence>
+
             <style>{`
                 @keyframes pulse-slow { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.5; } }
+                @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
                 .animate-pulse-slow { animation: pulse-slow 8s infinite; }
+                .animate-spin-slow { animation: spin-slow 12s linear infinite; }
 
                 /* 🐟 Animación de Nado (Peces) */
                 @keyframes swim {
@@ -736,7 +957,7 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
                 .animate-float { animation: float-water 3s ease-in-out infinite; }
                 .animate-fly { animation: fly 5s ease-in-out infinite; }
             `}</style>
-        </div>
+        </div >
     );
 };
 

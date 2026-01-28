@@ -5,8 +5,8 @@
 
 -- Ensure Colombia exists and get its ID
 DELETE FROM countries WHERE code = 'CO';
-INSERT INTO countries (code, name, flag_emoji, description, official_language, currency)
-VALUES ('CO', 'Colombia', '🇨🇴', 'País megadiverso con el segundo mayor número de especies en el mundo', 'Español', 'COP');
+INSERT INTO countries (code, name, flag_emoji, continent, description, official_language, currency, conservation_agency, agency_website)
+VALUES ('CO', 'Colombia', '🇨🇴', 'america', 'País megadiverso con el segundo mayor número de especies en el mundo', 'Español', 'COP', 'IDEAM', 'http://www.ideam.gov.co');
 
 INSERT INTO regions (
     country_id, code, name, biome_type, 

@@ -72,6 +72,28 @@ export const supabaseService = {
         return data[0];
     },
 
+    async getProjectsBySteward(stewardWallet) {
+        if (!supabase || !stewardWallet) return [];
+        const { data, error } = await supabase
+            .from('projects')
+            .select('*')
+            .eq('steward_wallet', stewardWallet)
+            .order('created_at', { ascending: false });
+        if (error) throw error;
+        return data;
+    },
+
+    async updateProjectQuotas(projectId, carbonQuota, m2Quota) {
+        if (!supabase) return null;
+        const { data, error } = await supabase
+            .from('projects')
+            .update({ carbon_quota: carbonQuota, m2_quota: m2Quota })
+            .eq('id', projectId)
+            .select();
+        if (error) throw error;
+        return data[0];
+    },
+
     // --- Adoptions ---
     async getAdoptions(walletAddress) {
         if (!supabase || !walletAddress) return [];
@@ -441,7 +463,10 @@ export const supabaseService = {
             co2_captured_kg: 0,
             trees_planted: 0,
             funds_raised_usd: 0,
-            species_protected: 0
+            species_protected: 0,
+            experiences: [],
+            products: [],
+            stream_url: ''
         };
     },
 
@@ -464,6 +489,27 @@ export const supabaseService = {
             .select();
         if (error) throw error;
         return data[0];
+    },
+
+    async registerPixelAdoption(adoptionData) {
+        if (!supabase) return null;
+        const { data, error } = await supabase
+            .from('pixel_adoptions')
+            .insert([adoptionData])
+            .select();
+        if (error) throw error;
+        return data[0];
+    },
+
+    async getPixelHolders(pixelId) {
+        if (!supabase) return [];
+        const { data, error } = await supabase
+            .from('pixel_adoptions')
+            .select('*, profiles(name)')
+            .eq('pixel_id', pixelId)
+            .eq('status', 'active');
+        if (error) return [];
+        return data;
     },
 
     // ============================================
@@ -951,6 +997,21 @@ export const supabaseService = {
             return data;
         } catch (error) {
             console.error('Error fetching zones:', error);
+            return [];
+        }
+    },
+
+    async getZonesBySteward(stewardWallet) {
+        if (!supabase || !stewardWallet) return [];
+        try {
+            const { data, error } = await supabase
+                .from('zones')
+                .select('*, regions(name, country_id)')
+                .eq('steward_wallet', stewardWallet);
+            if (error) throw error;
+            return data;
+        } catch (error) {
+            console.error('Error fetching steward zones:', error);
             return [];
         }
     }

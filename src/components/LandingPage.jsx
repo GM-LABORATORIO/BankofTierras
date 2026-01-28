@@ -230,7 +230,7 @@ const LandingPage = ({ onEnter, onDiscovery }) => {
                                 {[
                                     { t: "Inmutabilidad Blockchain", d: "Cada transacción y certificado es un registro público irreversible que garantiza la propiedad única." },
                                     { t: "Auditoría Satelital Inmediata", d: "Conectamos datos de biomasa reales con smart contracts, validando el impacto en tiempo real." },
-                                    { t: "Trazabilidad Radical", d: "Desde la inversión inicial hasta la liquidación NFT, cada centavo tiene un rastro digital auditable." }
+                                    { t: "Trazabilidad Radical", d: "Desde la adopción inicial hasta la liquidación NFT, cada centavo tiene un rastro digital auditable." }
                                 ].map((item, i) => (
                                     <li key={i} className="flex gap-4">
                                         <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0 mt-1 text-emerald-500">
@@ -302,7 +302,7 @@ const LandingPage = ({ onEnter, onDiscovery }) => {
                             MAPA DE <span className="text-emerald-500">VIDA.</span>
                         </h3>
                         <p className="text-gray-400 text-lg md:text-xl font-bold leading-relaxed max-w-2xl mx-auto">
-                            Explora cada píxel del planeta. Cada nodo representa un área de conservación real auditada on-chain. Haz clic en las zonas para ver su valoración biológica y potencial de impacto.
+                            Tu portal de usabilidad para el eco-token $BoT. Conecta con biomas estratégicos para desbloquear experiencias únicas, NFTs de colección, certificados de impacto y productos de las comunidades protectoras.
                         </p>
                     </div>
 
@@ -318,7 +318,7 @@ const LandingPage = ({ onEnter, onDiscovery }) => {
                             { label: "Nodos de Red", val: "64,800", sub: "Píxeles Globales" },
                             { label: "Resolución", val: "1.0°", sub: "Grilla Táctica" },
                             { label: "Malla Inmutable", val: "100%", sub: "Auditoría On-Chain" },
-                            { label: "Tasa de ROI", val: "12-25%", sub: "Impacto Ecosistémico" }
+                            { label: "Nivel de Impacto", val: "Premium", sub: "Beneficios de Vida" }
                         ].map((item, i) => (
                             <div key={i} className="bg-white/5 border border-white/5 p-8 rounded-3xl text-center space-y-1">
                                 <div className="text-[9px] font-black text-emerald-500/50 uppercase tracking-widest">{item.label}</div>
@@ -336,14 +336,14 @@ const LandingPage = ({ onEnter, onDiscovery }) => {
                             <h2 className="text-xs font-black text-emerald-500 uppercase tracking-[0.3em] mb-4">Seguridad Jurídica & Fiscal</h2>
                             <h3 className="text-4xl md:text-6xl font-black mb-8 italic tracking-tighter uppercase">Blindaje Legal para tu Empresa</h3>
                             <p className="text-gray-400 text-lg leading-relaxed mb-10 font-medium">
-                                Operamos bajo el marco legal colombiano para transformar tus inversiones ambientales en beneficios tributarios reales y cumplimiento de ley.
+                                Operamos bajo el marco legal colombiano para transformar tus compensaciones ambientales en beneficios tributarios reales y cumplimiento de ley.
                             </p>
 
                             <div className="space-y-8">
                                 {[
                                     { title: "Ley 2173 (Ley del Árbol)", desc: "Cumplimiento automático de la obligación de siembra de 2 árboles por empleado.", law: "Ley 2173 de 2021" },
                                     { title: "Neutralidad de Carbono", desc: "No causación de hasta el 50% del Impuesto Nacional al Carbono.", law: "Decreto 926 de 2017" },
-                                    { title: "Descuento de Renta (25%)", desc: "Deducciones fiscales directas por inversiones en control y mejoramiento ambiental.", law: "Art. 255/257 Estatuto Tributario" }
+                                    { title: "Descuento de Renta (25%)", desc: "Deducciones fiscales directas por aportes en control y mejoramiento ambiental.", law: "Art. 255/257 Estatuto Tributario" }
                                 ].map((item, i) => (
                                     <div key={i} className="flex gap-6">
                                         <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0 border border-emerald-500/20">

@@ -366,7 +366,7 @@ const CarbonMarketplace = ({ projects }) => {
 
                                 <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-5 space-y-2">
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Inversión Estimada</span>
+                                        <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Compensación Estimada</span>
                                         <span className="text-lg font-black text-white italic tracking-tighter">
                                             $ {Math.round(amount * pricePerTonCOP).toLocaleString()} COP
                                         </span>

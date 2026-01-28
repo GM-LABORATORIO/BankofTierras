@@ -252,7 +252,7 @@ const EcoTokenPurchase = () => {
                             <div>
                                 <h3 className="font-black text-lg mb-2">100% Seguro</h3>
                                 <p className="text-gray-400 text-sm">
-                                    Contratos auditados y verificados en Snowtrace. Tu inversión está protegida.
+                                    Contratos auditados y verificados en Snowtrace. Tu contribución está respaldada.
                                 </p>
                             </div>
                         </div>

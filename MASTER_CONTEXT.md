@@ -2,13 +2,15 @@
 
 ## 📋 Resumen del Proyecto
 
-**Bank of Tierras** es una plataforma Web3 de adopción temporal de píxeles de tierra que combina:
-- 🗺️ Mapa interactivo global con biomas reales
-- 🌱 Sistema de conservación ambiental
-- 💎 NFTs con tiers dinámicos (BASIC, COMMON, RARE, EPIC)
-- 📸 Galería de medios (fotos + live-streams)
-- 🎯 Experiencias premium (viajes, webinars, live-cams)
-- 📊 Tracking de impacto ambiental (CO2, árboles, fondos)
+**Bank of Tierras** es un ecosistema Web3 integral diseñado para liderar la **compensación ambiental**, la **protección de biodiversidad** y el **cumplimiento de marcos legales y corporativos (ESG / Ley del Árbol)**. 
+
+La plataforma utiliza la adopción de nodos territoriales (píxeles) como un mecanismo de usabilidad y transparencia para:
+- 🌿 **Compensación Ambiental**: Facilitar a personas y empresas el cumplimiento de sus objetivos de huella de carbono.
+- 🦊 **Protección de Especies**: Financiar directamente la conservación de fauna en peligro de extinción.
+- 🤝 **Apoyo Comunitario**: Canalizar donaciones y recursos a comunidades locales guardianas de biomas.
+- 📑 **Certificación Legal**: Emitir certificados verificables on-chain para beneficios tributarios y cumplimiento normativo.
+- 🪙 **Economía Circular**: Utilizar el EcoToken como motor de incentivos para la regeneración ecosistémica.
+- 📊 **Métricas Reales**: Trazabilidad absoluta de CO2, árboles plantados y estado de salud biótica.
 
 ---
 
@@ -27,7 +29,7 @@
 **Características del Mapa**:
 - Detección de biomas en tiempo real
 - Sistema de coordenadas determinista
-- Precios procedurales con volatilidad de mercado
+- Aportes de compensación procedurales con volatilidad de mercado
 - Hover interactivo con throttling (100ms)
 - Zoom optimizado (0.5x - 12x)
 - Visualización de tiers con colores dinámicos
@@ -40,7 +42,7 @@
 
 **4 Niveles de Exclusividad**:
 
-| Tier | Nombre | % del Mapa | Cantidad | Precio (USD) | Multiplicador |
+| Tier | Nombre | % del Mapa | Cantidad | Aporte Sugerido (USD) | Multiplicador |
 |------|--------|------------|----------|--------------|---------------|
 | **1 - EPIC** | Santuario Crítico | 1% | 648 px | $1,000 - $3,500 | 1.5x |
 | **2 - RARE** | Hotspot Biótico | 9% | 5,832 px | $500 - $1,000 | 1.3x |
@@ -57,26 +59,26 @@
 - 🗳️ Votación en gobernanza del proyecto
 - ✈️ Viaje guiado de 7-10 días al bioma
 - 🎓 Webinar mensual con expertos
-- 💰 ROI estimado: 25%
+- 🌱 **Nivel de Impacto: Máximo**
 
 #### RARE ($500-$999)
 - 📊 Reportes de especies en tiempo real
 - 📜 Certificado de Impacto Premium
 - 🌐 Acceso a zona VIP de Discord
 - 🎥 Webinar trimestral exclusivo
-- 💰 ROI estimado: 18%
+- 🌱 **Nivel de Impacto: Alto**
 
 #### COMMON ($250-$499)
 - ⚡ Generación acelerada de EcoTokens
 - 📈 Pool de recompensas de carbono
 - 🌱 Certificado digital de adopción
-- 💰 ROI estimado: 12%
+- 🌱 **Nivel de Impacto: Medio**
 
 #### BASIC ($100-$249)
 - 🛡️ Membresía de Guardián
 - 🌊 Participación en proyectos de limpieza
 - 📱 Badge de perfil
-- 💰 ROI estimado: 8%
+- 🌱 **Nivel de Impacto: Base**
 
 **Archivo**: `src/data/globalBiomes.jsx` (ADOPTION_PLANS)
 
@@ -117,7 +119,7 @@
 - 📜 Certificados de compensación ambiental
 - 💰 Re-inversión en créditos de carbono
 - 👥 Gestión de equipo corporativo
-- 📈 Análisis de ROI ambiental
+- 📈 Análisis de Impacto Ambiental
 
 **Beneficios Corporativos**:
 - Reducción de impuestos por compensación ambiental
@@ -208,7 +210,7 @@ Token nativo de la plataforma que representa créditos de carbono y servicios ec
 - **BASIC**: 1 token/mes por píxel
 
 **Usos del EcoToken**:
-1. Comprar más píxeles con descuento
+1. Adoptar más píxeles con incentivos
 2. Acceder a experiencias premium
 3. Votar en gobernanza
 4. Comercializar en marketplace
@@ -225,7 +227,7 @@ Token nativo de la plataforma que representa créditos de carbono y servicios ec
 **Funcionalidades**:
 - 📊 Listado de proyectos de conservación
 - 🔍 Filtros por bioma, tier, precio, impacto
-- 💰 Compra de créditos de carbono
+- 💰 Adopción de créditos de carbono
 - 📈 Gráficos de impacto en tiempo real
 - 🏆 Ranking de proyectos más impactantes
 - 💬 Sistema de reviews y ratings
@@ -843,7 +845,12 @@ Organización Autónoma Descentralizada (DAO) donde los holders de píxeles vota
 6. **Tiers y Beneficios**
    - Tabla comparativa de 4 tiers
    - Beneficios destacados
-   - Calculadora de ROI
+   - Calculadora de Impacto
+
+7. **Pasaporte de Aventuras**
+   - Visualización de sellos coleccionados con fotos reales.
+   - Álbum de Biodiversidad con especies desbloqueables.
+   - Sistema de gamificación por exploración.
 
 7. **Partners**
    - Logos de ONGs aliadas
@@ -902,11 +909,11 @@ Organización Autónoma Descentralizada (DAO) donde los holders de píxeles vota
 - ✅ Tab de **Impacto** (Métricas de CO2, árboles, fondos y gráfico de salud).
 - ✅ Lógica de **Comunidad** (Carga de holders y eventos).
 
-#### 5. **Paneles de Administración**
-- ✅ `AdminRegionManager.jsx` - Gestión de regiones por continente/país.
-- ✅ `AdminImpactEditor.jsx` - Edición de métricas ambientales.
-- ✅ `AdminBulkTools.jsx` - Creación masiva de píxeles.
-- ✅ `AdminExperiencesManager.jsx` - Gestión de expediciones.
+#### 6. **Pasaporte y Álbum de Biodiversidad**
+- ✅ **Álbum Visual**: Integración de fotos reales de monumentos en el pasaporte.
+- ✅ **Colección de Fauna**: 7 especies iniciales (Jaguar, Delfín Rosado, etc.) con lógica de "locked/unlocked".
+- ✅ **Drop Logic**: 10% de probabilidad de descubrir especies al interactuar con el mapa.
+- ✅ **Optimización de Mapa**: Reducción de densidad de vegetación para mayor claridad visual.
 
 ---
 
@@ -1074,14 +1081,13 @@ AMAZONAS CERO/
 
 ## 🎯 Visión a Largo Plazo
 
-**Bank of Tierras** busca convertirse en la plataforma líder de adopción de tierra con propósito de conservación, conectando:
-- 🌍 **100+ biomas** de todos los continentes
-- 👥 **Millones de adoptantes** comprometidos con el planeta
-- 🏢 **Cientos de partners** (ONGs, eco-lodges, aerolíneas)
-- 💰 **Fondos significativos** para proyectos de conservación
-- 📊 **Impacto medible** (CO2, árboles, especies protegidas)
+**Bank of Tierras** busca consolidarse como la infraestructura tecnológica definitiva para la **regeneración del planeta**, transformando la compensación ambiental en un proceso transparente, interactivo y legalmente sólido, conectando:
+- 🏗️ **Infraestructura ESG**: El estándar para certificados de cumplimiento ambiental empresarial.
+- 🐾 **Santuario Global**: Protección activa de miles de especies y sus hábitats.
+- 🏘️ **Impacto Social**: Prosperidad para comunidades locales a través de la custodia ambiental.
+- 🌎 **Mercado Unificado**: El eje de intercambio para créditos de carbono y servicios ecosistémicos.
 
 ---
 
-**Última actualización**: 2026-01-27
-**Versión**: 2.0 (Expansión Global + Supabase)
+**Última actualización**: 2026-01-28
+**Versión**: 2.1 (Passport & Biodiversity Evolution)

@@ -273,7 +273,7 @@ const CorporatePanel = ({ myForest = [], projects = [], totalRetired = 0, onReti
                                 <div className="space-y-4">
                                     {[
                                         { label: "Saldo Disponible", value: `${carbonBalance}`, unit: "tCO2", icon: <Leaf className="text-emerald-500" />, sub: "Listo para retirar" },
-                                        { label: "Inversión Verde", value: "$45.2M", unit: "COP", icon: <TrendingUp className="text-blue-500" />, sub: "Capital Catalítico" },
+                                        { label: "Compensación Verde", value: "$45.2M", unit: "COP", icon: <TrendingUp className="text-blue-500" />, sub: "Capital Catalítico" },
                                         { label: "Especies Protegidas", value: `${myForest.length}`, unit: "Ud", icon: <Heart className="text-pink-500" />, sub: "Biodiversidad" },
                                     ].map((stat, i) => (
                                         <div key={i} className="bg-[#0a0a0a] border border-white/5 p-6 rounded-3xl flex items-center gap-4 hover:border-emerald-500/20 transition-all">
@@ -300,7 +300,7 @@ const CorporatePanel = ({ myForest = [], projects = [], totalRetired = 0, onReti
 
                                 {/* Projects Column */}
                                 <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-[2.5rem]">
-                                    <h3 className="text-sm font-black text-gray-500 uppercase tracking-widest mb-6">Proyectos de Inversión Sugeridos</h3>
+                                    <h3 className="text-sm font-black text-gray-500 uppercase tracking-widest mb-6">Proyectos Recomendados</h3>
                                     <div className="space-y-4">
                                         {projects.filter(p => p.status === 'Verificado' || p.status === 'Tokenizado').map(p => (
                                             <div key={`real-${p.id}-${p.regid}`} className="group cursor-pointer">
