@@ -14,10 +14,10 @@ const AdminExperiencesManager = () => {
         title: '',
         description: '',
         experience_type: 'webinar',
-        region_id: '',
-        min_tier: 1,
+        biome_key: '',
+        requires_tier: 4,
         price_usd: 0,
-        included_in_tier: false,
+        price_included: false,
         booking_url: '',
         image_url: '',
         max_participants: ''
@@ -31,7 +31,7 @@ const AdminExperiencesManager = () => {
         setIsLoading(true);
         try {
             const [expRes, regRes] = await Promise.all([
-                supabaseService.supabase.from('experiences').select('*, region:regions(name)').order('created_at', { ascending: false }),
+                supabaseService.supabase.from('premium_experiences').select('*').order('created_at', { ascending: false }),
                 supabaseService.supabase.from('regions').select('id, name').order('name')
             ]);
 
@@ -60,13 +60,13 @@ const AdminExperiencesManager = () => {
 
             if (editingExp) {
                 const { error } = await supabaseService.supabase
-                    .from('experiences')
+                    .from('premium_experiences')
                     .update(expData)
                     .eq('id', editingExp.id);
                 if (error) throw error;
             } else {
                 const { error } = await supabaseService.supabase
-                    .from('experiences')
+                    .from('premium_experiences')
                     .insert([expData]);
                 if (error) throw error;
             }
@@ -89,10 +89,10 @@ const AdminExperiencesManager = () => {
             title: exp.title,
             description: exp.description || '',
             experience_type: exp.experience_type,
-            region_id: exp.region_id || '',
-            min_tier: exp.min_tier || 1,
+            biome_key: exp.biome_key || '',
+            requires_tier: exp.requires_tier || 4,
             price_usd: exp.price_usd || 0,
-            included_in_tier: exp.included_in_tier || false,
+            price_included: exp.price_included || false,
             booking_url: exp.booking_url || '',
             image_url: exp.image_url || '',
             max_participants: exp.max_participants || ''
@@ -119,8 +119,16 @@ const AdminExperiencesManager = () => {
                         onClick={() => {
                             setEditingExp(null);
                             setFormData({
-                                title: '', description: '', experience_type: 'webinar', region_id: '',
-                                min_tier: 1, price_usd: 0, included_in_tier: false, booking_url: '', image_url: '', max_participants: ''
+                                title: '',
+                                description: '',
+                                experience_type: 'webinar',
+                                biome_key: '',
+                                requires_tier: 4,
+                                price_usd: 0,
+                                price_included: false,
+                                booking_url: '',
+                                image_url: '',
+                                max_participants: ''
                             });
                             setShowForm(true);
                         }}
@@ -177,14 +185,14 @@ const AdminExperiencesManager = () => {
                             <div>
                                 <label className="block text-[10px] font-black text-gray-400 uppercase mb-2">Min Tier</label>
                                 <select
-                                    value={formData.min_tier}
-                                    onChange={(e) => setFormData({ ...formData, min_tier: parseInt(e.target.value) })}
+                                    value={formData.requires_tier}
+                                    onChange={(e) => setFormData({ ...formData, requires_tier: parseInt(e.target.value) })}
                                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white"
                                 >
-                                    <option value={1}>Tier 1 (Bronze)</option>
-                                    <option value={2}>Tier 2 (Silver)</option>
-                                    <option value={3}>Tier 3 (Gold)</option>
-                                    <option value={4}>Tier 4 (Platinum)</option>
+                                    <option value={1}>Tier 1 (EPIC)</option>
+                                    <option value={2}>Tier 2 (RARE)</option>
+                                    <option value={3}>Tier 3 (COMMON)</option>
+                                    <option value={4}>Tier 4 (BASIC)</option>
                                 </select>
                             </div>
                             <div>
@@ -205,8 +213,8 @@ const AdminExperiencesManager = () => {
                             <label className="flex items-center gap-3 cursor-pointer">
                                 <input
                                     type="checkbox"
-                                    checked={formData.included_in_tier}
-                                    onChange={(e) => setFormData({ ...formData, included_in_tier: e.target.checked })}
+                                    checked={formData.price_included}
+                                    onChange={(e) => setFormData({ ...formData, price_included: e.target.checked })}
                                     className="w-5 h-5 accent-emerald-500"
                                 />
                                 <span className="text-xs font-black text-white uppercase">Included for free in Tier holders</span>
@@ -246,9 +254,9 @@ const AdminExperiencesManager = () => {
                                 </div>
                                 <div>
                                     <div className="flex items-center gap-2 mb-1">
-                                        <span className="text-[10px] font-black text-white bg-blue-500 px-2 py-0.5 rounded-full uppercase">Tier {exp.min_tier}+</span>
-                                        {exp.included_in_tier && <span className="text-[10px] font-black text-emerald-400 uppercase">✓ Included</span>}
-                                        {exp.region && <span className="text-[10px] font-black text-gray-500 uppercase tracking-tighter flex items-center gap-1"><MapPin size={10} /> {exp.region.name}</span>}
+                                        <span className="text-[10px] font-black text-white bg-blue-500 px-2 py-0.5 rounded-full uppercase">Tier {exp.requires_tier}+</span>
+                                        {exp.price_included && <span className="text-[10px] font-black text-emerald-400 uppercase">✓ Included</span>}
+                                        {exp.biome_key && <span className="text-[10px] font-black text-gray-500 uppercase tracking-tighter flex items-center gap-1"><MapPin size={10} /> {exp.biome_key}</span>}
                                     </div>
                                     <h4 className="text-lg font-black text-white">{exp.title}</h4>
                                     <div className="text-sm font-black text-white/50">${exp.price_usd} USD</div>

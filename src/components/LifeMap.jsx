@@ -114,6 +114,7 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
     const [viewMode, setViewMode] = useState('biologic');
     const [selectedMonument, setSelectedMonument] = useState(null);
     const [isMonumentModalOpen, setIsMonumentModalOpen] = useState(false);
+    const [lastDiscoveryTime, setLastDiscoveryTime] = useState(0);
 
     // 🛒 Estado de Selección Múltiple (Carrito)
     const [selectedCells, setSelectedCells] = useState([]);
@@ -122,6 +123,10 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
     const [isPassportOpen, setIsPassportOpen] = useState(false);
     const [collectedStamps, setCollectedStamps] = useState(() => {
         const saved = localStorage.getItem('bot_adventure_stamps');
+        return saved ? JSON.parse(saved) : [];
+    });
+    const [collectedSpecies, setCollectedSpecies] = useState(() => {
+        const saved = localStorage.getItem('bot_biodiversity_album');
         return saved ? JSON.parse(saved) : [];
     });
 
@@ -157,7 +162,32 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
             return updatedStamps;
         });
     };
+    const handleRandomDrop = (isLand) => {
+        // 10% de probabilidad de drop
+        if (Math.random() > 0.1) return;
 
+        const speciesList = isLand ? [
+            { name: "Jaguar de la Selva", icon: "🐆", rarity: "legendary" },
+            { name: "Tucán Real", icon: "🦜", rarity: "rare" },
+            { name: "Mariposa Morpho", icon: "🦋", rarity: "common" },
+            { name: "Puma Andino", icon: "🐈", rarity: "rare" },
+            { name: "Oso de Anteojos", icon: "🐻", rarity: "legendary" }
+        ] : [
+            { name: "Delfín Rosado", icon: "🐬", rarity: "legendary" },
+            { name: "Tortuga Marina", icon: "🐢", rarity: "rare" },
+            { name: "Pez Payaso", icon: "🐠", rarity: "common" },
+            { name: "Ballena Jorobada", icon: "🐋", rarity: "legendary" }
+        ];
+
+        const drop = speciesList[Math.floor(Math.random() * speciesList.length)];
+
+        setCollectedSpecies(prev => {
+            if (prev.some(s => s.name === drop.name)) return prev;
+            const updated = [...prev, drop];
+            localStorage.setItem('bot_biodiversity_album', JSON.stringify(updated));
+            return updated;
+        });
+    };
     // Sincronización de Zoom
     const currentZoom = externalZoom || internalZoom;
 
@@ -223,6 +253,9 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
                 const data = getCellData(coords, isLand);
 
                 if (isClick && data) {
+                    // 🎲 Posibilidad de encontrar especie
+                    handleRandomDrop(isLand);
+
                     // 🖱 Lógica de Selección Múltiple
                     setSelectedCells(prev => {
                         const exists = prev.find(p => p.id === data.id);
@@ -318,7 +351,7 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
                             <g ref={groupRef}>
                                 <Graticule stroke="rgba(34,197,94,0.15)" strokeWidth={0.4 / currentZoom} strokeDasharray="2,2" step={[GRID_STEP, GRID_STEP]} />
 
-                                {/* ⚡️ OPTIMIZACIÓN: Memoización de Capas Estáticas */}
+                                {/* ⚡️ OPTIMIZACIÓN CRÍTICA: Desacoplamiento de Zoom */}
                                 {useMemo(() => (
                                     <>
                                         <Geographies geography={geoUrl}>
@@ -345,12 +378,13 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
                                                             <Geography
                                                                 key={geo.rsmKey} geography={geo}
                                                                 fill={viewMode === 'biologic' ? geoColor : "rgba(34, 197, 94, 0.08)"}
-                                                                stroke="rgba(34, 197, 94, 0.5)" strokeWidth={0.8 / currentZoom}
+                                                                stroke="rgba(34, 197, 94, 0.5)"
+                                                                strokeWidth={1}
                                                                 onMouseMove={(e) => { handleInteraction(e, projection, true); e.stopPropagation(); }}
                                                                 onClick={(e) => { handleInteraction(e, projection, true, true); e.stopPropagation(); }}
                                                                 style={{
-                                                                    default: { outline: "none" },
-                                                                    hover: { fill: "rgba(34, 197, 94, 0.6)", outline: "none" },
+                                                                    default: { outline: "none", vectorEffect: "non-scaling-stroke" },
+                                                                    hover: { fill: "rgba(34, 197, 94, 0.6)", outline: "none", vectorEffect: "non-scaling-stroke" },
                                                                 }}
                                                             />
                                                         );
@@ -358,15 +392,6 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
                                                 </>
                                             )}
                                         </Geographies>
-
-                                        {/* 🌊 CAPA DE PARTÍCULAS (LOD: Zoom > 2) */}
-                                        {viewMode === 'biologic' && currentZoom > 2 && (
-                                            <>
-                                                <BiomeParticles biomeType="océano" />
-                                                <BiomeParticles biomeType="selva tropical" />
-                                                <BiomeParticles biomeType="tundra" />
-                                            </>
-                                        )}
 
                                         {/* 🗿 MONUMENTOS CULTURALES */}
                                         {viewMode === 'biologic' && CULTURAL_MONUMENTS.map((monument, idx) => (
@@ -386,8 +411,8 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
                                             </Marker>
                                         ))}
 
-                                        {/* 🌳 ICONOS DE BIOMA (LOD: Zoom > 2.5) */}
-                                        {viewMode === 'biologic' && currentZoom > 2.5 && BIOME_ICONS.map((icon, idx) => (
+                                        {/* 🌳 ICONOS DE BIOMA BASE */}
+                                        {viewMode === 'biologic' && BIOME_ICONS.map((icon, idx) => (
                                             <Marker key={`biome-${idx}`} coordinates={icon.coords}>
                                                 <g>
                                                     {getBiomeIconComponent(icon.type, 0, 0, icon.size)}
@@ -395,9 +420,43 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
                                             </Marker>
                                         ))}
                                     </>
-                                ), [currentZoom, viewMode])}  {/* ⚡️ Fin del bloque memorizado */}
+                                ), [viewMode])}  {/* ⚡️ Desacoplado de currentZoom para evitar freeze */}
+
+                                {/* 🌊 CAPA DE EFECTOS DINÁMICOS (LOD: Zoom > 2) */}
+                                {viewMode === 'biologic' && currentZoom > 2 && (
+                                    <g style={{ opacity: internalZoom > 8 ? 0.3 : 1 }}>
+                                        <BiomeParticles biomeType="océano" />
+                                        <BiomeParticles biomeType="selva tropical" />
+                                        <BiomeParticles biomeType="tundra" />
+                                    </g>
+                                )}
 
                                 {/* 🔥 INTERACTIVE LAYER: Solo esto se re-renderiza con hover */}
+                                {/* 🔗 LÍNEAS DE CONEXIÓN (Corredores Biológicos) */}
+                                {selectedCells.length > 1 && selectedCells.map((cell, i) => {
+                                    return selectedCells.slice(i + 1).map((other) => {
+                                        const dx = (cell.coords[0] - other.coords[0]) / GRID_STEP;
+                                        const dy = (cell.coords[1] - other.coords[1]) / GRID_STEP;
+                                        const distance = Math.sqrt(dx * dx + dy * dy);
+
+                                        if (distance <= 1.5) { // Umbral de adyacencia
+                                            return (
+                                                <line
+                                                    key={`link-${cell.id}-${other.id}`}
+                                                    x1={cell.coords[0]} y1={cell.coords[1]}
+                                                    x2={other.coords[0]} y2={other.coords[1]}
+                                                    stroke="#10b981"
+                                                    strokeWidth={0.5 / currentZoom}
+                                                    strokeDasharray="1,1"
+                                                    className="animate-pulse"
+                                                    opacity="0.6"
+                                                />
+                                            );
+                                        }
+                                        return null;
+                                    });
+                                })}
+
                                 {/* ✅ CELDAS SELECCIONADAS (Selección Múltiple) */}
                                 {selectedCells.map((cell) => (
                                     <Marker key={cell.id} coordinates={cell.coords}>
@@ -455,51 +514,38 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
                                                 className="opacity-90"
                                                 style={{ filter: hoveredData.tier?.level === 1 ? 'drop-shadow(0 0 4px #fbbf24)' : 'none' }}
                                             />
-                                            {/* Smart Hover Label */}
-                                            <foreignObject x={pixelSize / 2 + 5} y={-45} width={180} height={100}>
+                                            {/* Smart Hover Label - Ultra Compact Version */}
+                                            <foreignObject x={pixelSize / 2 + 3} y={-30} width={110} height={60}>
                                                 <div
-                                                    className="p-4 rounded-2xl shadow-2xl backdrop-blur-3xl flex flex-col gap-1.5 transform scale-[0.6] origin-left"
+                                                    className="p-2 rounded-xl shadow-xl backdrop-blur-3xl flex flex-col gap-0.5 transform scale-[0.6] origin-left"
                                                     style={{
-                                                        background: hoveredData.tier?.level === 1 ? 'linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(217, 119, 6, 0.15))' :
-                                                            hoveredData.tier?.level === 2 ? 'linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(147, 51, 234, 0.15))' :
-                                                                'linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(10, 14, 39, 0.95))',
+                                                        background: hoveredData.tier?.level === 1 ? 'linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(217, 119, 6, 0.2))' :
+                                                            hoveredData.tier?.level === 2 ? 'linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(147, 51, 234, 0.2))' :
+                                                                'linear-gradient(135deg, rgba(0, 0, 0, 0.98), rgba(10, 14, 39, 0.98))',
                                                         border: hoveredData.tier?.level === 1 ? '1px solid rgba(251, 191, 36, 0.4)' :
                                                             hoveredData.tier?.level === 2 ? '1px solid rgba(168, 85, 247, 0.4)' :
-                                                                '1px solid rgba(255, 255, 255, 0.2)',
-                                                        boxShadow: hoveredData.tier?.level === 1 ? '0 0 20px rgba(251, 191, 36, 0.3)' :
-                                                            hoveredData.tier?.level === 2 ? '0 0 15px rgba(168, 85, 247, 0.3)' :
-                                                                '0 0 10px rgba(0, 0, 0, 0.5)'
+                                                                '1px solid rgba(255, 255, 255, 0.15)',
                                                     }}
                                                 >
-                                                    <div className="flex justify-between items-center text-[7px] font-black uppercase tracking-[0.2em] border-b pb-1.5"
+                                                    <div className="flex justify-between items-center text-[5px] font-black uppercase tracking-widest border-b pb-0.5"
                                                         style={{
                                                             color: hoveredData.tier?.level === 1 ? '#fbbf24' :
                                                                 hoveredData.tier?.level === 2 ? '#a855f7' : '#22c55e',
-                                                            borderColor: 'rgba(255, 255, 255, 0.1)'
+                                                            borderColor: 'rgba(255, 255, 255, 0.08)'
                                                         }}
                                                     >
-                                                        <span>{hoveredData.tier?.name || "GRID NODE"}</span>
-                                                        <Zap
-                                                            size={10}
-                                                            fill={hoveredData.tier?.level < 3 ? "currentColor" : "none"}
-                                                            className={hoveredData.tier?.level === 1 ? "animate-pulse" : ""}
-                                                        />
+                                                        <span>{hoveredData.tier?.name || "GRID"}</span>
+                                                        <Zap size={6} fill="currentColor" />
                                                     </div>
-                                                    <div className="text-sm font-black text-white italic tracking-tighter"
-                                                        style={{
-                                                            color: hoveredData.tier?.level === 1 ? "#fbbf24" :
-                                                                hoveredData.tier?.level === 2 ? "#a855f7" :
-                                                                    (hoveredData.type === 'land' ? '#22c55e' : '#06b6d4')
-                                                        }}
-                                                    >
-                                                        {hoveredData.label}
+
+                                                    <div className="text-[9px] font-black text-white uppercase truncate leading-none mt-1">
+                                                        {hoveredData.label?.split(':')[0]}
                                                     </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="text-[10px] font-black text-white italic leading-none">${hoveredData.price} USD</div>
-                                                        {hoveredData.tier?.level === 1 && <span className="text-[6px] bg-yellow-400/30 text-yellow-400 px-1 rounded-sm font-black animate-pulse">ULTRA RARE</span>}
-                                                        {hoveredData.tier?.level === 2 && <span className="text-[6px] bg-purple-400/30 text-purple-400 px-1 rounded-sm font-black">RARE</span>}
+
+                                                    <div className="flex items-center justify-between mt-0.5">
+                                                        <span className="text-[8px] font-black text-white/90">${hoveredData.price}</span>
+                                                        <span className="text-[5px] text-white/30 uppercase font-bold">{hoveredData.id.split('-').pop()}</span>
                                                     </div>
-                                                    <div className="text-[9px] font-bold text-white/40">{hoveredData.id}</div>
                                                 </div>
                                             </foreignObject>
                                         </g>
@@ -659,6 +705,7 @@ const LifeMap = ({ onDiscovery, isFullscreenDefault = false, zoom: externalZoom 
                 isOpen={isPassportOpen}
                 onClose={() => setIsPassportOpen(false)}
                 collectedStamps={collectedStamps}
+                collectedSpecies={collectedSpecies}
             />
 
             <style>{`

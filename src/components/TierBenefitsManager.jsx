@@ -85,7 +85,7 @@ const TierBenefitsManager = () => {
 
     const handleToggleStatus = async (id, currentStatus) => {
         try {
-            await supabaseService.toggleTierBenefitStatus(id, !currentStatus);
+            await supabaseService.updateTierBenefit(id, { active: !currentStatus });
             loadBenefits();
         } catch (error) {
             console.error('Error toggling status:', error);

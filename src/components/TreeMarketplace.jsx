@@ -17,6 +17,7 @@ import {
 import { useWeb3 } from '../context/Web3Context';
 import { ethers } from 'ethers';
 import { supabaseService } from '../services/supabaseService';
+import { certificateService } from '../services/certificateService';
 
 const ADMIN_WALLET = "0xA583f0675a2d6f01ab21DEA98629e9Ee04320108";
 
@@ -28,6 +29,7 @@ const TreeMarketplace = ({ species, setSpecies, resetSpecies, myForest, setMyFor
     const [editingItem, setEditingItem] = useState(null);
     const [isAdding, setIsAdding] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [isDownloading, setIsDownloading] = useState(false);
     const [guardianName, setGuardianName] = useState('');
 
     // Check if user has enough balance for the current tree
@@ -547,10 +549,22 @@ const TreeMarketplace = ({ species, setSpecies, resetSpecies, myForest, setMyFor
                                             <ExternalLink size={14} /> Snowtrace
                                         </a>
                                         <button
-                                            onClick={() => window.print()}
-                                            className="flex-1 py-5 bg-emerald-500 rounded-2xl text-[10px] font-black text-white shadow-2xl shadow-emerald-500/40 uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-emerald-600 transition-all"
+                                            onClick={async () => {
+                                                setIsDownloading(true);
+                                                try {
+                                                    const fileName = `Certificado-Adopcion-${selectedTree.name.replace(/\s+/g, '-')}.pdf`;
+                                                    await certificateService.generatePDF('adoption-certificate', fileName);
+                                                } catch (err) {
+                                                    alert("Error al descargar: " + err.message);
+                                                } finally {
+                                                    setIsDownloading(false);
+                                                }
+                                            }}
+                                            disabled={isDownloading}
+                                            className="flex-1 py-5 bg-emerald-500 rounded-2xl text-[10px] font-black text-white shadow-2xl shadow-emerald-500/40 uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-emerald-600 transition-all disabled:opacity-50"
                                         >
-                                            <Download size={14} /> Descargar PDF
+                                            {isDownloading ? <Loader2 className="animate-spin" size={14} /> : <Download size={14} />}
+                                            {isDownloading ? "Generando..." : "Descargar PDF"}
                                         </button>
                                     </div>
 

@@ -2,8 +2,15 @@ import React from 'react';
 import { X, MapPin, Calendar, Info, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const MonumentModal = ({ monument, isOpen, onClose }) => {
-    if (!monument) return null;
+const MonumentModal = ({ monument, isOpen, onClose, onVisit }) => {
+    // 🛂 Auto-trigger de Sello de Pasaporte
+    React.useEffect(() => {
+        if (isOpen && monument && onVisit) {
+            onVisit(monument);
+        }
+    }, [isOpen, monument, onVisit]);
+
+    if (!isOpen || !monument) return null;
 
     return (
         <AnimatePresence>

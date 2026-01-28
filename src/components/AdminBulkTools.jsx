@@ -169,19 +169,71 @@ const AdminBulkTools = () => {
                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all"
                             >
                                 <option value="">Select an Originator...</option>
-                                {originators.map(o => <option key={o.id} value={o.id}>{o.name || o.wallet_address.slice(0, 10)}</option>)}
+                                {originators.map(o => (
+                                    <option key={o.id} value={o.id}>
+                                        {o.name || o.display_name || o.wallet_address?.slice(0, 10) || 'Unnamed'}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">Target Zone for Assignment</label>
+                            <select
+                                value={selectedZone}
+                                onChange={(e) => setSelectedZone(e.target.value)}
+                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all"
+                            >
+                                <option value="">Select a Zone...</option>
+                                {zones.map(z => <option key={z.id} value={z.id}>{z.name}</option>)}
                             </select>
                         </div>
 
                         <div className="p-6 bg-blue-500/5 border border-blue-500/10 rounded-2xl">
                             <p className="text-sm text-gray-400 font-medium">
-                                Selection logic will be integrated with the Map or a list view of available pixels.
+                                {selectedZone ? 'Ready to assign all available pixels in this zone.' : 'Select an originator and a zone to proceed with assignment.'}
                             </p>
                         </div>
                     </div>
 
-                    <button className="mt-8 w-full py-4 bg-blue-500 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-blue-600 transition-all flex items-center justify-center gap-2">
-                        <Link size={18} /> Assign Selected Lands
+                    <button
+                        onClick={async () => {
+                            if (!selectedOriginator || !selectedZone) {
+                                alert('Select both Originator and Zone');
+                                return;
+                            }
+                            setIsProcessing(true);
+                            try {
+                                // 1. Get available pixels in zone
+                                const { data: availablePixels } = await supabaseService.supabase
+                                    .from('pixels')
+                                    .select('id')
+                                    .eq('zone_id', selectedZone)
+                                    .is('originator_id', null);
+
+                                if (!availablePixels || availablePixels.length === 0) {
+                                    alert('No available pixels found in this zone');
+                                    setIsProcessing(false);
+                                    return;
+                                }
+
+                                const ids = availablePixels.map(p => p.id);
+                                await supabaseService.assignPixelsToOriginator(ids, selectedOriginator);
+                                setResult({
+                                    success: true,
+                                    message: `Assigned ${ids.length} pixels to originator successfully.`
+                                });
+                            } catch (error) {
+                                setResult({ success: false, message: error.message });
+                            } finally {
+                                setIsProcessing(false);
+                            }
+                        }}
+                        disabled={isProcessing || !selectedOriginator || !selectedZone}
+                        className="mt-8 w-full py-4 bg-blue-500 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-blue-600 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                        {isProcessing ? <Loader2 className="animate-spin" /> : <Link size={18} />}
+                        Assign Zone Pixels
                     </button>
                 </div>
             </div>

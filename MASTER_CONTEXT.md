@@ -870,202 +870,60 @@ Organización Autónoma Descentralizada (DAO) donde los holders de píxeles vota
 ### ✅ Completado
 
 #### 1. **Base de Datos de Biomas (27 Regiones)**
-- **Colombia**: 7 regiones naturales
-  - Eje Cafetero (Manizales, Nevado del Ruiz) 🆕
-  - Andes (Nevados y Páramos)
-  - Amazonía Colombiana
-  - Caribe (Costa Dorada)
-  - Pacífico (Selva Húmeda)
-  - Orinoquía (Llanos)
-  - Insular (San Andrés)
+- **Colombia**: 7 regiones naturales (Eje Cafetero, Andes, Amazonía, Caribe, Pacífico, Orinoquía, Insular)
+- **Brasil**: 5 regiones (Mata Atlántica, Cerrado, Pantanal, Caatinga, Fernando de Noronha)
+- **Argentina**: 4 regiones (Pampas, Quebrada de Humahuaca, Península Valdés, Iguazú)
+- **Chile**: 3 regiones (Patagonia, Atacama, Bosque Valdiviano)
+- **Perú**: 2 regiones (Amazonía Peruana, Machu Picchu)
+- **Ecuador**: 1 región (Galápagos)
+- **Global**: México (Yucatán, Lacandona), USA (Yellowstone, Everglades) 🆕
 
-- **Brasil**: 5 regiones
-  - Mata Atlántica
-  - Cerrado
-  - Pantanal
-  - Caatinga
-  - Fernando de Noronha
+#### 2. **Base de Datos Supabase (11 Tablas)**
+- ✅ `tier_benefits` - Beneficios por tier
+- ✅ `premium_experiences` - Viajes, webinars, live-cams
+- ✅ `pixel_impact` - Tracking de impacto ambiental
+- ✅ `pixel_community` - Adopciones, renovaciones, eventos
+- ✅ `community_events` - Eventos de comunidad
+- ✅ `event_participants` - Participantes en eventos
+- ✅ `user_gallery` - Fotos de usuarios
+- ✅ `gallery_likes` - Likes en fotos
+- ✅ `gallery_comments` - Comentarios en fotos
+- ✅ `profiles` - Perfiles de usuario y roles
+- ✅ `system_config` - Configuración global
 
-- **Argentina**: 4 regiones
-  - Pampas
-  - Quebrada de Humahuaca
-  - Península Valdés
-  - Iguazú
+#### 3. **Servicios de Supabase (`supabaseService.js`)**
+- ✅ Métodos CRUD completos para todas las tablas.
+- ✅ Lógica de carga de impacto, comunidad y experiencias.
 
-- **Chile**: 3 regiones
-  - Patagonia (Torres del Paine)
-  - Atacama
-  - Bosque Valdiviano
+#### 4. **Modal Mejorado de Biomas (`EnhancedBiomeModal.jsx`)**
+- ✅ Carrusel de fotos y Live-stream.
+- ✅ Tab de **Detalles** (Planes, beneficios, descripción).
+- ✅ Tab de **Experiencias Premium** (Viajes, webinars con tier-locking).
+- ✅ Tab de **Impacto** (Métricas de CO2, árboles, fondos y gráfico de salud).
+- ✅ Lógica de **Comunidad** (Carga de holders y eventos).
 
-- **Perú**: 2 regiones
-  - Amazonía Peruana
-  - Machu Picchu
-
-- **Ecuador**: 1 región
-  - Galápagos
-
-**Archivo**: `src/data/globalBiomes.jsx`
-
-Cada bioma incluye:
-- Coordenadas geográficas precisas
-- 3-4 fotos específicas (Unsplash)
-- Especies nativas y en peligro
-- Datos educativos y fun facts
-- Tips de conservación
-- Enlaces de donación
-- Precio base ($100-$380 USD)
-- Live-cam URLs (cuando disponible)
-
-#### 2. **Base de Datos Supabase (9 Tablas)**
-
-**Scripts ejecutados**:
-1. ✅ `supabase_tier_benefits.sql` - Beneficios por tier
-2. ✅ `supabase_premium_experiences.sql` - Viajes, webinars, live-cams
-3. ✅ `supabase_pixel_impact.sql` - Tracking de impacto ambiental
-4. ✅ `supabase_pixel_community.sql` - Adopciones, renovaciones, eventos
-5. ✅ `supabase_user_gallery.sql` - Galería de fotos, likes, comentarios
-
-**Tablas creadas**:
-- `tier_benefits` - 17 beneficios por tier
-- `premium_experiences` - Experiencias premium
-- `pixel_impact` - CO2, árboles, fondos, salud del ecosistema
-- `pixel_community` - Adopciones y renovaciones
-- `community_events` - Eventos de comunidad
-- `event_participants` - Participantes en eventos
-- `user_gallery` - Fotos de usuarios
-- `gallery_likes` - Likes en fotos
-- `gallery_comments` - Comentarios en fotos
-
-**Funciones auxiliares**:
-- `calculate_expiration_date()` - Calcular vencimiento de adopción
-- `renew_adoption()` - Renovar adopción
-- `get_pixel_holders()` - Obtener holders de un píxel
-- `toggle_gallery_like()` - Dar/quitar like
-- `increment_gallery_views()` - Incrementar vistas
-- `approve_gallery_photo()` - Aprobar foto
-
-**Vistas útiles**:
-- `biome_impact_summary` - Resumen de impacto por bioma
-- `biome_community_stats` - Estadísticas de comunidad
-- `expiring_soon` - Adopciones próximas a expirar
-- `popular_gallery_photos` - Fotos más populares
-- `pending_moderation` - Fotos pendientes de moderación
-- `biome_gallery_stats` - Estadísticas de galería por bioma
-
-#### 3. **Sistema de Adopción Temporal**
-**Archivo**: `src/data/globalBiomes.jsx`
-
-4 planes disponibles:
-- **Plan 24m** (2 años): 0% descuento - Badge 🌱 Starter
-- **Plan 36m** (3 años): 10% descuento - Badge 🌿 Guardian
-- **Plan 48m** (4 años): 15% descuento - Badge 🌳 Protector
-- **Plan 60m** (5 años): 20% descuento - Badge 🏆 Champion
-
-#### 4. **Modal Mejorado con Medios**
-**Archivo**: `src/components/EnhancedBiomeModal.jsx`
-
-Características:
-- Carrusel de fotos (4+ imágenes por bioma)
-- Reproductor de YouTube live-stream con fullscreen
-- Selector de plan de adopción (24-60 meses)
-- Cálculo dinámico de precio con descuentos
-- Integración con `GLOBAL_BIOMES`
-
-#### 5. **Mapa Interactivo Optimizado**
-**Archivo**: `src/components/LifeMap.jsx`
-
-Optimizaciones recientes:
-- ✅ Throttling de 100ms en eventos de hover
-- ✅ Prevención de freezing al hacer zoom
-- ✅ Detección de 27 biomas en tiempo real
-- ✅ Sistema de tiers dinámicos (BASIC, COMMON, RARE, EPIC)
-- ✅ Precios procedurales con volatilidad de mercado
-
-#### 6. **Documentación**
-- ✅ `GUIA_EJECUCION_SCRIPTS.md` - Guía paso a paso para ejecutar scripts de Supabase
-- ✅ `implementation_plan.md` - Plan maestro de expansión global
-- ✅ `walkthrough.md` - Documentación de features implementados
-- ✅ `task.md` - Checklist de tareas
+#### 5. **Paneles de Administración**
+- ✅ `AdminRegionManager.jsx` - Gestión de regiones por continente/país.
+- ✅ `AdminImpactEditor.jsx` - Edición de métricas ambientales.
+- ✅ `AdminBulkTools.jsx` - Creación masiva de píxeles.
+- ✅ `AdminExperiencesManager.jsx` - Gestión de expediciones.
 
 ---
 
 ## 🚧 Pendiente de Implementación
 
-### 1. **Funcionalidades del Modal (8 features)**
+### 1. **Correcciones en el Modal (`EnhancedBiomeModal.jsx`)**
+- 🛠️ **Botón de Comunidad**: El contenido del tab existe pero falta el botón en la barra de navegación.
+- 🛠️ **Tab de Galería**: Implementar la pestaña de fotos de usuario (el servicio ya existe).
+- 🛠️ **Certificado PDF**: Implementar la generación de certificados descargables.
 
-#### A. Tab de Experiencias Premium
-- Mostrar viajes, webinars, live-cams desde `premium_experiences`
-- Filtrar por tier del usuario
-- Sistema de reserva/booking
-- Integración con partners
+### 2. **Refactorización**
+- 🧹 **Modularizar el Modal**: Dividir `EnhancedBiomeModal.jsx` (800+ líneas) en sub-componentes.
+- 🧹 **Limpieza**: Eliminar archivos `.backup` y logs de depuración excesivos.
 
-#### B. Historial de Impacto
-- Gráfico de CO2 capturado
-- Contador de árboles plantados
-- Fondos recaudados
-- Timeline de salud del ecosistema
-
-#### C. Comunidad de Holders
-- Lista de holders del píxel
-- Roles (member, moderator, ambassador)
-- Score de contribución
-- Próximos eventos
-
-#### D. Certificado Descargable
-- Generación de PDF con:
-  - Datos del píxel
-  - Información del holder
-  - Duración de adopción
-  - Impacto ambiental
-  - QR code de verificación
-
-#### E. Comparador de Planes
-- Tabla comparativa de 4 planes
-- Cálculo de ahorro
-- Beneficios por plan
-- ROI estimado
-
-#### F. Galería de Usuario
-- Subir fotos del bioma
-- Integración con Instagram
-- Sistema de likes y comentarios
-- Moderación de contenido
-
-#### G. Alertas y Notificaciones
-- Recordatorios de renovación
-- Eventos de la comunidad
-- Nuevas experiencias disponibles
-- Actualizaciones de impacto
-
-#### H. Modo Comparación
-- Comparar 2-3 píxeles lado a lado
-- Diferencias de precio, impacto, beneficios
-- Recomendaciones basadas en preferencias
-
-### 2. **Servicios de Supabase**
-**Archivo a crear**: `src/services/supabaseService.js`
-
-Métodos necesarios:
-```javascript
-// Experiencias Premium
-getPremiumExperiences(biomeKey)
-bookExperience(experienceId, userId)
-
-// Impacto
-getPixelImpact(pixelId)
-updateImpactMetrics(pixelId, metrics)
-
-// Comunidad
-getPixelHolders(pixelId)
-createCommunityEvent(eventData)
-registerForEvent(eventId, userId)
-
-// Galería
-uploadPhoto(photoData)
-likePhoto(photoId, userId)
-commentOnPhoto(photoId, userId, comment)
-moderatePhoto(photoId, status)
-```
+### 3. **Funcionalidades Web3**
+- ⛓️ **Integración Blockchain**: Conectar la adopción con el contrato inteligente.
+- ⛓️ **NFT Metadata**: Sincronizar adopción con metadata IPFS.
 
 ### 3. **Expansión de Biomas (100+ regiones)**
 

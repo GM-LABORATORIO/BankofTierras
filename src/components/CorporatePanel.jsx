@@ -4,6 +4,7 @@ import { MOCK_PROJECTS, MOCK_CERTIFICATE_TEMPLATE } from '../constants/mockData'
 import { useWeb3 } from '../context/Web3Context';
 import { ethers } from 'ethers';
 import { motion, AnimatePresence } from 'framer-motion';
+import { certificateService } from '../services/certificateService';
 
 const CorporatePanel = ({ myForest = [], projects = [], totalRetired = 0, onRetire, userProfile }) => {
     const { signer, contractAddresses, CARBON_TOKEN_ABI, account, carbonBalance, refreshBalance } = useWeb3();
@@ -11,6 +12,7 @@ const CorporatePanel = ({ myForest = [], projects = [], totalRetired = 0, onReti
     const [nit, setNit] = useState(userProfile?.tax_id || '');
     const [isRetiring, setIsRetiring] = useState(false);
     const [showLegalCert, setShowLegalCert] = useState(null);
+    const [isDownloading, setIsDownloading] = useState(false);
     const [activeTab, setActiveTab] = useState('inventory'); // inventory, history, compliance
 
     // Sync nit state if userProfile loads late
@@ -551,11 +553,22 @@ const CorporatePanel = ({ myForest = [], projects = [], totalRetired = 0, onReti
                                         <div className="text-[9px] font-mono break-all text-gray-400 line-clamp-1">{showLegalCert.txHash}</div>
                                     </div>
                                     <button
-                                        onClick={() => window.print()}
-                                        className="px-6 py-3 bg-black text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-600 transition-all flex items-center gap-2"
+                                        onClick={async () => {
+                                            setIsDownloading(true);
+                                            try {
+                                                const fileName = `Certificado-DIAN-${showLegalCert.company.replace(/\s+/g, '-')}.pdf`;
+                                                await certificateService.generatePDF('legal-certificate', fileName);
+                                            } catch (err) {
+                                                alert("Error al descargar: " + err.message);
+                                            } finally {
+                                                setIsDownloading(false);
+                                            }
+                                        }}
+                                        disabled={isDownloading}
+                                        className="px-6 py-3 bg-black text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-600 transition-all flex items-center gap-2 disabled:opacity-50"
                                     >
-                                        <FileText size={14} />
-                                        Descargar Certificado DIAN
+                                        {isDownloading ? <Loader2 className="animate-spin" size={14} /> : <FileText size={14} />}
+                                        {isDownloading ? "Generando..." : "Descargar Certificado DIAN"}
                                     </button>
                                 </div>
                                 <div className="w-24 h-24 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center p-2">

@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Save, Loader2, TrendingUp, Plus, Trash2 } from 'lucide-react';
 import { supabaseService } from '../services/supabaseService';
 
 const AdminImpactEditor = () => {
     const [isLoading, setIsLoading] = useState(false);
+    const [zones, setZones] = useState([]);
+    const [selectedZone, setSelectedZone] = useState('');
+    const [pixels, setPixels] = useState([]);
     const [formData, setFormData] = useState({
         pixel_id: '',
         co2_captured_kg: '',
@@ -15,6 +18,87 @@ const AdminImpactEditor = () => {
         health_history: '[]',
         conservation_activities: '[]'
     });
+
+    const [isInitialLoading, setIsInitialLoading] = useState(true);
+
+    useEffect(() => {
+        loadZones();
+    }, []);
+
+    useEffect(() => {
+        if (selectedZone) {
+            loadPixels(selectedZone);
+        } else {
+            setPixels([]);
+        }
+    }, [selectedZone]);
+
+    useEffect(() => {
+        if (formData.pixel_id) {
+            loadExistingImpact(formData.pixel_id);
+        }
+    }, [formData.pixel_id]);
+
+    const loadZones = async () => {
+        try {
+            const data = await supabaseService.getZones();
+            setZones(data || []);
+        } catch (error) {
+            console.error('Error loading zones:', error);
+        } finally {
+            setIsInitialLoading(false);
+        }
+    };
+
+    const loadPixels = async (zoneId) => {
+        try {
+            const { data, error } = await supabaseService.supabase
+                .from('pixels')
+                .select('*')
+                .eq('zone_id', zoneId);
+            if (error) throw error;
+            setPixels(data || []);
+        } catch (error) {
+            console.error('Error loading pixels:', error);
+        }
+    };
+
+    const loadExistingImpact = async (pixelId) => {
+        setIsLoading(true);
+        try {
+            const data = await supabaseService.getPixelImpact(pixelId);
+            if (data) {
+                setFormData({
+                    pixel_id: data.pixel_id,
+                    co2_captured_kg: data.co2_captured_kg || '',
+                    trees_planted: data.trees_planted || '',
+                    funds_raised_usd: data.funds_raised_usd || '',
+                    species_protected: data.species_protected || '',
+                    current_health: data.current_health || '',
+                    area_protected_m2: data.area_protected_m2 || '',
+                    health_history: JSON.stringify(data.health_history || [], null, 2),
+                    conservation_activities: JSON.stringify(data.conservation_activities || [], null, 2)
+                });
+            } else {
+                // Keep pixel_id but reset other fields
+                setFormData(prev => ({
+                    ...prev,
+                    co2_captured_kg: '',
+                    trees_planted: '',
+                    funds_raised_usd: '',
+                    species_protected: '',
+                    current_health: '',
+                    area_protected_m2: '',
+                    health_history: '[]',
+                    conservation_activities: '[]'
+                }));
+            }
+        } catch (error) {
+            console.error('Error loading impact data:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -103,19 +187,41 @@ const AdminImpactEditor = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Pixel ID */}
-                <div>
-                    <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-2">
-                        Pixel ID
-                    </label>
-                    <input
-                        type="text"
-                        value={formData.pixel_id}
-                        onChange={(e) => setFormData({ ...formData, pixel_id: e.target.value })}
-                        placeholder="CELL-72-45"
-                        required
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-mono text-white focus:border-emerald-500 outline-none transition-all"
-                    />
+                <div className="grid grid-cols-2 gap-4">
+                    {/* Zone Selector */}
+                    <div>
+                        <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-2">
+                            Select Zone
+                        </label>
+                        <select
+                            value={selectedZone}
+                            onChange={(e) => setSelectedZone(e.target.value)}
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 outline-none transition-all"
+                        >
+                            <option value="">Select a Zone...</option>
+                            {zones.map(z => <option key={z.id} value={z.id}>{z.name}</option>)}
+                        </select>
+                    </div>
+
+                    {/* Pixel Selector */}
+                    <div>
+                        <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-2">
+                            Select Pixel
+                        </label>
+                        <select
+                            value={formData.pixel_id}
+                            onChange={(e) => setFormData({ ...formData, pixel_id: e.target.value })}
+                            disabled={!selectedZone}
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-500 outline-none transition-all disabled:opacity-30 font-mono"
+                        >
+                            <option value="">Select a Pixel...</option>
+                            {pixels.map(p => (
+                                <option key={p.id} value={p.custom_id}>
+                                    {p.custom_id} ({p.status})
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
 
                 {/* Metrics Grid */}

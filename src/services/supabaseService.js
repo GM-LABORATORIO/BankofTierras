@@ -393,18 +393,17 @@ export const supabaseService = {
     // ============================================
     async getPremiumExperiences(regionId = null, biomeKey = null, userTier = 4) {
         if (!supabase) return [];
-        let query = supabase.from('experiences').select('*, region:regions(name)');
+        // Corrected table name based on SQL: premium_experiences
+        let query = supabase.from('premium_experiences').select('*');
 
-        if (regionId) {
-            query = query.eq('region_id', regionId);
-        } else if (biomeKey) {
+        if (biomeKey) {
             query = query.eq('biome_key', biomeKey);
         }
 
         const { data, error } = await query
-            .lte('min_tier', userTier)
-            .eq('is_active', true)
-            .order('min_tier', { ascending: true });
+            .lte('requires_tier', userTier) // Corrected column name: requires_tier
+            .eq('active', true) // Corrected column name: active
+            .order('requires_tier', { ascending: true });
 
         if (error) throw error;
         return data || [];
@@ -412,12 +411,13 @@ export const supabaseService = {
 
     // 🏆 TIER BENEFITS (NEW)
     // ============================================
-    async getTierBenefits(tierLevel = 1) {
+    async getTierBenefits(tierLevel = 4) {
         if (!supabase) return [];
         const { data, error } = await supabase
             .from('tier_benefits')
-            .select('*, benefit:benefits(*)')
-            .eq('tier_level', tierLevel);
+            .select('*')
+            .eq('tier_level', tierLevel)
+            .eq('active', true);
 
         if (error) {
             console.error('Error fetching tier benefits:', error);

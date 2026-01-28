@@ -12,7 +12,7 @@ const EnhancedBiomeModal = ({ selectedCell, onClose }) => {
     const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
     const [isLiveStreamFullscreen, setIsLiveStreamFullscreen] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState(ADOPTION_PLANS[0]);
-    const [activeTab, setActiveTab] = useState('details'); // 'details', 'experiences', 'impact', 'community'
+    const [activeTab, setActiveTab] = useState('details'); // 'details', 'experiences', 'impact', 'community', 'gallery'
     const [premiumExperiences, setPremiumExperiences] = useState([]);
     const [loadingExperiences, setLoadingExperiences] = useState(false);
 
@@ -29,6 +29,10 @@ const EnhancedBiomeModal = ({ selectedCell, onClose }) => {
     const [pixelHolders, setPixelHolders] = useState([]);
     const [upcomingEvents, setUpcomingEvents] = useState([]);
     const [loadingCommunity, setLoadingCommunity] = useState(false);
+
+    // Gallery tab state
+    const [galleryPhotos, setGalleryPhotos] = useState([]);
+    const [loadingGallery, setLoadingGallery] = useState(false);
 
     // Generate pixel ID from coordinates
     const pixelId = `CELL-${Math.round(selectedCell.coords[0])}-${Math.round(selectedCell.coords[1])}`;
@@ -122,6 +126,28 @@ const EnhancedBiomeModal = ({ selectedCell, onClose }) => {
         }
     }, [activeTab, pixelId, selectedCell]);
 
+    // Load gallery photos from Supabase
+    useEffect(() => {
+        const loadGallery = async () => {
+            if (!selectedCell) return;
+            const biomeKey = selectedCell.zone?.key || selectedCell.label?.split(':')[0] || 'UNKNOWN';
+
+            setLoadingGallery(true);
+            try {
+                const photos = await supabaseService.getBiomePhotos(biomeKey);
+                setGalleryPhotos(photos || []);
+            } catch (error) {
+                console.error('Error loading gallery photos:', error);
+            } finally {
+                setLoadingGallery(false);
+            }
+        };
+
+        if (activeTab === 'gallery') {
+            loadGallery();
+        }
+    }, [activeTab, selectedCell]);
+
     const nextPhoto = () => {
         setCurrentPhotoIndex((prev) => (prev + 1) % photoGallery.length);
     };
@@ -210,7 +236,7 @@ const EnhancedBiomeModal = ({ selectedCell, onClose }) => {
                 <motion.div
                     initial={{ scale: 0.9, y: 50 }}
                     animate={{ scale: 1, y: 0 }}
-                    className="bg-[#050505] border border-white/10 rounded-[3rem] max-w-7xl w-full max-h-[95vh] overflow-hidden flex flex-col md:flex-row shadow-[0_100px_200px_rgba(0,0,0,1)]"
+                    className="bg-[#050505] border border-white/10 rounded-[2rem] max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col md:flex-row shadow-[0_50px_100px_rgba(0,0,0,0.8)]"
                     onClick={e => e.stopPropagation()}
                 >
                     {/* LEFT SIDE: Media Gallery + Live Stream */}
@@ -324,52 +350,59 @@ const EnhancedBiomeModal = ({ selectedCell, onClose }) => {
                     {/* RIGHT SIDE: Details + Adoption Plans */}
                     <div className="w-full md:w-2/5 p-8 bg-[#080808] flex flex-col overflow-y-auto">
                         {/* Header */}
-                        <div className="flex justify-between items-start mb-6">
+                        <div className="flex justify-between items-start mb-4">
                             <div>
-                                <div className={`text-xs font-black ${dynamicTier.color} uppercase tracking-widest mb-2 flex items-center gap-2`}>
+                                <div className={`text-[10px] font-black ${dynamicTier.color} uppercase tracking-[0.15em] mb-1.5 flex items-center gap-2`}>
                                     {dynamicTier.icon} {dynamicTier.name} Tier
                                 </div>
-                                <h4 className="text-2xl font-black text-white uppercase tracking-tight">
+                                <h4 className="text-xl font-black text-white uppercase tracking-tight">
                                     {selectedCell.zone?.biome || selectedCell.label}
                                 </h4>
                             </div>
                             <button
                                 onClick={onClose}
-                                className="p-3 bg-white/5 rounded-full hover:bg-white/10 transition-all"
+                                className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition-all"
                             >
-                                <X size={24} className="text-white" />
+                                <X size={20} className="text-white" />
                             </button>
                         </div>
 
                         {/* Tabs Navigation */}
-                        <div className="mb-6 flex gap-2 p-1 bg-white/5 rounded-2xl">
+                        <div className="mb-4 flex gap-1.5 p-1 bg-white/5 rounded-xl">
                             <button
                                 onClick={() => setActiveTab('details')}
-                                className={`flex-1 py-3 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${activeTab === 'details' ? 'bg-emerald-500 text-white' : 'text-gray-400 hover:text-white'}`}
+                                className={`flex-1 py-2 px-3 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${activeTab === 'details' ? 'bg-emerald-500 text-white' : 'text-gray-400 hover:text-white'}`}
                             >
-                                <Calendar size={14} className="inline mr-2" />
+                                <Calendar size={12} className="inline mr-1" />
                                 Detalles
                             </button>
                             <button
                                 onClick={() => setActiveTab('experiences')}
-                                className={`flex-1 py-3 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${activeTab === 'experiences' ? 'bg-emerald-500 text-white' : 'text-gray-400 hover:text-white'}`}
+                                className={`flex-1 py-2 px-3 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${activeTab === 'experiences' ? 'bg-emerald-500 text-white' : 'text-gray-400 hover:text-white'}`}
                             >
-                                <Gift size={14} className="inline mr-2" />
-                                Experiencias
+                                <Gift size={12} className="inline mr-1" />
+                                Exp
                             </button>
                             <button
                                 onClick={() => setActiveTab('impact')}
-                                className={`flex-1 py-3 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${activeTab === 'impact' ? 'bg-emerald-500 text-white' : 'text-gray-400 hover:text-white'}`}
+                                className={`flex-1 py-2 px-3 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${activeTab === 'impact' ? 'bg-emerald-500 text-white' : 'text-gray-400 hover:text-white'}`}
                             >
-                                <TrendingUp size={14} className="inline mr-2" />
+                                <TrendingUp size={12} className="inline mr-1" />
                                 Impacto
                             </button>
                             <button
                                 onClick={() => setActiveTab('community')}
-                                className={`flex-1 py-3 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${activeTab === 'community' ? 'bg-emerald-500 text-white' : 'text-gray-400 hover:text-white'}`}
+                                className={`flex-1 py-2 px-3 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${activeTab === 'community' ? 'bg-emerald-500 text-white' : 'text-gray-400 hover:text-white'}`}
                             >
-                                <Users size={14} className="inline mr-2" />
+                                <Users size={12} className="inline mr-1" />
                                 Comunidad
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('gallery')}
+                                className={`flex-1 py-2 px-3 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${activeTab === 'gallery' ? 'bg-emerald-500 text-white' : 'text-gray-400 hover:text-white'}`}
+                            >
+                                <Camera size={12} className="inline mr-1" />
+                                Galería
                             </button>
                         </div>
 
@@ -377,23 +410,23 @@ const EnhancedBiomeModal = ({ selectedCell, onClose }) => {
                         {activeTab === 'details' && (
                             <>
                                 {/* Health Bar */}
-                                <div className="mb-6 p-6 bg-white/5 border border-white/10 rounded-2xl">
-                                    <div className="flex justify-between items-center text-xs font-black text-gray-400 uppercase tracking-wider mb-3">
+                                <div className="mb-4 p-4 bg-white/5 border border-white/10 rounded-xl">
+                                    <div className="flex justify-between items-center text-[9px] font-black text-gray-400 uppercase tracking-wider mb-2">
                                         <span>Estado Conservación</span>
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-gray-500">Valor CV: {regionalData?.conservation_score || 5}/10</span>
-                                            <span className="text-emerald-500 text-2xl">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-gray-500 text-[8px]">CV: {regionalData?.conservation_score || 5}/10</span>
+                                            <span className="text-emerald-500 text-lg">
                                                 {regionalData?.conservation_status || selectedCell.zone?.status}
                                             </span>
                                         </div>
                                     </div>
-                                    <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                                    <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
                                         <div
-                                            className="h-full bg-emerald-500 shadow-[0_0_15px_#10b981] transition-all duration-1000"
+                                            className="h-full bg-emerald-500 shadow-[0_0_10px_#10b981] transition-all duration-1000"
                                             style={{ width: `${selectedCell.zone?.health || 85}%` }}
                                         />
                                     </div>
-                                    <div className="mt-3 text-xs text-gray-400 font-medium leading-relaxed">
+                                    <div className="mt-2 text-[10px] text-gray-400 font-medium leading-tight">
                                         {regionalData?.description || "Cargando datos regionales del ecosistema..."}
                                     </div>
                                 </div>
@@ -566,7 +599,7 @@ const EnhancedBiomeModal = ({ selectedCell, onClose }) => {
                                                         />
                                                         <div className="absolute inset-0 bg-gradient-to-t from-[#080808] via-transparent to-transparent" />
                                                         <div className="absolute top-4 right-4 px-3 py-1 bg-black/50 backdrop-blur-xl rounded-full border border-white/10 text-[10px] font-black text-white uppercase">
-                                                            Tier {exp.min_tier}+
+                                                            Tier {exp.requires_tier}+
                                                         </div>
                                                     </div>
                                                 )}
@@ -752,7 +785,7 @@ const EnhancedBiomeModal = ({ selectedCell, onClose }) => {
                                             </div>
                                             <div className="p-4 bg-white/5 border border-white/10 rounded-xl text-center">
                                                 <div className="text-2xl font-black text-blue-400">
-                                                    {pixelHolders.filter(h => h.is_active).length}
+                                                    {pixelHolders.filter(h => h.is_active || h.active).length}
                                                 </div>
                                                 <div className="text-xs text-gray-400 uppercase tracking-wider mt-1">Activos</div>
                                             </div>
@@ -776,7 +809,7 @@ const EnhancedBiomeModal = ({ selectedCell, onClose }) => {
                                                                     {idx + 1}
                                                                 </div>
                                                                 <div className="text-xs font-bold text-white">
-                                                                    Holder #{holder.user_id?.slice(0, 8)}
+                                                                    {holder.profiles?.name || `Holder #${(holder.user_id || holder.wallet_address)?.slice(0, 8)}`}
                                                                 </div>
                                                             </div>
                                                             <span className="px-2 py-1 bg-emerald-500/20 text-emerald-400 text-[8px] font-black rounded-full">
@@ -788,7 +821,28 @@ const EnhancedBiomeModal = ({ selectedCell, onClose }) => {
                                             </div>
                                         )}
 
-                                        {upcomingEvents.length === 0 && (
+                                        {upcomingEvents.length > 0 && (
+                                            <div className="p-6 bg-white/5 border border-white/10 rounded-[2.5rem]">
+                                                <div className="text-xs font-black text-gray-400 uppercase tracking-wider mb-4">
+                                                    📅 Próximos Eventos
+                                                </div>
+                                                <div className="space-y-4">
+                                                    {upcomingEvents.map((event, idx) => (
+                                                        <div key={idx} className="flex items-center gap-4">
+                                                            <div className="p-2 bg-emerald-500/20 rounded-lg text-emerald-400">
+                                                                <Calendar size={18} />
+                                                            </div>
+                                                            <div>
+                                                                <div className="text-sm font-bold text-white uppercase">{event.title}</div>
+                                                                <div className="text-[10px] text-gray-500">{new Date(event.event_date).toLocaleDateString()}</div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {upcomingEvents.length === 0 && pixelHolders.length === 0 && (
                                             <div className="text-center py-12">
                                                 <Users className="w-16 h-16 text-blue-500 mx-auto mb-4" />
                                                 <h5 className="text-xl font-black text-white mb-2">Comunidad de Holders</h5>
@@ -799,6 +853,45 @@ const EnhancedBiomeModal = ({ selectedCell, onClose }) => {
                                         )}
                                     </>
                                 )}
+                            </div>
+                        )}
+
+                        {/* Tab Content: Gallery */}
+                        {activeTab === 'gallery' && (
+                            <div className="space-y-4">
+                                <div className="text-xs font-black text-white/40 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-cyan-500" />
+                                    Galería de la Comunidad
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    {loadingGallery ? (
+                                        <div className="col-span-2 text-center py-12">
+                                            <div className="animate-spin w-8 h-8 border-4 border-cyan-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+                                            <p className="text-gray-400 text-sm">Buscando fotografías...</p>
+                                        </div>
+                                    ) : galleryPhotos.length > 0 ? (
+                                        galleryPhotos.map((photo, idx) => (
+                                            <div key={idx} className="group relative aspect-square rounded-2xl overflow-hidden border border-white/10 hover:border-cyan-500/50 transition-all">
+                                                <img src={photo.photo_url} alt={photo.caption} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-4 flex flex-col justify-end">
+                                                    <p className="text-[10px] text-white font-bold">{photo.caption}</p>
+                                                    <div className="flex items-center gap-2 mt-1">
+                                                        <Heart size={10} className="text-red-500" />
+                                                        <span className="text-[8px] text-gray-300">{photo.likes_count || 0}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="text-center py-20 px-10 bg-white/[0.02] border border-white/10 border-dashed rounded-[3rem] col-span-2">
+                                            <Camera className="w-16 h-16 text-cyan-500 mx-auto mb-4" />
+                                            <h5 className="text-xl font-black text-white mb-2">Galería Vacía</h5>
+                                            <p className="text-gray-400 text-sm">
+                                                Sé el primero en compartir una foto de este bioma.
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         )}
                     </div>

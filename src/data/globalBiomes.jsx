@@ -19,10 +19,9 @@ export const GLOBAL_BIOMES = {
         donationLink: "https://www.parquesnacionales.gov.co/",
         liveCamUrl: "https://www.youtube.com/embed/live_stream?channel=UCVArkbPFFy_ojNW0PzEWUqg&autoplay=1&mute=1",
         photoGallery: [
-            "https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=800", // Café colombiano
-            "https://images.unsplash.com/photo-1589802829985-817e51171b92?w=800", // Nevado del Ruiz
-            "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800", // Plantación de café
-            "https://images.unsplash.com/photo-1580654712603-eb43273aff33?w=800"  // Valle del Cocora (Palmas de cera)
+            "https://images.unsplash.com/photo-1583623025817-d180a2221d0a?w=800", // Valle del Cocora
+            "https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=800", // Café
+            "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800"
         ],
         icon: <Trees className="text-amber-600" />,
         basePrice: 340
@@ -41,10 +40,9 @@ export const GLOBAL_BIOMES = {
         donationLink: "https://www.parquesnacionales.gov.co/",
         liveCamUrl: "https://www.youtube.com/embed/live_stream?channel=UCVArkbPFFy_ojNW0PzEWUqg&autoplay=1&mute=1",
         photoGallery: [
-            "https://images.unsplash.com/photo-1589802829985-817e51171b92?w=800", // Nevado
+            "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800", // Nevado Santa Isabel
             "https://images.unsplash.com/photo-1580654712603-eb43273aff33?w=800", // Páramo
-            "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800", // Montañas
-            "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800"  // Paisaje andino
+            "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800"
         ],
         icon: <Mountain className="text-blue-200" />,
         basePrice: 320
@@ -106,9 +104,9 @@ export const GLOBAL_BIOMES = {
         donationLink: "https://www.worldwildlife.org/",
         liveCamUrl: null,
         photoGallery: [
-            "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800",
-            "https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=800",
-            "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=800"
+            "https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=800", // Cascada Chocó
+            "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=800", // Mar Pacífico
+            "https://images.unsplash.com/photo-1547234935-80c7145ec969?w=800"
         ],
         icon: <Waves className="text-blue-500" />,
         basePrice: 310
