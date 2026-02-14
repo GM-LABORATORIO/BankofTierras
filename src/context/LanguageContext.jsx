@@ -136,7 +136,7 @@ const translations = {
                 signals_label: 'Motor de Señales en Vivo',
                 stats: {
                     inventory: 'Stock de Inventario',
-                    sovereign: 'Conectividad On-Chain',
+                    sovereign: 'Protocolo',
                     gas: 'Pool de Gas $SIGNAL',
                     throughput: 'Rendimiento de Red',
                     latest: 'Última Liquidación'
@@ -434,7 +434,7 @@ const translations = {
                 signals_label: 'Live Signals Engine',
                 stats: {
                     inventory: 'Inventory Stock',
-                    sovereign: 'On-Chain Connectivity',
+                    sovereign: 'Protocol',
                     gas: '$SIGNAL Gas Pool',
                     throughput: 'Network Throughput',
                     latest: 'Latest Settlement'
@@ -725,7 +725,7 @@ const translations = {
                 signals_label: 'محرك الإشارات المباشر',
                 stats: {
                     inventory: 'مخزون الجرد',
-                    sovereign: 'الاتصال على السلسلة',
+                    sovereign: 'بروتوكول',
                     gas: 'مجمع غاز $SIGNAL',
                     throughput: 'إنتاجية الشبكة',
                     latest: 'آخر تسوية'

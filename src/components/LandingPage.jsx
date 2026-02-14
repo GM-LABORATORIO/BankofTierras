@@ -238,7 +238,7 @@ const LandingPage = ({ onEnter }) => {
                                 <div className="space-y-6">
                                     {[
                                         { label: t('landing.hero.stats.inventory'), value: "2,000,000.00 T", color: "emerald" },
-                                        { label: t('landing.hero.stats.sovereign'), value: "Evergreen Subnet", color: "white" },
+                                        { label: t('landing.hero.stats.sovereign'), value: "CPX On-Chain", color: "white" },
                                         { label: t('landing.hero.stats.gas'), value: "840,210 $SIGNAL", color: "emerald" },
                                         { label: t('landing.hero.stats.throughput'), value: "4.2 T/sec", color: "emerald" }
                                     ].map((stat, i) => (
@@ -834,7 +834,7 @@ const LandingPage = ({ onEnter }) => {
                                     <div className="grid grid-cols-2 gap-8 py-10 border-y border-slate-100">
                                         <div className="space-y-2">
                                             <div className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Protocol Standard</div>
-                                            <div className="text-sm font-black italic">Evergreen / RWA-ERC-3643</div>
+                                            <div className="text-sm font-black italic">Evergreen / Native CPX Signal</div>
                                         </div>
                                         <div className="space-y-2">
                                             <div className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Compliance</div>
