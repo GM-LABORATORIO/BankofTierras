@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Coins, TrendingUp, Shield, Zap, ArrowRight, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Coins, TrendingUp, Shield, Zap, ArrowRight, Loader2, CheckCircle2, AlertCircle, ShoppingCart, Globe, Scale } from 'lucide-react';
 import { useWeb3 } from '../context/Web3Context';
 import { ethers } from 'ethers';
 
@@ -62,12 +62,11 @@ const EcoTokenPurchase = () => {
             setTxHash(tx.hash);
             await tx.wait();
 
-            // ✅ Refresh balance automatically
             setTimeout(() => {
                 refreshBalance();
             }, 2000);
 
-            alert(`¡Éxito! Has recibido ${botAmount} EcoToken\nHash: ${tx.hash.substring(0, 10)}...`);
+            alert(`¡Éxito! Has recibido ${botAmount} $SIGNAL\nHash: ${tx.hash.substring(0, 10)}...`);
             setAvaxAmount('');
             setBotAmount('0');
 
@@ -83,247 +82,178 @@ const EcoTokenPurchase = () => {
     const avaxInCop = avaxInUsd * prices.usdCop;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0a0a0a] to-[#050505] text-white p-6">
-            {/* Header */}
-            <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="max-w-6xl mx-auto mb-12"
-            >
-                <div className="text-center space-y-4">
-                    <h1 className="text-6xl font-black bg-gradient-to-r from-emerald-400 via-green-500 to-teal-400 bg-clip-text text-transparent">
-                        Compra EcoToken
-                    </h1>
-                    <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-                        El token que financia la conservación del Amazonas
-                    </p>
-                </div>
-            </motion.div>
+        <div className="space-y-12 pb-20 font-inter">
+            {/* Terminal Header */}
+            <div className="bg-white border border-slate-200 rounded-[3rem] p-10 shadow-sm relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-emerald-500/5 rounded-full blur-[100px] -mr-40 -mt-20 opacity-100" />
 
-            <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-8">
-                {/* Purchase Card */}
-                <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl"
-                >
-                    <div className="space-y-6">
-                        <div className="flex items-center justify-between">
-                            <h2 className="text-2xl font-black">Comprar Ahora</h2>
-                            <div className="bg-emerald-500/20 px-4 py-2 rounded-full">
-                                <span className="text-emerald-400 font-bold text-sm">1 EcoToken = 0.001 AVAX</span>
+                <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-10">
+                    <div className="flex items-center gap-8">
+                        <div className="w-20 h-20 bg-emerald-500 rounded-[2rem] flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                            <Coins size={40} className="text-black" />
+                        </div>
+                        <div>
+                            <div className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.3em] mb-2 leading-none">Liquidity Protocol</div>
+                            <h2 className="text-4xl font-black text-slate-800 italic uppercase tracking-tighter leading-none mb-3">
+                                $SIGNAL <span className="text-slate-300">Terminal</span>
+                            </h2>
+                            <div className="flex items-center gap-3">
+                                <span className="text-slate-400 text-[9px] font-bold uppercase tracking-widest">Global Asset Backing • Amazonas Conservation</span>
                             </div>
                         </div>
+                    </div>
 
-                        {/* Input Amount */}
-                        <div className="space-y-3">
-                            <label className="text-sm font-bold text-gray-400 uppercase tracking-wider">
-                                Cantidad en AVAX
-                            </label>
-                            <div className="relative">
-                                <input
-                                    type="number"
-                                    value={avaxAmount}
-                                    onChange={(e) => handleAvaxChange(e.target.value)}
-                                    placeholder="0.0"
-                                    className="w-full bg-white/5 border border-white/20 rounded-2xl p-6 text-3xl font-black focus:border-emerald-500 outline-none transition-all"
-                                    step="0.01"
-                                    min="0"
-                                />
-                                <div className="absolute right-6 top-1/2 -translate-y-1/2">
-                                    <span className="text-gray-500 font-bold">AVAX</span>
+                    <div className="px-8 py-4 bg-slate-50 border border-slate-100 rounded-2xl">
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Exchange Rate</span>
+                        <div className="text-2xl font-black text-slate-800 italic">1 <span className="text-emerald-500">$SIGNAL</span> = 0.001 <span className="text-slate-300">AVAX</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid lg:grid-cols-12 gap-10">
+                {/* Purchase Matrix */}
+                <div className="lg:col-span-7 space-y-8">
+                    <div className="bg-white border border-slate-200 rounded-[3rem] p-10 shadow-sm relative overflow-hidden">
+                        <div className="flex items-center justify-between mb-10">
+                            <h3 className="text-xl font-black text-slate-800 uppercase italic tracking-tighter flex items-center gap-4">
+                                <div className="p-3 bg-slate-50 rounded-xl">
+                                    <ShoppingCart size={20} className="text-slate-400" />
                                 </div>
-                            </div>
-                            {avaxAmount && (
-                                <div className="text-sm text-gray-400 space-y-1">
-                                    <div>≈ ${avaxInUsd.toFixed(2)} USD</div>
-                                    <div>≈ ${avaxInCop.toLocaleString('es-CO')} COP</div>
+                                Liquidation Flow
+                            </h3>
+                            {account && (
+                                <div className="px-4 py-2 bg-emerald-50 rounded-xl border border-emerald-100">
+                                    <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Wallet Connected</span>
                                 </div>
                             )}
                         </div>
 
-                        {/* Arrow */}
-                        <div className="flex justify-center">
-                            <div className="bg-emerald-500/20 p-3 rounded-full">
-                                <ArrowRight className="text-emerald-400" size={24} />
-                            </div>
-                        </div>
-
-                        {/* Output Amount */}
-                        <div className="space-y-3">
-                            <label className="text-sm font-bold text-gray-400 uppercase tracking-wider">
-                                Recibirás
-                            </label>
-                            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-6">
-                                <div className="text-4xl font-black text-emerald-400">
-                                    {botAmount}
+                        <div className="space-y-8">
+                            <div className="space-y-4">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Deposit Amount (AVAX)</label>
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        value={avaxAmount}
+                                        onChange={(e) => handleAvaxChange(e.target.value)}
+                                        placeholder="0.00"
+                                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-8 py-6 text-3xl font-black text-slate-800 focus:bg-white focus:border-emerald-500 outline-none transition-all pr-24"
+                                    />
+                                    <span className="absolute right-8 top-1/2 -translate-y-1/2 text-xs font-black text-slate-300 uppercase italic">Native</span>
                                 </div>
-                                <div className="text-sm text-emerald-500/70 mt-2">EcoToken</div>
-                            </div>
-                        </div>
-
-                        {/* Fee Info */}
-                        <div className="bg-white/5 rounded-xl p-4 space-y-2 text-sm">
-                            <div className="flex justify-between">
-                                <span className="text-gray-400">Fee de protocolo</span>
-                                <span className="font-bold">{FEE_PERCENT}%</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-400">Slippage protection</span>
-                                <span className="font-bold text-emerald-400">1%</span>
-                            </div>
-                        </div>
-
-                        {/* Error */}
-                        {error && (
-                            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex items-center gap-3">
-                                <AlertCircle className="text-red-400" size={20} />
-                                <span className="text-red-400 text-sm">{error}</span>
-                            </div>
-                        )}
-
-                        {/* Success */}
-                        {txHash && (
-                            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 flex items-center gap-3">
-                                <CheckCircle2 className="text-emerald-400" size={20} />
-                                <div className="flex-1">
-                                    <div className="text-emerald-400 text-sm font-bold">¡Compra exitosa!</div>
-                                    <a
-                                        href={`https://snowtrace.io/tx/${txHash}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-xs text-emerald-500/70 hover:text-emerald-400 transition-colors"
-                                    >
-                                        Ver en Snowtrace →
-                                    </a>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Buy Button */}
-                        {!account ? (
-                            <button
-                                onClick={connectWallet}
-                                className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-black py-6 rounded-2xl transition-all transform hover:scale-[1.02] shadow-lg shadow-emerald-500/20"
-                            >
-                                Conectar Wallet
-                            </button>
-                        ) : (
-                            <button
-                                onClick={handleBuyBot}
-                                disabled={isProcessing || !avaxAmount || parseFloat(avaxAmount) <= 0}
-                                className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white font-black py-6 rounded-2xl transition-all transform hover:scale-[1.02] shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-3"
-                            >
-                                {isProcessing ? (
-                                    <>
-                                        <Loader2 className="animate-spin" size={20} />
-                                        Procesando...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Coins size={20} />
-                                        Comprar EcoToken
-                                    </>
+                                {avaxAmount && (
+                                    <div className="flex gap-4 px-2">
+                                        <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">≈ ${avaxInUsd.toFixed(2)} USD</div>
+                                        <div className="w-px h-3 bg-slate-200" />
+                                        <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">≈ ${avaxInCop.toLocaleString('es-CO')} COP</div>
+                                    </div>
                                 )}
-                            </button>
-                        )}
-
-                        {/* Balance */}
-                        {account && (
-                            <div className="text-center text-sm text-gray-400">
-                                Tu balance: <span className="font-bold text-emerald-400">{parseFloat(botBalance).toFixed(2)} EcoToken</span>
                             </div>
-                        )}
+
+                            <div className="flex justify-center h-4 relative">
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t border-dashed border-slate-200" />
+                                </div>
+                                <div className="relative bg-white px-4 z-10">
+                                    <ArrowRight className="text-emerald-500" size={20} />
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Minting Output ($SIGNAL)</label>
+                                <div className="bg-slate-800 rounded-2xl px-8 py-8 shadow-inner relative overflow-hidden group">
+                                    <div className="absolute inset-0 bg-emerald-500/5 group-hover:bg-emerald-500/10 transition-colors" />
+                                    <div className="text-5xl font-black text-white italic tracking-tighter relative z-10">
+                                        {botAmount} <span className="text-emerald-500 text-xl uppercase not-italic">SIGNAL</span>
+                                    </div>
+                                    <Zap className="absolute right-8 top-1/2 -translate-y-1/2 text-emerald-500/20" size={40} />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Execution Error/Success */}
+                        <AnimatePresence>
+                            {error && (
+                                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="bg-red-50 border border-red-100 rounded-xl p-4 flex items-center gap-3">
+                                    <AlertCircle className="text-red-500 flex-shrink-0" size={18} />
+                                    <span className="text-[10px] font-black text-red-600 uppercase tracking-widest leading-relaxed">{error}</span>
+                                </motion.div>
+                            )}
+                            {txHash && (
+                                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex items-center gap-3">
+                                    <CheckCircle2 className="text-emerald-500 flex-shrink-0" size={18} />
+                                    <div className="flex-1">
+                                        <div className="text-[10px] font-black text-emerald-600 uppercase tracking-widest italic">Verification Broadcasted</div>
+                                        <a href={`https://snowtrace.io/tx/${txHash}`} target="_blank" className="text-[8px] font-bold text-emerald-400 uppercase tracking-[0.2em] hover:text-emerald-600 transition-colors">Explorer Hash: {txHash.slice(0, 20)}...</a>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        <button
+                            onClick={!account ? connectWallet : handleBuyBot}
+                            disabled={isProcessing || (account && (!avaxAmount || parseFloat(avaxAmount) <= 0))}
+                            className={`w-full py-6 rounded-2xl font-black text-sm uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-4 ${!account
+                                ? 'bg-slate-800 text-white hover:bg-emerald-500 hover:text-black shadow-xl'
+                                : 'bg-emerald-500 text-black hover:bg-emerald-400 shadow-xl shadow-emerald-500/20'
+                                } disabled:opacity-50`}
+                        >
+                            {isProcessing ? <Loader2 className="animate-spin" /> : (!account ? <Globe size={20} /> : <Zap size={20} />)}
+                            {isProcessing ? "Transact Flowing..." : (!account ? "Link Institutional Wallet" : "Authorize Asset Minting")}
+                        </button>
                     </div>
-                </motion.div>
-
-                {/* Info Cards */}
-                <div className="space-y-6">
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.1 }}
-                        className="bg-gradient-to-br from-emerald-500/10 to-green-500/5 border border-emerald-500/20 rounded-3xl p-6"
-                    >
-                        <div className="flex items-start gap-4">
-                            <div className="bg-emerald-500/20 p-3 rounded-2xl">
-                                <Shield size={24} className="text-emerald-400" />
-                            </div>
-                            <div>
-                                <h3 className="font-black text-lg mb-2">100% Seguro</h3>
-                                <p className="text-gray-400 text-sm">
-                                    Contratos auditados y verificados en Snowtrace. Tu contribución está respaldada.
-                                </p>
-                            </div>
-                        </div>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.2 }}
-                        className="bg-gradient-to-br from-blue-500/10 to-cyan-500/5 border border-blue-500/20 rounded-3xl p-6"
-                    >
-                        <div className="flex items-start gap-4">
-                            <div className="bg-blue-500/20 p-3 rounded-2xl">
-                                <TrendingUp size={24} className="text-blue-400" />
-                            </div>
-                            <div>
-                                <h3 className="font-black text-lg mb-2">Respaldado por AVAX</h3>
-                                <p className="text-gray-400 text-sm">
-                                    Cada EcoToken está respaldado por AVAX en el Treasury. Precio estable y transparente.
-                                </p>
-                            </div>
-                        </div>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.3 }}
-                        className="bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-500/20 rounded-3xl p-6"
-                    >
-                        <div className="flex items-start gap-4">
-                            <div className="bg-purple-500/20 p-3 rounded-2xl">
-                                <Zap size={24} className="text-purple-400" />
-                            </div>
-                            <div>
-                                <h3 className="font-black text-lg mb-2">Impacto Inmediato</h3>
-                                <p className="text-gray-400 text-sm">
-                                    Usa tus EcoTokens para adoptar especies, compensar carbono y apoyar proyectos de conservación ambiental.
-                                </p>
-                            </div>
-                        </div>
-                    </motion.div>
-
-                    {/* Stats */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4 }}
-                        className="bg-white/5 border border-white/10 rounded-3xl p-6"
-                    >
-                        <h3 className="font-black text-lg mb-4">Estadísticas</h3>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <div className="text-2xl font-black text-emerald-400">0.001</div>
-                                <div className="text-xs text-gray-400">AVAX por token</div>
-                            </div>
-                            <div>
-                                <div className="text-2xl font-black text-blue-400">3%</div>
-                                <div className="text-xs text-gray-400">Fee de protocolo</div>
-                            </div>
-                            <div>
-                                <div className="text-2xl font-black text-purple-400">1B</div>
-                                <div className="text-xs text-gray-400">Supply máximo</div>
-                            </div>
-                            <div>
-                                <div className="text-2xl font-black text-pink-400">100%</div>
-                                <div className="text-xs text-gray-400">Respaldado</div>
-                            </div>
-                        </div>
-                    </motion.div>
                 </div>
+            </div>
+
+            {/* Network Metrics & Proofs */}
+            <div className="lg:col-span-5 space-y-8">
+                <div className="bg-slate-50 border border-slate-100 rounded-[2.5rem] p-8 shadow-inner">
+                    <h4 className="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-8 flex items-center justify-between">
+                        Protocol Stats
+                        <TrendingUp size={14} className="text-emerald-500" />
+                    </h4>
+                    <div className="grid grid-cols-2 gap-6">
+                        {[
+                            { label: 'Liquidation Fee', val: '3%', color: 'text-slate-800' },
+                            { label: 'Slippage Shield', val: '1%', color: 'text-emerald-500' },
+                            { label: 'Supply Limit', val: '1B', color: 'text-slate-300' },
+                            { label: 'Collateral', val: '100%', color: 'text-emerald-600' }
+                        ].map((stat, i) => (
+                            <div key={i}>
+                                <div className="text-[8px] font-black text-slate-400 uppercase mb-1">{stat.label}</div>
+                                <div className={`text-xl font-black italic tracking-tighter ${stat.color}`}>{stat.val}</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 space-y-6">
+                    <div className="flex items-start gap-4">
+                        <div className="p-3 bg-emerald-50 rounded-xl"><Shield size={20} className="text-emerald-500" /></div>
+                        <div>
+                            <h5 className="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-1 italic">Verified Proof</h5>
+                            <p className="text-[9px] font-bold text-slate-400 uppercase leading-relaxed tracking-wider">Audited smart contracts following ERC-20 standards for conservation.</p>
+                        </div>
+                    </div>
+                    <div className="flex items-start gap-4">
+                        <div className="p-3 bg-slate-50 rounded-xl"><Scale size={20} className="text-slate-300" /></div>
+                        <div>
+                            <h5 className="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-1 italic">Asset Collateral</h5>
+                            <p className="text-[9px] font-bold text-slate-400 uppercase leading-relaxed tracking-wider">Every $SIGNAL is backed by native network architecture.</p>
+                        </div>
+                    </div>
+                </div>
+
+                {account && (
+                    <div className="p-8 bg-slate-800 rounded-[2.5rem] text-center text-white relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-emerald-500/5" />
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Your Portfolio Balance</span>
+                        <div className="text-3xl font-black text-emerald-400 italic tracking-tighter mb-4">
+                            {parseFloat(botBalance).toFixed(2)} <span className="text-white uppercase text-xs not-italic">SIGNAL</span>
+                        </div>
+                        <button onClick={() => refreshBalance()} className="text-[8px] font-black text-white/40 uppercase tracking-[0.3em] hover:text-emerald-400 transition-colors">Re-sync signals</button>
+                    </div>
+                )}
             </div>
         </div>
     );

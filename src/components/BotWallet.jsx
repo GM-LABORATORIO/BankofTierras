@@ -104,9 +104,9 @@ const BotWallet = () => {
             setBuyAmount('');
 
             const botReceived = (parseFloat(buyAmount) * 0.97 / 0.001).toFixed(2);
-            alert(`✅ Compra exitosa! Recibiste ${botReceived} $BoT EcoTokens`);
+            alert(`✅ Compra exitosa! Recibiste ${botReceived} $SIGNAL Tokens`);
         } catch (error) {
-            console.error("Error buying $BoT:", error);
+            console.error("Error buying $SIGNAL:", error);
             alert("Error: " + (error.reason || error.message));
         } finally {
             setIsLoading(false);
@@ -120,7 +120,7 @@ const BotWallet = () => {
         }
 
         if (!isOriginator) {
-            alert("Solo los Originadores pueden redimir $BoT por AVAX");
+            alert("Solo los Originadores pueden redimir $SIGNAL por AVAX");
             return;
         }
 
@@ -141,7 +141,7 @@ const BotWallet = () => {
             const avaxReceived = (parseFloat(redeemAmount) * 0.001 * 0.98).toFixed(4);
             alert(`✅ Redención exitosa! Recibiste ${avaxReceived} AVAX (Fee 2% aplicado)`);
         } catch (error) {
-            console.error("Error redeeming $BoT:", error);
+            console.error("Error redeeming $SIGNAL:", error);
             alert("Error: " + (error.reason || error.message));
         } finally {
             setIsLoading(false);
@@ -164,12 +164,12 @@ const BotWallet = () => {
 
                     <div className="relative z-10">
                         <div className="flex items-center justify-between mb-6">
-                            <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Balance $BoT EcoToken</div>
+                            <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Balance $SIGNAL Token</div>
                             <Wallet className="text-emerald-500" size={24} />
                         </div>
                         <div className="text-5xl font-black text-white mb-2">{parseFloat(botBalance).toLocaleString()}</div>
                         <div className="text-sm text-gray-500 font-bold">≈ ${botValueUSD.toFixed(2)} USD</div>
-                        <div className="text-xs text-gray-600 mt-1">1 $BoT EcoToken = 0.001 AVAX</div>
+                        <div className="text-xs text-gray-600 mt-1">1 $SIGNAL Token = 0.001 AVAX</div>
                     </div>
                 </motion.div>
 
@@ -204,11 +204,10 @@ const BotWallet = () => {
                     </h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                         <div>
-                            <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">$BoT Vendidos</div>
                             <div className="text-2xl font-black text-white">{parseFloat(stats.totalSold).toLocaleString()}</div>
                         </div>
                         <div>
-                            <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">$BoT Quemados</div>
+                            <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">$SIGNAL Quemados</div>
                             <div className="text-2xl font-black text-emerald-500">{parseFloat(stats.totalBurned).toLocaleString()}</div>
                         </div>
                         <div>
@@ -227,13 +226,13 @@ const BotWallet = () => {
             <div className="bg-[#0a0a0a] border border-white/5 rounded-[2rem] p-8">
                 <h3 className="text-xl font-black text-white mb-6 flex items-center gap-3 uppercase tracking-tighter">
                     <ArrowDownCircle className="text-emerald-500" />
-                    Comprar $BoT con AVAX
+                    Comprar $SIGNAL con AVAX
                 </h3>
 
                 <div className="space-y-6">
                     <div className="bg-black/40 p-6 rounded-2xl border border-white/10">
                         <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">Precio Fijo EcoToken</div>
-                        <div className="text-3xl font-black text-emerald-500">1 $BoT = 0.001 AVAX</div>
+                        <div className="text-3xl font-black text-emerald-500">1 $SIGNAL = 0.001 AVAX</div>
                         <div className="text-sm text-gray-600 mt-2">≈ $0.012 USD • Fee: 3%</div>
                     </div>
 
@@ -249,7 +248,7 @@ const BotWallet = () => {
                         />
                         {buyAmount && (
                             <div className="text-sm text-gray-500 font-bold">
-                                Recibirás: ~{(parseFloat(buyAmount) * 0.97 / 0.001).toFixed(2)} $BoT EcoTokens
+                                Recibirás: ~{(parseFloat(buyAmount) * 0.97 / 0.001).toFixed(2)} $SIGNAL Tokens
                             </div>
                         )}
                     </div>
@@ -260,7 +259,7 @@ const BotWallet = () => {
                         className="w-full py-5 bg-emerald-500 text-white rounded-2xl font-black text-lg uppercase tracking-widest hover:bg-emerald-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
                     >
                         {isLoading ? <Loader2 className="animate-spin" /> : <ArrowDownCircle />}
-                        {isLoading ? "Procesando..." : "Comprar $BoT EcoToken"}
+                        {isLoading ? "Procesando..." : "Comprar $SIGNAL Token"}
                     </button>
                 </div>
             </div>
@@ -276,12 +275,12 @@ const BotWallet = () => {
 
                     <h3 className="text-xl font-black text-white mb-6 flex items-center gap-3 uppercase tracking-tighter">
                         <ArrowUpCircle className="text-emerald-500" />
-                        Redimir $BoT por AVAX
+                        Redimir $SIGNAL por AVAX
                     </h3>
 
                     <div className="space-y-6">
                         <div className="space-y-3">
-                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Monto en $BoT</label>
+                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Monto en $SIGNAL</label>
                             <input
                                 type="number"
                                 value={redeemAmount}

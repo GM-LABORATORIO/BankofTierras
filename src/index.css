@@ -5,33 +5,117 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #050505;
+  /* CPX 2.0 Theme Tokens - The Green Terminal */
+  --cpx-bg: #01030a;
+  /* True Obsidian */
+  --cpx-bg-alt: #050814;
+  --cpx-bg-light: #F8FAFC;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --cpx-accent: #00FFAB;
+  /* Neon Emerald */
+  --cpx-accent-solid: #059669;
+  /* Solid Emerald */
+  --cpx-accent-glow: rgba(0, 255, 171, 0.4);
+
+  --cpx-card: rgba(10, 10, 10, 0.7);
+  --cpx-card-light: #FFFFFF;
+
+  --cpx-text-primary: #F1F5F9;
+  --cpx-text-secondary: #94A3B8;
+  --cpx-text-dark: #0F172A;
+
+  --cpx-border: rgba(0, 255, 171, 0.1);
+  --cpx-border-strong: rgba(0, 255, 171, 0.2);
+  --cpx-border-subtle: rgba(255, 255, 255, 0.05);
+
+  --font-inter: 'Inter', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+
+  color-scheme: dark;
+  color: var(--cpx-text-primary);
+  background-color: var(--cpx-bg);
+}
+
+:root[data-theme='light'] {
+  --cpx-bg: var(--cpx-bg-light);
+  --cpx-bg-alt: #EDF2F7;
+  --cpx-accent: var(--cpx-accent-solid);
+  --cpx-card: var(--cpx-card-light);
+  --cpx-text-primary: var(--cpx-text-dark);
+  --cpx-text-secondary: #475569;
+  --cpx-border: rgba(5, 150, 105, 0.1);
+  --cpx-border-strong: rgba(5, 150, 105, 0.2);
+  --cpx-border-subtle: rgba(0, 0, 0, 0.05);
+  color-scheme: light;
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #050505;
-  color: white;
+  font-family: var(--font-inter);
+  background-color: var(--cpx-bg);
+  color: var(--cpx-text-primary);
+  transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @theme {
-  --color-primary: #6CA03C;
-  --color-primary-dark: #226400;
-  --color-emerald-500: #6CA03C;
-  --color-emerald-600: #226400;
-  --color-emerald-400: #8AC955;
-  --color-bg-dark: #050505;
-  --color-bg-card: #0a0a0a;
-  --color-border-subtle: #1a1a1a;
+  --color-primary: var(--cpx-accent);
+  --color-primary-dark: #00D18B;
+  --color-bg-dark: var(--cpx-bg);
+  --color-bg-card: var(--cpx-card);
+  --color-border-cpx: var(--cpx-border);
+}
+
+/* 🧪 Glassmorphism & Depth Utilities */
+.glass-terminal {
+  background: var(--cpx-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--cpx-border);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.text-mono {
+  font-family: var(--font-mono);
+}
+
+.cpx-gradient-text {
+  background: linear-gradient(135deg, #00FFAB 0%, #059669 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 🧬 3D Identity Card Styles */
+.card-3d-container {
+  perspective: 1000px;
+}
+
+.card-3d-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.card-3d-container:hover .card-3d-inner {
+  transform: rotateY(180deg);
+}
+
+.card-3d-front,
+.card-3d-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 24px;
+}
+
+.card-3d-back {
+  transform: rotateY(180deg);
 }
 
 /* Custom Scrollbar */

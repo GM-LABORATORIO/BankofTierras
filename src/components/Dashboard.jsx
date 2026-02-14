@@ -12,109 +12,47 @@ import {
     X,
     Loader2,
     User,
-    Globe
+    Globe,
+    ShoppingCart,
+    Zap,
+    Store,
+    Activity,
+    Hexagon,
+    Award
 } from 'lucide-react';
 
 import { useWeb3 } from '../context/Web3Context';
 import OriginatorPanel from './OriginatorPanel';
-import AuditorPanel from './AuditorPanel';
 import CorporatePanel from './CorporatePanel';
 import TechnicalPanel from './TechnicalPanel';
-import TreeMarketplace from './TreeMarketplace';
 import CarbonMarketplace from './CarbonMarketplace';
+import GreenBusinessCenter from './GreenBusinessCenter';
+import GlobalRankings from './GlobalRankings';
 import AdminPanel from './AdminPanel';
 import UserProfile from './UserProfile';
 import EcoTokenPurchase from './EcoTokenPurchase';
 import logoBot from '../assets/logo_bot.png';
-
-const ADMIN_WALLET = "0xA583f0675a2d6f01ab21DEA98629e9Ee04320108";
-
-import { MOCK_PROJECTS } from '../constants/mockData';
-import { Heart } from 'lucide-react';
-
-const INITIAL_SPECIES = [
-    {
-        id: 'jaguar-01',
-        name: "Jaguar (Otorongo)",
-        scientific: "Panthera onca",
-        description: "El felino más grande de América. Tu adopción financia corredores biológicos y cámaras trampa.",
-        impact: "Protección de 100ha",
-        cost: "500 EcoToken",
-        category: "Fauna",
-        status: "Casi Amenazado",
-        image: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=800"
-    },
-    {
-        id: 'delfin-01',
-        name: "Delfín Rosado",
-        scientific: "Inia geoffrensis",
-        description: "Ser mitológico del Amazonas. Protegemos las cuencas hídricas contra la minería de mercurio.",
-        impact: "Limpieza de Cuenca",
-        cost: "250 EcoToken",
-        category: "Fauna",
-        status: "En Peligro",
-        image: "https://images.unsplash.com/photo-1570710891163-6d3b5c47248b?auto=format&fit=crop&q=80&w=800"
-    },
-    {
-        id: 'aguila-01',
-        name: "Águila Harpía",
-        scientific: "Harpia harpyja",
-        description: "La reina del dosel. Protegemos los árboles más altos donde anidan estas majestuosas aves.",
-        impact: "Protección de Nidos",
-        cost: "350 EcoToken",
-        category: "Fauna",
-        status: "Vulnerable",
-        image: "https://images.unsplash.com/photo-1621533031496-e24c6530324c?auto=format&fit=crop&q=80&w=800"
-    },
-    {
-        id: 'guacamayo-01',
-        name: "Guacamayo Rojo",
-        scientific: "Ara macao",
-        description: "Dispersor de semillas vital para el Amazonas. Protegemos sus nidos en los huecos de los árboles.",
-        impact: "Reforestación Natural",
-        cost: "150 EcoToken",
-        category: "Fauna",
-        status: "Protegido",
-        image: "https://images.unsplash.com/photo-1552728089-57bdde30fc3b?auto=format&fit=crop&q=80&w=800"
-    },
-    {
-        id: 'lupuna-01',
-        name: "Lupuna Gigante",
-        scientific: "Ceiba pentandra",
-        description: "El gigante sagrado del Amazonas. Estos árboles son refugio para cientos de especies.",
-        impact: "450kg CO2 / año",
-        cost: "50 EcoToken",
-        category: "Flora",
-        status: "Protegido",
-        image: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&q=80&w=800"
-    },
-    {
-        id: 'orquidea-01',
-        name: "Orquídea Amazónica",
-        scientific: "Cattleya luteola",
-        description: "Símbolo de la biodiversidad floral. Tu apoyo financia viveros de especies nativas.",
-        impact: "Conservación Genética",
-        cost: "75 EcoToken",
-        category: "Flora",
-        status: "Vulnerable",
-        image: "https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?auto=format&fit=crop&q=80&w=800"
-    }
-];
-
 import { supabaseService } from '../services/supabaseService';
+import ImpactPassport from './ImpactPassport';
+import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 
-const Dashboard = ({ onBack, onDiscovery }) => {
+const Dashboard = ({ onBack }) => {
+    const { isDark, toggleTheme } = useTheme();
+    const { t, language, setLanguage } = useLanguage();
+    const ADMIN_WALLET = "0xA583f0675a2d6f01ab21DEA98629e9Ee04320108";
     const { account, connectWallet, isConnecting, carbonBalance, botBalance } = useWeb3();
-    const [activeTab, setActiveTab] = useState('profile');
+    const [activeTab, setActiveTab] = useState('passport');
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [isRTL, setIsRTL] = useState(false); // Language support
 
     // Persistence Logic with Supabase
     const [projects, setProjects] = useState([]);
-    const [species, setSpecies] = useState([]);
     const [myForest, setMyForest] = useState([]);
     const [totalRetired, setTotalRetired] = useState(0);
     const [userProfile, setUserProfile] = useState(null);
+    const [reputation, setReputation] = useState({ total_score: 0, total_actions: 0 });
 
     // Function to load projects from Supabase
     const loadProjects = async () => {
@@ -149,6 +87,10 @@ const Dashboard = ({ onBack, onDiscovery }) => {
             if (profile) {
                 setUserProfile(profile);
             }
+            const repSummary = await supabaseService.getReputationSummary(account);
+            if (repSummary) {
+                setReputation(repSummary);
+            }
         } catch (error) {
             console.error("Error loading profile:", error);
         }
@@ -159,18 +101,7 @@ const Dashboard = ({ onBack, onDiscovery }) => {
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                const [dbSpecies, dbProjects] = await Promise.all([
-                    supabaseService.getSpecies(),
-                    supabaseService.getProjects()
-                ]);
-
-                if (dbSpecies.length === 0 && INITIAL_SPECIES.length > 0) {
-                    await supabaseService.seedSpecies(INITIAL_SPECIES.map(({ id, ...rest }) => rest));
-                    const restoredSpecies = await supabaseService.getSpecies();
-                    setSpecies(restoredSpecies.length > 0 ? restoredSpecies : INITIAL_SPECIES);
-                } else {
-                    setSpecies(dbSpecies.length > 0 ? dbSpecies : INITIAL_SPECIES);
-                }
+                const dbProjects = await supabaseService.getProjects();
 
                 const normalizedProjects = dbProjects.map(p => ({
                     id: p.id,
@@ -227,214 +158,91 @@ const Dashboard = ({ onBack, onDiscovery }) => {
         setProjects(newProjects);
     };
 
-    const updateSpecies = (newSpecies) => setSpecies(newSpecies);
-
-    const tabs = [
+    const allTabs = [
         {
-            id: 'profile',
-            label: 'Mi Perfil',
-            icon: <User size={20} />,
-            component: <UserProfile myForest={myForest} onProfileUpdate={loadProfile} />
+            id: 'passport',
+            label: userProfile?.type === 'corporate' ? 'Strategy' : t('dashboard.passport'),
+            icon: <Globe size={24} />,
+            component: <ImpactPassport />,
+            roles: ['citizen', 'corporate', 'commerce']
         },
         {
-            id: 'buy-ecotoken',
-            label: 'Comprar EcoToken',
-            icon: <Heart size={20} />,
-            component: <EcoTokenPurchase />
+            id: 'carbon-market',
+            label: userProfile?.type === 'corporate' ? 'Liquidity' : t('dashboard.market'),
+            icon: <ShoppingCart size={24} />,
+            component: <CarbonMarketplace projects={projects} />,
+            roles: ['citizen', 'corporate']
         },
         {
-            id: 'market',
-            label: 'Mercado Carbono',
-            icon: <LayoutDashboard size={20} />,
-            component: <CarbonMarketplace projects={projects} onPurchaseSuccess={loadProjects} />
-        },
-        {
-            id: 'originator',
-            label: 'Originador',
-            icon: <Users size={20} />,
-            component: <OriginatorPanel projects={projects} onProjectsChange={async (newP) => {
-                const latest = newP[0];
-                if (latest && !latest.id.toString().includes('-')) {
-                    try {
-                        const savedProject = await supabaseService.addProject({
-                            name: latest.name,
-                            location: latest.location,
-                            area: latest.area,
-                            regid: latest.regid,
-                            status: latest.status,
-                            image: latest.image,
-                            reportipfs: latest.reportipfs,
-                            coordinates: latest.coordinates,
-                            owner_wallet: latest.owner_wallet || account,
-                            token_id: latest.id, // Store blockchain tokenId in token_id column
-                            total_quota: latest.total_quota || (parseFloat(latest.area) * 2.5)
-                        });
-
-                        if (savedProject) {
-                            const updatedProjects = newP.map((p, i) =>
-                                i === 0 ? { ...p, id: savedProject.id, tokenId: latest.id } : p
-                            );
-                            setProjects(updatedProjects);
-                            return;
-                        }
-                    } catch (err) {
-                        console.error("Error saving project:", err);
-                        alert("Error guardando en base de datos: " + err.message);
-                        throw err; // Re-throw to be caught by component
-                    }
-                }
-                setProjects(newP);
-            }} />
-        },
-        {
-            id: 'auditor',
-            label: 'Auditor',
-            icon: <ShieldCheck size={20} />,
-            component: <AuditorPanel projects={projects} onProjectsChange={async (newP) => {
-                // Find what changed to update Supabase
-                const changed = newP.find(p => {
-                    const old = projects.find(op => op.id === p.id);
-                    return old && old.status !== p.status;
-                });
-
-                if (changed) {
-                    try {
-                        await supabaseService.updateProject(changed.id, { status: changed.status });
-                    } catch (err) {
-                        console.error("Error updating project status:", err);
-                    }
-                }
-                setProjects(newP);
-            }} />
+            id: 'rankings',
+            label: 'Global Score',
+            icon: <Award size={24} />,
+            component: <GlobalRankings />,
+            roles: ['citizen', 'corporate', 'commerce']
         },
         {
             id: 'corporate',
-            label: 'Empresa',
-            icon: <Building2 size={20} />,
-            component: <CorporatePanel
-                myForest={myForest}
-                projects={projects}
-                totalRetired={totalRetired}
-                userProfile={userProfile}
-                onRetire={async (amount, certData) => {
-                    setTotalRetired(prev => prev + parseFloat(amount));
-                    await supabaseService.addCompensation({
-                        wallet_address: account,
-                        company_name: certData.company,
-                        nit: certData.nit,
-                        amount: parseFloat(amount),
-                        tx_hash: certData.txHash,
-                        date: certData.date
-                    });
-                }}
-            />
+            label: userProfile?.type === 'corporate' ? 'Command' : t('dashboard.compliance_hub'),
+            icon: <Building2 size={24} />,
+            component: <CorporatePanel projects={projects} myForest={myForest} totalRetired={totalRetired} userProfile={userProfile} />,
+            roles: ['citizen', 'corporate']
+        },
+        {
+            id: 'green-business',
+            label: userProfile?.type === 'commerce' ? 'Business Node' : t('dashboard.hub'),
+            icon: <Store size={24} />,
+            component: <GreenBusinessCenter />,
+            roles: ['citizen', 'commerce']
+        },
+        {
+            id: 'profile',
+            label: t('dashboard.identity_id'),
+            icon: <User size={24} />,
+            component: <UserProfile myForest={myForest} onProfileUpdate={loadProfile} />,
+            roles: ['citizen', 'corporate', 'commerce']
+        },
+        {
+            id: 'originator',
+            label: t('dashboard.originator'),
+            icon: <Users size={24} />,
+            component: <OriginatorPanel projects={projects} onProjectsChange={setProjects} />,
+            roles: ['originator']
         },
         {
             id: 'technical',
-            label: 'Info Técnica',
-            icon: <Settings size={20} />,
-            component: <TechnicalPanel />
+            label: t('dashboard.settlement_info'),
+            icon: <Settings size={24} />,
+            component: <TechnicalPanel />,
+            roles: ['corporate', 'originator']
         },
-        {
-            id: 'marketplace',
-            label: 'Adopción',
-            icon: <Heart size={20} />,
-            component: <TreeMarketplace
-                species={species}
-                setSpecies={async (newS) => {
-                    // Detect changes to sync with Supabase
-                    const latestAdded = newS.find(s => s.id && s.id.toString().startsWith('new-'));
-
-                    if (latestAdded) {
-                        const { id, ...cleanItem } = latestAdded;
-                        const saved = await supabaseService.addSpecies(cleanItem);
-                        if (saved) {
-                            // Replace the temp 'new-' id with the real DB id
-                            setSpecies(newS.map(s => s.id === latestAdded.id ? saved : s));
-                        } else {
-                            setSpecies(newS);
-                        }
-                        return;
-                    }
-
-                    // Check for updates to existing items
-                    const changedItem = newS.find(newItem => {
-                        const oldVersion = species.find(oldItem => oldItem.id === newItem.id);
-                        return oldVersion && JSON.stringify(oldVersion) !== JSON.stringify(newItem);
-                    });
-
-                    if (changedItem) {
-                        const { id, created_at, ...updates } = changedItem;
-                        await supabaseService.updateSpecies(id, updates);
-                    }
-
-                    setSpecies(newS);
-                }}
-                resetSpecies={() => setSpecies([])} // In DB context, maybe just re-fetch
-                myForest={myForest}
-                setMyForest={async (newF) => {
-                    const latest = newF[newF.length - 1];
-                    if (latest && latest.id.toString().startsWith('adoption-')) {
-                        await supabaseService.addAdoption({
-                            species_id: latest.db_id || latest.id, // Ensure we have the DB UUID
-                            wallet_address: account,
-                            guardian_name: latest.owner,
-                            adoption_date: latest.adoptionDate,
-                            tx_hash: latest.txHash
-                        });
-                    }
-                    setMyForest(newF);
-                }}
-            />
-        },
-        // --- Admin Tab (Only for Admin Wallet) ---
         ...(account?.toLowerCase() === ADMIN_WALLET.toLowerCase() ? [{
             id: 'admin',
-            label: 'Panel Admin',
-            icon: <ShieldCheck size={20} className="text-emerald-500" />,
-            component: <AdminPanel />
+            label: t('dashboard.admin'),
+            icon: <ShieldCheck size={24} className="text-emerald-500" />,
+            component: <AdminPanel />,
+            roles: ['admin', 'citizen', 'corporate', 'commerce', 'originator']
         }] : [])
     ];
 
-    return (
-        <div className="flex h-screen bg-[#050505] relative overflow-hidden">
-            {/* Mobile Sidebar Overlay */}
-            <AnimatePresence>
-                {isMenuOpen && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={() => setIsMenuOpen(false)}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] lg:hidden"
-                    />
-                )}
-            </AnimatePresence>
+    const userRole = userProfile?.type || 'citizen';
+    const tabs = allTabs.filter(tab => tab.roles.includes(userRole) || account?.toLowerCase() === ADMIN_WALLET.toLowerCase());
 
-            {/* Sidebar */}
+    return (
+        <div className="flex h-screen bg-slate-50 text-slate-800 font-inter overflow-hidden relative" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+            {/* 1. Sidebar (New Aesthetic: Clean & Icon-Focused) */}
             <aside className={`
                 fixed lg:static inset-y-0 left-0 z-[110] 
-                w-72 border-r border-white/5 bg-[#0a0a0a] flex flex-col 
-                transition-transform duration-300 ease-in-out
+                w-24 lg:w-32 border-r border-slate-200 bg-white flex flex-col 
+                transition-all duration-300 ease-in-out
                 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
             `}>
-                <div className="p-6 flex items-center justify-between border-b border-white/5">
-                    <div className="flex items-center gap-4">
-                        <button onClick={onBack} className="p-2 hover:bg-white/5 rounded-lg transition-colors shrink-0">
-                            <ChevronLeft size={20} className="text-gray-400" />
-                        </button>
-                        <img src={logoBot} className="h-12 w-auto brightness-0 invert opacity-95" alt="Bank of Tierras" />
-                    </div>
-                    <button
-                        onClick={() => setIsMenuOpen(false)}
-                        className="p-2 lg:hidden text-gray-500 hover:text-white"
-                    >
-                        <X size={20} />
+                <div className="p-4 flex items-center justify-center border-b border-slate-100 h-20">
+                    <button onClick={onBack} className="p-3 bg-emerald-500 rounded-xl text-white shadow-lg shadow-emerald-500/20 hover:scale-105 transition-all">
+                        <Hexagon size={24} fill="currentColor" />
                     </button>
                 </div>
 
-                <nav className="flex-1 p-4 flex flex-col gap-2 overflow-y-auto">
-                    <div className="text-[10px] font-bold text-gray-600 uppercase tracking-widest px-4 mb-4">Roles de Impacto</div>
+                <nav className="flex-1 overflow-y-auto py-8 space-y-6 flex flex-col items-center custom-scrollbar">
                     {tabs.map((tab) => (
                         <button
                             key={tab.id}
@@ -442,134 +250,156 @@ const Dashboard = ({ onBack, onDiscovery }) => {
                                 setActiveTab(tab.id);
                                 setIsMenuOpen(false);
                             }}
-                            className={`flex items-center gap-4 px-5 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all group ${activeTab === tab.id
-                                ? 'bg-emerald-500 text-white shadow-[0_10px_25px_rgba(16,185,129,0.3)]'
-                                : 'text-gray-400 hover:bg-white/5 hover:text-white'
-                                }`}
+                            className={`
+                                flex flex-col items-center gap-2 p-3 rounded-2xl transition-all group
+                                ${activeTab === tab.id
+                                    ? 'text-emerald-500'
+                                    : 'text-slate-400 hover:text-emerald-500'}
+                            `}
                         >
-                            <span className={activeTab === tab.id ? 'text-white' : 'text-emerald-500/50 group-hover:text-emerald-500 transition-colors'}>
+                            <div className={`p-3 rounded-xl transition-all ${activeTab === tab.id ? 'bg-emerald-50' : 'group-hover:bg-slate-50'}`}>
                                 {tab.icon}
+                            </div>
+                            <span className="text-[10px] font-black uppercase tracking-tighter text-center leading-tight">
+                                {tab.label}
                             </span>
-                            {tab.label}
                         </button>
                     ))}
-
-                    <div className="mt-8 px-4">
-                        <button
-                            onClick={onDiscovery}
-                            className="w-full flex items-center justify-center gap-3 py-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-500 font-black text-[10px] uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all group shadow-2xl"
-                        >
-                            <Globe size={16} className="group-hover:rotate-12 transition-transform" />
-                            Explorar Globo BoT
-                        </button>
-                    </div>
                 </nav>
 
-                <div className="p-6 border-t border-white/5">
-                    {account ? (
-                        <div className="space-y-3">
-                            <div className="px-5 py-4 bg-emerald-500/5 rounded-2xl border border-emerald-500/20">
-                                <div className="text-[9px] text-emerald-500/50 font-black uppercase mb-1 tracking-[0.2em]">Wallet Activa</div>
-                                <div className="text-[10px] font-mono text-white truncate font-bold">{account}</div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="px-4 py-3 bg-white/5 rounded-2xl border border-white/10 group hover:border-emerald-500/30 transition-all">
-                                    <div className="text-[8px] text-gray-500 font-black uppercase mb-1 tracking-wider">EcoToken</div>
-                                    <div className="flex items-baseline gap-1">
-                                        <span className="text-lg font-black text-emerald-400 italic">{parseFloat(botBalance || 0).toLocaleString()}</span>
-                                        <span className="text-[9px] font-black text-emerald-500/70">$BoT</span>
-                                    </div>
-                                </div>
-                                <div className="px-4 py-3 bg-white/5 rounded-2xl border border-white/10 group hover:border-blue-500/30 transition-all">
-                                    <div className="text-[8px] text-gray-500 font-black uppercase mb-1 tracking-wider">Carbon</div>
-                                    <div className="flex items-baseline gap-1">
-                                        <span className="text-lg font-black text-blue-400 italic">{parseFloat(carbonBalance || 0).toLocaleString()}</span>
-                                        <span className="text-[9px] font-black text-blue-500/70">tCO2</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
-                        <button
-                            onClick={connectWallet}
-                            disabled={isConnecting}
-                            className="w-full py-4 bg-emerald-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-600 transition-all flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(16,185,129,0.2)]"
-                        >
-                            {isConnecting ? "Conectando..." : "Conectar Wallet"}
-                        </button>
-                    )}
+                <div className="p-6 border-t border-slate-100">
+                    <button className="w-full flex justify-center text-slate-400 hover:text-red-500 transition-colors">
+                        <LogOut size={20} />
+                    </button>
                 </div>
             </aside>
 
-            {/* Main Content */}
-            <main className="flex-1 overflow-y-auto w-full">
-                <header className="h-20 lg:h-24 border-b border-white/5 px-6 lg:px-10 flex items-center justify-between bg-[#0a0a0a]/50 backdrop-blur-3xl sticky top-0 z-[50]">
-                    <div className="flex items-center gap-4">
-                        <button
-                            onClick={() => setIsMenuOpen(true)}
-                            className="p-3 bg-white/5 rounded-xl lg:hidden text-emerald-500 border border-white/10"
-                        >
-                            <Menu size={20} />
+            {/* Main Wrapper (TopBar + Viewport + SignalBar) */}
+            <div className="flex-1 flex flex-col min-w-0">
+
+                {/* 2. Top Bar (Institutional & Balanced) */}
+                <header className="h-20 border-b border-slate-200 px-8 flex items-center justify-between bg-white z-[100] sticky top-0">
+                    <div className="flex items-center gap-8">
+                        <button onClick={() => setIsMenuOpen(true)} className="lg:hidden p-2 text-emerald-500">
+                            <Menu size={24} />
                         </button>
-                        <h2 className="text-lg lg:text-xl font-black text-white flex items-center gap-3 italic uppercase tracking-tighter">
-                            <span className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500">
-                                {tabs.find(t => t.id === activeTab)?.icon}
-                            </span>
-                            <span className="hidden sm:inline">{tabs.find(t => t.id === activeTab)?.label}</span>
-                        </h2>
+                        <div className="flex items-center gap-3 border-r border-slate-100 pr-8">
+                            <span className="text-xl font-black text-slate-800 tracking-tighter">CLIMATE PASS EXCHANGE <span className="text-emerald-500">(CPX)</span></span>
+                        </div>
                     </div>
 
-                    <div className="flex items-center gap-4 lg:gap-8">
-                        {!account && (
-                            <button
-                                onClick={connectWallet}
-                                disabled={isConnecting}
-                                className="px-4 py-2 bg-emerald-500 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-600 transition-all flex items-center gap-2 shadow-lg sm:px-6 sm:py-3 sm:text-xs"
-                            >
-                                {isConnecting ? <Loader2 size={14} className="animate-spin" /> : "Conectar"}
-                            </button>
-                        )}
-                        <div className="hidden md:flex flex-col items-end">
-                            <span className="text-[9px] font-black text-gray-600 uppercase tracking-widest leading-none mb-1">Red</span>
-                            <span className="text-[10px] text-emerald-400 font-black font-mono leading-none tracking-tighter">AVALANCHE MAINNET</span>
+                    <div className="flex items-center gap-12">
+                        {/* Clean Language Switcher */}
+                        <div className="flex gap-6 text-xs font-black text-slate-400 uppercase tracking-widest">
+                            {['ES', 'EN', 'AR'].map((lang) => (
+                                <button
+                                    key={lang}
+                                    onClick={() => setLanguage(lang.toLowerCase())}
+                                    className={`hover:text-emerald-500 transition-colors ${language === lang.toLowerCase() ? 'text-emerald-500' : ''}`}
+                                >
+                                    {lang}
+                                </button>
+                            ))}
                         </div>
-                        <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group cursor-pointer hover:border-emerald-500/50 transition-all">
-                            <LogOut size={18} className="text-gray-500 group-hover:text-emerald-500 transition-colors" />
+
+                        {/* Climate Score Radial Widget (Institutional V3) */}
+                        <div className="flex items-center gap-4 py-2 px-6 bg-slate-50 border border-slate-200 rounded-full">
+                            <div className="relative w-12 h-12">
+                                <svg className="w-full h-full transform -rotate-90 scale-110">
+                                    <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3" fill="transparent" className="text-slate-200" />
+                                    <circle
+                                        cx="24" cy="24" r="20"
+                                        stroke="currentColor" strokeWidth="4"
+                                        fill="transparent"
+                                        strokeDasharray={126}
+                                        strokeDashoffset={126 - (126 * (reputation.total_score % 100)) / 100}
+                                        className="text-emerald-500 drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]"
+                                        strokeLinecap="round"
+                                    />
+                                </svg>
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="flex flex-col items-center">
+                                        <span className="text-sm font-black text-slate-800 tracking-tight leading-none">{reputation.total_score}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Action Trajectory</span>
+                                <span className="text-sm font-black text-slate-800 uppercase tracking-tight italic">CLIMATE ACTION SCORE™</span>
+                            </div>
+                        </div>
+
+                        {/* Account Chip */}
+                        <div className="hidden sm:flex items-center gap-3 px-4 py-2 bg-emerald-500 text-black rounded-full shadow-lg shadow-emerald-500/10">
+                            <User size={14} />
+                            <span className="text-xs font-black uppercase tracking-widest">{account ? `${account.slice(0, 6)}...${account.slice(-4)}` : 'DISCONNECTED'}</span>
                         </div>
                     </div>
                 </header>
 
-                <div className="p-6 lg:p-10 max-w-7xl mx-auto">
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={activeTab}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.2 }}
-                        >
-                            {isLoading ? (
-                                <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-                                    <Loader2 className="w-12 h-12 text-emerald-500 animate-spin" />
-                                    <p className="text-gray-500 font-black uppercase tracking-widest text-xs italic">Sincronizando con Bank of Tierras Cloud...</p>
-                                </div>
-                            ) : (
-                                tabs.find(t => t.id === activeTab)?.component
-                            )}
-                        </motion.div>
-                    </AnimatePresence>
-
-                    {/* Dashboard Footer Footprint */}
-                    <footer className="mt-20 pt-12 border-t border-white/5 pb-12 text-center">
-                        <div className="flex flex-col items-center gap-4">
-                            <img src={logoBot} className="h-8 brightness-0 invert opacity-30" alt="Bank of Tierras" />
-                            <p className="text-[8px] font-black text-gray-700 uppercase tracking-[0.4em]">
-                                &copy; 2024 BANK OF TIERRAS PROTOCOL • SUSTAINABLE WEB3 INFRASTRUCTURE
-                            </p>
+                <div className="flex-1 flex overflow-hidden">
+                    {/* 3. Main Content (Viewport) */}
+                    <main className="flex-1 overflow-y-auto custom-scrollbar p-8 lg:p-12 relative">
+                        <div className="max-w-6xl mx-auto">
+                            <AnimatePresence mode="wait">
+                                <motion.div
+                                    key={activeTab}
+                                    initial={{ opacity: 0, scale: 0.98 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 1.02 }}
+                                    transition={{ duration: 0.2 }}
+                                >
+                                    {isLoading ? (
+                                        <div className="flex flex-col items-center justify-center min-h-[500px] space-y-6">
+                                            <Loader2 className="w-12 h-12 text-emerald-500 animate-spin" />
+                                            <span className="text-[10px] font-black text-gray-600 uppercase tracking-[0.3em]">Decoding Climate Signals...</span>
+                                        </div>
+                                    ) : (
+                                        tabs.find(t => t.id === activeTab)?.component
+                                    )}
+                                </motion.div>
+                            </AnimatePresence>
                         </div>
-                    </footer>
+                    </main>
+
+                    {/* 4. Signal Bar (Right - Only B2B Context Mock) */}
+                    <aside className="hidden xl:flex w-64 border-l border-slate-200 bg-white flex-col overflow-hidden">
+                        <div className="p-6 border-b border-slate-100 bg-slate-50/50">
+                            <h4 className="text-[10px] font-black text-slate-800 uppercase tracking-[0.2em] flex items-center gap-2 italic">
+                                <Activity size={12} className="text-emerald-500" />
+                                {t('marketplace.signals')}
+                            </h4>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+                            <div className="flex flex-col gap-10">
+                                {[
+                                    { biz: 'Shell PLC', amount: '5,000 t', zone: 'Amazonas' },
+                                    { biz: 'Delta Air', amount: '1,200 t', zone: 'Meta' },
+                                    { biz: 'Google ESG', amount: '12,500 t', zone: 'Global' }
+                                ].map((signal, i) => (
+                                    <div key={i} className="flex-shrink-0">
+                                        <div className="flex items-center justify-between mb-1">
+                                            <span className="text-[10px] font-black text-slate-800 italic tracking-tighter uppercase">{signal.biz}</span>
+                                            <span className="text-[9px] font-black text-emerald-600 px-2 py-0.5 bg-emerald-50 rounded border border-emerald-100">{signal.amount}</span>
+                                        </div>
+                                        <div className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Network Node: {signal.zone}</div>
+                                        <div className="mt-2 h-0.5 w-full bg-slate-50 rounded-full overflow-hidden">
+                                            <div className="h-full bg-emerald-500/20 animate-pulse" style={{ width: '60%' }} />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="p-8 border-t border-slate-100 bg-emerald-50/30 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl -mr-12 -mt-12" />
+                            <div className="relative z-10">
+                                <div className="text-[9px] font-black text-emerald-600 uppercase tracking-[0.25em] mb-2 leading-none">Liquidez de Mercado ($80M)</div>
+                                <div className="text-2xl font-black text-slate-800 italic tracking-tighter leading-none">2,000,000 <span className="text-emerald-500">t</span></div>
+                            </div>
+                        </div>
+                    </aside>
                 </div>
-            </main>
+            </div>
         </div>
     );
 };

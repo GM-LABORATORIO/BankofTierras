@@ -9,8 +9,8 @@ La plataforma utiliza la adopción de nodos territoriales (píxeles) como un mec
 - 🦊 **Protección de Especies**: Financiar directamente la conservación de fauna en peligro de extinción.
 - 🤝 **Apoyo Comunitario**: Canalizar donaciones y recursos a comunidades locales guardianas de biomas.
 - 📑 **Certificación Legal**: Emitir certificados verificables on-chain para beneficios tributarios y cumplimiento normativo.
-- 🪙 **Economía Circular**: Utilizar el EcoToken como motor de incentivos para la regeneración ecosistémica.
-- 📊 **Métricas Reales**: Trazabilidad absoluta de CO2, árboles plantados y estado de salud biótica.
+- 🪙 **Economía Circular**: Utilizar el token $SIGNAL como motor de incentivos y combustible de la red para la regeneración ecosistémica.
+- 📊 **Métricas Reales**: Trazabilidad absoluta de CO2, árboles plantados y estado de salud biótica mediante el CPX Ledger.
 
 ---
 
@@ -189,12 +189,12 @@ Verificadores independientes que validan el impacto real de los proyectos.
 
 ---
 
-### 🪙 Sistema de EcoToken
+### 🪙 Sistema de Token $SIGNAL (Legacy: EcoToken)
 
-**Componente**: `EcoTokenPurchase.jsx`
+**Componente**: `EcoTokenPurchase.jsx` / `BotWallet.jsx`
 
-**¿Qué es el EcoToken?**
-Token nativo de la plataforma que representa créditos de carbono y servicios ecosistémicos.
+**¿Qué es $SIGNAL?**
+Token nativo y de gas de la Subnet que representa el pulso de la red y potencia los servicios ecosistémicos.
 
 **Características**:
 - 💰 Precio dinámico basado en TRM (Tasa Representativa del Mercado)
@@ -342,18 +342,28 @@ Marketplace especializado en adopción de árboles individuales con NFTs únicos
 
 ### 💳 Sistema de Wallet
 
-**Componente**: `BotWallet.jsx`
-
-**Funcionalidades**:
-- 💰 Balance de EcoTokens
-- 📊 Historial de transacciones
-- 💸 Enviar/Recibir tokens
-- 🔄 Swap de tokens
-- 📈 Gráfico de balance histórico
-- 🔐 Gestión de claves privadas
-- 🌐 Conexión con MetaMask/WalletConnect
-
 **Archivo**: `src/components/BotWallet.jsx`
+
+---
+
+### 🗄️ Arquitectura de Base de Datos Unificada (Supabase)
+
+Esta arquitectura ha sido simplificada y optimizada (Febrero 2026) para eliminar redundancias y escalar con el protocolo $SIGNAL.
+
+**Tablas Principales**:
+1. **`profiles`**: Gestión de identidades Web3 (wallet_address como PK). Almacena tipos de entidad (individual/corporativo) y roles.
+2. **`species`**: Catálogo unificado de activos biológicos. Fusionado con la antigua `species_listings`.
+3. **`projects`**: Registro maestro de iniciativas de conservación y cuotas de carbono/m2.
+4. **`pixels`**: El ledger geográfico. Define coordenadas, estados y dueños (originadores).
+5. **`pixel_adoptions`**: Registro transaccional de adopciones vinculado a wallets.
+6. **`pixel_impact`**: Métricas de impacto en tiempo real por cada coordenada.
+7. **`reputation_logs`**: El ledger de acciones de reputación (reemplaza a `reputation_history`).
+8. **`community_events`**: Infraestructura de gamificación para eventos sociales.
+
+**Vistas de Integración**:
+- **`reputation_summary`**: Agregación dinámica de puntos por wallet para cálculo de CPX Score.
+- **`pixel_community`**: Vista que une adoptions con profiles para mostrar la red social de holders.
+- **`biome_impact_summary`**: Resumen de métricas agregadas por bioma.
 
 ---
 
@@ -915,6 +925,21 @@ Organización Autónoma Descentralizada (DAO) donde los holders de píxeles vota
 - ✅ **Drop Logic**: 10% de probabilidad de descubrir especies al interactuar con el mapa.
 - ✅ **Optimización de Mapa**: Reducción de densidad de vegetación para mayor claridad visual.
 
+#### 7. **Ultra-High Fidelity 3D Card Engine (CO2Pay™)**
+- ✅ **3D Card Engine**: Sustitución de secuencias pesadas por un motor 3D CSS dinámico (Framer Motion) sincronizado con el scroll. Zero-latency.
+- ✅ **Official Assets**: Integración del diseño "First Edition" (Esmeralda/VISA/Embossed).
+- ✅ **Flat Aesthetic**: Eliminación de sombras pesadas para una integración minimalista "Pure White".
+
+#### 8. **Institutional Layout & Global Footer (Saudi-tier)**
+- ✅ **Layout Tightening**: Reducción de zonas muertas de scroll de 160vh a 120vh para una narrativa compacta.
+- ✅ **Master Footer**: Implementación de un cierre institucional de 4 columnas (Ecosistema, Recursos, Compliance, Legal).
+- ✅ **Trust Badges**: Integración visual de partners (ColCX, Avalanche Evergreen) y estatus de red.
+
+#### 9. **B2B Command Station & Corporate Dashboard V3**
+- ✅ **Carbon Treasury**: Estación de comando ejecutiva para empresas (B2B Vault).
+- ✅ **Persona-Based Layouts**: Detección dinámica de roles (Ciudadano, Comercio, Corporativo) en el Dashboard.
+- ✅ **Bulky UI Fix**: Optimización de etiquetas y pesos visuales en botones para una estética "Saudi-tier".
+
 ---
 
 ## 🚧 Pendiente de Implementación
@@ -1089,5 +1114,5 @@ AMAZONAS CERO/
 
 ---
 
-**Última actualización**: 2026-01-28
-**Versión**: 2.1 (Passport & Biodiversity Evolution)
+**Última actualización**: 2026-02-14
+**Versión**: 3.0 (Institutional Infrastructure & 3D Cards)

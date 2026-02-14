@@ -1,17 +1,21 @@
 import React, { useState } from 'react';
 import LandingPage from './components/LandingPage';
 import Dashboard from './components/Dashboard';
-import LifeMapPage from './components/LifeMapPage';
+import { ThemeProvider } from './context/ThemeContext';
+import { LanguageProvider } from './context/LanguageContext';
 
 function App() {
-  const [view, setView] = useState('landing'); // 'landing', 'dashboard', 'discovery'
+  const [view, setView] = useState('landing'); // 'landing', 'dashboard'
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white selection:bg-emerald-500/30">
-      {view === 'landing' && <LandingPage onEnter={() => setView('dashboard')} onDiscovery={() => setView('discovery')} />}
-      {view === 'dashboard' && <Dashboard onBack={() => setView('landing')} onDiscovery={() => setView('discovery')} />}
-      {view === 'discovery' && <LifeMapPage onBack={() => setView('landing')} />}
-    </div>
+    <ThemeProvider>
+      <LanguageProvider>
+        <div className="min-h-screen bg-[var(--cpx-bg)] text-[var(--cpx-text-primary)] selection:bg-emerald-500/30">
+          {view === 'landing' && <LandingPage onEnter={() => setView('dashboard')} />}
+          {view === 'dashboard' && <Dashboard onBack={() => setView('landing')} />}
+        </div>
+      </LanguageProvider>
+    </ThemeProvider>
   );
 }
 

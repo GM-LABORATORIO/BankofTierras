@@ -341,81 +341,11 @@ export const supabaseService = {
         return data;
     },
 
-    // --- Tier Benefits Management ---
-    async getTierBenefits(tierLevel = null) {
-        if (!supabase) return [];
-        let query = supabase
-            .from('tier_benefits')
-            .select('*')
-            .eq('active', true);
-
-        if (tierLevel) query = query.eq('tier_level', tierLevel);
-
-        const { data, error } = await query.order('tier_level', { ascending: true });
-        if (error) throw error;
-        return data;
-    },
-
-    async getAllTierBenefits() {
-        if (!supabase) return [];
-        const { data, error } = await supabase
-            .from('tier_benefits')
-            .select('*')
-            .order('tier_level', { ascending: true });
-        if (error) throw error;
-        return data;
-    },
-
-    async addTierBenefit(benefit) {
-        if (!supabase) return null;
-        const { data, error } = await supabase
-            .from('tier_benefits')
-            .insert([benefit])
-            .select();
-        if (error) throw error;
-        return data[0];
-    },
-
-    async updateTierBenefit(id, updates) {
-        if (!supabase) return null;
-        const { data, error } = await supabase
-            .from('tier_benefits')
-            .update(updates)
-            .eq('id', id)
-            .select();
-        if (error) throw error;
-        return data[0];
-    },
-
-    async deleteTierBenefit(id) {
-        if (!supabase) return null;
-        const { data, error } = await supabase
-            .from('tier_benefits')
-            .delete()
-            .eq('id', id);
-        if (error) throw error;
-        return data;
-    },
-
-    async toggleTierBenefitStatus(id, active) {
-        if (!supabase) return null;
-        const { data, error } = await supabase
-            .from('tier_benefits')
-            .update({ active })
-            .eq('id', id)
-            .select();
-        if (error) throw error;
-        return data[0];
-    },
-
     // ============================================
-    // 🎁 PREMIUM EXPERIENCES (NEW)
+    // 🎁 PREMIUM EXPERIENCES
     // ============================================
-    // 🎁 EXPERIENCES (NEW)
-    // ============================================
-    async getPremiumExperiences(regionId = null, biomeKey = null, userTier = 4) {
+    async getPremiumExperiences(biomeKey = null, userTier = 4) {
         if (!supabase) return [];
-        // Corrected table name based on SQL: premium_experiences
         let query = supabase.from('premium_experiences').select('*');
 
         if (biomeKey) {
@@ -423,15 +353,18 @@ export const supabaseService = {
         }
 
         const { data, error } = await query
-            .lte('requires_tier', userTier) // Corrected column name: requires_tier
-            .eq('active', true) // Corrected column name: active
+            .lte('requires_tier', userTier)
+            .eq('active', true)
             .order('requires_tier', { ascending: true });
 
-        if (error) throw error;
+        if (error) {
+            console.error('Error fetching premium experiences:', error);
+            return [];
+        }
         return data || [];
     },
 
-    // 🏆 TIER BENEFITS (NEW)
+    // 🏆 TIER BENEFITS
     // ============================================
     async getTierBenefits(tierLevel = 4) {
         if (!supabase) return [];
@@ -439,7 +372,8 @@ export const supabaseService = {
             .from('tier_benefits')
             .select('*')
             .eq('tier_level', tierLevel)
-            .eq('active', true);
+            .eq('active', true)
+            .order('tier_level', { ascending: true });
 
         if (error) {
             console.error('Error fetching tier benefits:', error);
@@ -801,6 +735,41 @@ export const supabaseService = {
             return null;
         }
         return data;
+    },
+
+    // --- Reputation System (Phase 2) ---
+    async getReputationSummary(walletAddress) {
+        if (!supabase || !walletAddress) return { total_score: 0, total_actions: 0 };
+        try {
+            const { data, error } = await supabase
+                .from('reputation_summary')
+                .select('*')
+                .eq('wallet_address', walletAddress)
+                .single();
+
+            if (error && error.code !== 'PGRST116') throw error;
+            return data || { total_score: 0, total_actions: 0 };
+        } catch (error) {
+            console.error("Error getting reputation summary:", error);
+            return { total_score: 0, total_actions: 0 };
+        }
+    },
+
+    async getReputationLogs(walletAddress) {
+        if (!supabase || !walletAddress) return [];
+        try {
+            const { data, error } = await supabase
+                .from('reputation_logs')
+                .select('*')
+                .eq('wallet_address', walletAddress)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            return data || [];
+        } catch (error) {
+            console.error("Error getting reputation logs:", error);
+            return [];
+        }
     },
 
     async upsertZone(zoneData) {

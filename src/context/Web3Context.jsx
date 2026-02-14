@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { supabaseService } from '../services/supabaseService';
+import { aaService, co2PayService } from '../services/web3AuthService';
 
 const Web3Context = createContext();
 
@@ -14,6 +15,7 @@ export const Web3Provider = ({ children }) => {
     const [isConnecting, setIsConnecting] = useState(false);
     const [carbonBalance, setCarbonBalance] = useState('0');
     const [botBalance, setBotBalance] = useState('0');
+    const [isSmartAccount, setIsSmartAccount] = useState(false);
     const [prices, setPrices] = useState({ avax: 35, usdCop: 4000 });
     const [systemConfig, setSystemConfig] = useState({
         treasury_wallet: '0xA583f0675a2d6f01ab21DEA98629e9Ee04320108',
@@ -124,6 +126,10 @@ export const Web3Provider = ({ children }) => {
             setProvider(browserProvider);
             setSigner(await browserProvider.getSigner());
             setChainId(network.chainId);
+
+            // Initialize AA
+            const smartAccount = await aaService.connectSmartAccount(await browserProvider.getSigner());
+            if (smartAccount) setIsSmartAccount(true);
 
             fetchCarbonBalance(accounts[0], browserProvider);
             fetchBotBalance(accounts[0], browserProvider);
@@ -293,6 +299,13 @@ export const Web3Provider = ({ children }) => {
             refreshBalance: () => {
                 fetchCarbonBalance(account);
                 fetchBotBalance(account);
+            },
+            executeOrder: async (projectId, amount, mode = 'web3') => {
+                if (mode === 'fiat') {
+                    return await co2PayService.createFiatOrder(amount);
+                }
+                // Web3 Gasless Execution
+                return await aaService.executeGasless(contractAddresses.carbonToken, "0x...");
             }
         }}>
             {children}
