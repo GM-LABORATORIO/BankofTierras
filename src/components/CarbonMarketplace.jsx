@@ -79,31 +79,31 @@ const CarbonMarketplace = ({ projects }) => {
     );
 
     return (
-        <div className="space-y-8 pb-20 font-inter">
+        <div className="space-y-6 sm:space-y-8 pb-12 sm:pb-20 font-inter">
 
             {/* 1. Inventory & Market Status */}
-            <div className="bg-white border border-slate-200 rounded-[2rem] overflow-hidden shadow-sm">
-                <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/30">
+            <div className="bg-white border border-slate-200 rounded-xl sm:rounded-[2rem] overflow-hidden shadow-sm">
+                <div className="p-4 sm:p-6 md:p-8 border-b border-slate-100 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 lg:gap-0 bg-slate-50/30">
                     <div>
-                        <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight italic">Global Impact Inventory</h2>
-                        <div className="flex gap-4 mt-1">
-                            <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Institutional Pool: {INSTITUTIONAL_INVENTORY.toLocaleString()} t AVAILABLE • Certified by ColCX</p>
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse self-center" />
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">CPX Subnet: {subnetStatus}</p>
+                        <h2 className="text-base sm:text-lg md:text-xl font-black text-slate-800 uppercase tracking-tight italic">Global Impact Inventory</h2>
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-2">
+                            <p className="text-[9px] sm:text-[10px] font-black text-emerald-500 uppercase tracking-widest">Pool: {INSTITUTIONAL_INVENTORY.toLocaleString()} t • ColCX</p>
+                            <span className="hidden sm:block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse self-center" />
+                            <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">CPX: {subnetStatus}</p>
                         </div>
                     </div>
-                    <div className="flex gap-6 items-center">
-                        <div className="text-right">
+                    <div className="flex gap-3 sm:gap-4 md:gap-6 items-center w-full lg:w-auto overflow-x-auto">
+                        <div className="text-left sm:text-right min-w-[80px]">
                             <div className="text-xs font-black text-emerald-600 italic">{signalGasPool.toLocaleString()} $SIGNAL</div>
-                            <div className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">GAS POOL (RELAYER)</div>
+                            <div className="text-[7px] sm:text-[8px] font-bold text-slate-400 uppercase tracking-widest">GAS POOL</div>
                         </div>
-                        <div className="text-right border-l border-slate-200 pl-6">
+                        <div className="text-left sm:text-right border-l border-slate-200 pl-3 sm:pl-4 md:pl-6 min-w-[60px]">
                             <div className="text-xs font-black text-slate-800 italic">{globalThroughput} t/s</div>
-                            <div className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">GLOBAL THROUGHPUT</div>
+                            <div className="text-[7px] sm:text-[8px] font-bold text-slate-400 uppercase tracking-widest">THROUGHPUT</div>
                         </div>
-                        <div className="text-right border-l border-slate-200 pl-6">
-                            <div className="text-xs font-black text-slate-800 italic">$40.00 USD/T</div>
-                            <div className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Benchmark Price</div>
+                        <div className="text-left sm:text-right border-l border-slate-200 pl-3 sm:pl-4 md:pl-6 min-w-[70px]">
+                            <div className="text-xs font-black text-slate-800 italic">$40.00/T</div>
+                            <div className="text-[7px] sm:text-[8px] font-bold text-slate-400 uppercase tracking-widest">PRICE</div>
                         </div>
                     </div>
                 </div>
@@ -132,45 +132,45 @@ const CarbonMarketplace = ({ projects }) => {
 
                 {/* Projects Table (Bloomberg Style) */}
                 <div className="overflow-x-auto">
-                    <table className="w-full border-collapse">
+                    <table className="w-full border-collapse min-w-[800px]">
                         <thead>
                             <tr className="bg-slate-50/50 border-y border-slate-100">
-                                <th className="px-8 py-4 text-left text-[9px] font-black text-slate-400 uppercase tracking-widest">Project Unit</th>
-                                <th className="px-8 py-4 text-left text-[9px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                                <th className="px-8 py-4 text-left text-[9px] font-black text-slate-400 uppercase tracking-widest">Price/Gram</th>
-                                <th className="px-8 py-4 text-left text-[9px] font-black text-slate-400 uppercase tracking-widest">Fracc. Supply (g)</th>
-                                <th className="px-8 py-4 text-left text-[9px] font-black text-slate-400 uppercase tracking-widest">Audit</th>
-                                <th className="px-8 py-4 text-right"></th>
+                                <th className="px-4 sm:px-6 md:px-8 py-3 sm:py-4 text-left text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest">Project</th>
+                                <th className="px-4 sm:px-6 md:px-8 py-3 sm:py-4 text-left text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                                <th className="px-4 sm:px-6 md:px-8 py-3 sm:py-4 text-left text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest">Price/g</th>
+                                <th className="px-4 sm:px-6 md:px-8 py-3 sm:py-4 text-left text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest hidden md:table-cell">Supply (g)</th>
+                                <th className="px-4 sm:px-6 md:px-8 py-3 sm:py-4 text-left text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest hidden lg:table-cell">Audit</th>
+                                <th className="px-4 sm:px-6 md:px-8 py-3 sm:py-4 text-right"></th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
                             {filteredProjects.map((p, i) => (
                                 <tr key={i} className="hover:bg-slate-50 transition-all group">
-                                    <td className="px-8 py-5">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-emerald-500">
-                                                <Database size={16} />
+                                    <td className="px-4 sm:px-6 md:px-8 py-4 sm:py-5">
+                                        <div className="flex items-center gap-2 sm:gap-3">
+                                            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-slate-100 flex items-center justify-center text-emerald-500">
+                                                <Database size={14} className="sm:w-4 sm:h-4" />
                                             </div>
-                                            <span className="text-xs font-black text-slate-800 uppercase italic tracking-tighter">{p.name}</span>
+                                            <span className="text-[10px] sm:text-xs font-black text-slate-800 uppercase italic tracking-tighter">{p.name}</span>
                                         </div>
                                     </td>
-                                    <td className="px-8 py-5">
-                                        <span className="text-[10px] font-black text-emerald-600 px-2 py-1 bg-emerald-50 rounded uppercase">Certified</span>
+                                    <td className="px-4 sm:px-6 md:px-8 py-4 sm:py-5">
+                                        <span className="text-[9px] sm:text-[10px] font-black text-emerald-600 px-1.5 sm:px-2 py-0.5 sm:py-1 bg-emerald-50 rounded uppercase">Cert</span>
                                     </td>
-                                    <td className="px-8 py-5 text-xs font-black text-slate-800 text-mono italic">${CARBON_PRICE_PER_GRAM.toFixed(5)}</td>
-                                    <td className="px-8 py-5 text-xs font-black text-slate-800 text-mono">{((p.total_quota - p.sold_tokens) * 1000000).toLocaleString()} g</td>
-                                    <td className="px-8 py-5">
+                                    <td className="px-4 sm:px-6 md:px-8 py-4 sm:py-5 text-[10px] sm:text-xs font-black text-slate-800 text-mono italic">${CARBON_PRICE_PER_GRAM.toFixed(5)}</td>
+                                    <td className="px-4 sm:px-6 md:px-8 py-4 sm:py-5 text-[10px] sm:text-xs font-black text-slate-800 text-mono hidden md:table-cell">{((p.total_quota - p.sold_tokens) * 1000000).toLocaleString()} g</td>
+                                    <td className="px-4 sm:px-6 md:px-8 py-4 sm:py-5 hidden lg:table-cell">
                                         <div className="flex items-center gap-2">
-                                            <ShieldCheck size={14} className="text-emerald-500" />
-                                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">ColCX Approved</span>
+                                            <ShieldCheck size={12} className="sm:w-3.5 sm:h-3.5 text-emerald-500" />
+                                            <span className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest">ColCX</span>
                                         </div>
                                     </td>
-                                    <td className="px-8 py-5 text-right">
+                                    <td className="px-4 sm:px-6 md:px-8 py-4 sm:py-5 text-right">
                                         <button
                                             onClick={() => { setSelectedProject(p); setShowBuyModal(true); }}
-                                            className="px-6 py-2 bg-black text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-500 hover:text-black transition-all"
+                                            className="px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 bg-black text-white text-[9px] sm:text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-500 hover:text-black transition-all"
                                         >
-                                            Adquire Impact
+                                            Buy
                                         </button>
                                     </td>
                                 </tr>
@@ -223,14 +223,14 @@ const CarbonMarketplace = ({ projects }) => {
                             initial={{ scale: 0.9, y: 20 }}
                             animate={{ scale: 1, y: 0 }}
                             exit={{ scale: 0.9, y: 20 }}
-                            className="bg-white rounded-[3rem] border border-slate-200 w-full max-w-lg overflow-hidden shadow-2xl relative"
+                            className="bg-white rounded-2xl sm:rounded-[3rem] border border-slate-200 w-full max-w-lg overflow-hidden shadow-2xl relative mx-4"
                             onClick={e => e.stopPropagation()}
                         >
-                            <button onClick={() => setShowBuyModal(false)} className="absolute top-8 right-8 text-slate-300 hover:text-slate-600">
-                                <X size={24} />
+                            <button onClick={() => setShowBuyModal(false)} className="absolute top-4 right-4 sm:top-8 sm:right-8 text-slate-300 hover:text-slate-600 z-10">
+                                <X size={20} className="sm:w-6 sm:h-6" />
                             </button>
 
-                            <div className="p-12">
+                            <div className="p-6 sm:p-8 md:p-12">
                                 <div className="mb-10 text-center">
                                     <h3 className="text-3xl font-black text-slate-800 uppercase tracking-tighter italic">Adquire $CARBON Units</h3>
                                     <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mt-1">1 $CARBON = 1 Gram of Certified Compensation</p>

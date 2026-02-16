@@ -197,21 +197,21 @@ const LandingPage = ({ onEnter }) => {
                                 <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.3em]">{t('landing.hero.badge')}</span>
                             </div>
 
-                            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-white leading-[0.85] tracking-tighter mb-8 max-w-min">
+                            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white leading-[0.9] tracking-tighter mb-6 sm:mb-8">
                                 {t('landing.hero.title_part1')} <br />
                                 <span className="text-emerald-500 uppercase">{t('landing.hero.title_part2')}</span><br />
                                 <span className="uppercase">{t('landing.hero.title_part3')}</span>
                             </h1>
 
-                            <p className="text-xl text-gray-400 font-medium max-w-xl mb-12 leading-relaxed italic border-l-2 border-emerald-500/30 pl-6">
+                            <p className="text-base sm:text-lg md:text-xl text-gray-400 font-medium max-w-xl mb-8 sm:mb-12 leading-relaxed italic border-l-2 border-emerald-500/30 pl-4 sm:pl-6">
                                 {t('landing.hero.desc')}
                             </p>
 
-                            <div className="flex flex-wrap gap-4">
-                                <button onClick={onEnter} className="px-12 py-5 bg-emerald-500 text-black text-xs font-black uppercase tracking-[0.2em] rounded-sm hover:bg-emerald-400 transition-all shadow-[0_20px_40px_rgba(16,185,129,0.2)]">
+                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                                <button onClick={onEnter} className="w-full sm:w-auto px-8 sm:px-12 py-4 sm:py-5 bg-emerald-500 text-black text-xs font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] rounded-sm hover:bg-emerald-400 transition-all shadow-[0_20px_40px_rgba(16,185,129,0.2)]">
                                     {t('landing.hero.cta_terminal')}
                                 </button>
-                                <button className="px-12 py-5 bg-white/5 border border-white/10 text-white text-xs font-black uppercase tracking-[0.2em] rounded-sm hover:bg-white/10 transition-all backdrop-blur-md">
+                                <button className="w-full sm:w-auto px-8 sm:px-12 py-4 sm:py-5 bg-white/5 border border-white/10 text-white text-xs font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] rounded-sm hover:bg-white/10 transition-all backdrop-blur-md">
                                     {t('landing.hero.cta_portfolio')}
                                 </button>
                             </div>
@@ -266,15 +266,15 @@ const LandingPage = ({ onEnter }) => {
                 </div>
 
                 {/* Bottom Global Ribbon */}
-                <div className="absolute bottom-0 w-full bg-black/80 backdrop-blur-md border-t border-white/5 py-4">
-                    <div className="max-w-7xl mx-auto px-8 flex justify-between items-center">
-                        <div className="flex gap-12 text-[9px] font-black text-emerald-500/60 uppercase tracking-[0.3em]">
-                            <span className="flex items-center gap-2 underline underline-offset-4 Decoration-emerald-500/20">{t('landing.hero.ribbon.certified')}</span>
-                            <span className="hidden md:block">{t('landing.hero.ribbon.region')}</span>
+                <div className="absolute bottom-0 w-full bg-black/80 backdrop-blur-md border-t border-white/5 py-3 sm:py-4">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-8 flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0">
+                        <div className="flex gap-4 sm:gap-8 md:gap-12 text-[8px] sm:text-[9px] font-black text-emerald-500/60 uppercase tracking-[0.2em] sm:tracking-[0.3em]">
+                            <span className="flex items-center gap-1 sm:gap-2 underline underline-offset-4 Decoration-emerald-500/20">{t('landing.hero.ribbon.certified')}</span>
+                            <span className="hidden sm:block">{t('landing.hero.ribbon.region')}</span>
                             <span className="hidden lg:block">{t('landing.hero.ribbon.custody')}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <div className="text-[9px] font-black text-white uppercase tracking-widest mr-4">{t('landing.hero.ribbon.partner')}</div>
+                            <div className="text-[8px] sm:text-[9px] font-black text-white uppercase tracking-widest mr-2 sm:mr-4">{t('landing.hero.ribbon.partner')}</div>
                             <span className="text-xs font-black text-white italic">CO2Pay™</span>
                         </div>
                     </div>
@@ -315,27 +315,27 @@ const LandingPage = ({ onEnter }) => {
             </section>
 
             {/* 4. Climate Pass™ Infrastructure */}
-            <section id="infrastructure" className="py-32 bg-slate-50/50 relative">
-                <div className="max-w-7xl mx-auto px-8">
-                    <div className="grid lg:grid-cols-2 gap-20 items-center">
+            <section id="infrastructure" className="py-16 sm:py-24 md:py-32 bg-slate-50/50 relative">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+                    <div className="grid lg:grid-cols-2 gap-12 md:gap-16 lg:gap-20 items-center">
                         <div>
-                            <div className="mb-12">
-                                <h2 className="text-5xl md:text-7xl font-black tracking-tight mb-8">{t('landing.infrastructure.title_part1')}<br /><span className="text-emerald-500">{t('landing.infrastructure.title_part2')}</span></h2>
-                                <p className="text-xl text-slate-500 font-medium leading-relaxed mb-10">
+                            <div className="mb-8 sm:mb-12">
+                                <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black tracking-tight mb-6 sm:mb-8">{t('landing.infrastructure.title_part1')}<br /><span className="text-emerald-500">{t('landing.infrastructure.title_part2')}</span></h2>
+                                <p className="text-base sm:text-lg md:text-xl text-slate-500 font-medium leading-relaxed mb-6 sm:mb-10">
                                     {t('landing.infrastructure.desc')}
                                 </p>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-6">
-                                <div className="p-10 bg-slate-50 rounded-[3rem] border border-slate-200 group hover:border-emerald-500/30 transition-all">
-                                    <Cpu className="text-emerald-500 mb-6" size={48} />
-                                    <h4 className="text-lg font-black uppercase tracking-widest mb-3">{t('landing.infrastructure.csu_title')}</h4>
-                                    <p className="text-sm text-slate-500 font-bold leading-relaxed italic">{t('landing.infrastructure.csu_desc')}</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                                <div className="p-6 sm:p-8 md:p-10 bg-slate-50 rounded-[2rem] sm:rounded-[3rem] border border-slate-200 group hover:border-emerald-500/30 transition-all">
+                                    <Cpu className="text-emerald-500 mb-4 sm:mb-6" size={40} />
+                                    <h4 className="text-base sm:text-lg font-black uppercase tracking-widest mb-2 sm:mb-3">{t('landing.infrastructure.csu_title')}</h4>
+                                    <p className="text-xs sm:text-sm text-slate-500 font-bold leading-relaxed italic">{t('landing.infrastructure.csu_desc')}</p>
                                 </div>
-                                <div className="p-10 bg-black rounded-[3rem] text-white">
-                                    <Database className="text-emerald-500 mb-6" size={48} />
-                                    <h4 className="text-lg font-black uppercase tracking-widest mb-3">{t('landing.infrastructure.memory_title')}</h4>
-                                    <p className="text-sm text-gray-400 font-bold leading-relaxed italic">{t('landing.infrastructure.memory_desc')}</p>
+                                <div className="p-6 sm:p-8 md:p-10 bg-black rounded-[2rem] sm:rounded-[3rem] text-white">
+                                    <Database className="text-emerald-500 mb-4 sm:mb-6" size={40} />
+                                    <h4 className="text-base sm:text-lg font-black uppercase tracking-widest mb-2 sm:mb-3">{t('landing.infrastructure.memory_title')}</h4>
+                                    <p className="text-xs sm:text-sm text-gray-400 font-bold leading-relaxed italic">{t('landing.infrastructure.memory_desc')}</p>
                                 </div>
                             </div>
                         </div>
@@ -386,19 +386,19 @@ const LandingPage = ({ onEnter }) => {
                                 {t('landing.co2pay.desc')}
                             </p>
 
-                            <div className="grid grid-cols-2 gap-6 mb-12">
-                                <div className="p-8 bg-slate-50 rounded-3xl border border-slate-100">
-                                    <div className="text-2xl font-black text-slate-950 mb-2">{t('landing.co2pay.rewards')}</div>
-                                    <div className="text-xs font-bold text-slate-400 uppercase tracking-widest italic">{t('landing.co2pay.rewards_desc')}</div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8 sm:mb-12">
+                                <div className="p-6 sm:p-8 bg-slate-50 rounded-2xl sm:rounded-3xl border border-slate-100">
+                                    <div className="text-xl sm:text-2xl font-black text-slate-950 mb-2">{t('landing.co2pay.rewards')}</div>
+                                    <div className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest italic">{t('landing.co2pay.rewards_desc')}</div>
                                 </div>
-                                <div className="p-8 bg-slate-50 rounded-3xl border border-slate-100">
-                                    <div className="text-2xl font-black text-slate-950 mb-2">{t('landing.co2pay.access')}</div>
-                                    <div className="text-xs font-bold text-slate-400 uppercase tracking-widest italic">{t('landing.co2pay.access_desc')}</div>
+                                <div className="p-6 sm:p-8 bg-slate-50 rounded-2xl sm:rounded-3xl border border-slate-100">
+                                    <div className="text-xl sm:text-2xl font-black text-slate-950 mb-2">{t('landing.co2pay.access')}</div>
+                                    <div className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest italic">{t('landing.co2pay.access_desc')}</div>
                                 </div>
                             </div>
 
-                            <button className="w-full lg:w-auto px-12 py-5 bg-black text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-emerald-500 hover:text-black transition-all flex items-center justify-center gap-4 group shadow-xl">
-                                {t('landing.co2pay.cta')} <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform" />
+                            <button className="w-full lg:w-auto px-8 sm:px-12 py-4 sm:py-5 bg-black text-white text-[10px] font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] rounded-xl hover:bg-emerald-500 hover:text-black transition-all flex items-center justify-center gap-3 sm:gap-4 group shadow-xl">
+                                {t('landing.co2pay.cta')} <ArrowRight size={16} className="sm:w-[18px] sm:h-[18px] group-hover:translate-x-2 transition-transform" />
                             </button>
                         </div>
                     </div>
@@ -423,7 +423,7 @@ const LandingPage = ({ onEnter }) => {
                         </h2>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-8">
+                    <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
                         {[
                             {
                                 tier: t('landing.benefits.executive.tier'),
@@ -450,25 +450,25 @@ const LandingPage = ({ onEnter }) => {
                             <motion.div
                                 key={i}
                                 whileHover={{ y: -10 }}
-                                className={`p-10 rounded-[3rem] shadow-xl border border-slate-200 bg-${card.color} text-${card.textColor} relative overflow-hidden group`}
+                                className={`p-6 sm:p-8 md:p-10 rounded-[2rem] sm:rounded-[3rem] shadow-xl border border-slate-200 bg-${card.color} text-${card.textColor} relative overflow-hidden group`}
                             >
-                                {card.color === 'slate-950' && <div className="absolute top-0 right-0 p-8 opacity-10"><Zap size={80} /></div>}
-                                <div className="flex items-center gap-4 mb-10">
-                                    <div className={`p-4 rounded-2xl bg-${card.color === 'white' ? 'slate-50' : 'white/5'} border border-${card.color === 'white' ? 'slate-100' : 'white/10'}`}>
+                                {card.color === 'slate-950' && <div className="absolute top-0 right-0 p-6 sm:p-8 opacity-10"><Zap size={60} className="sm:w-20 sm:h-20" /></div>}
+                                <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-10">
+                                    <div className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-${card.color === 'white' ? 'slate-50' : 'white/5'} border border-${card.color === 'white' ? 'slate-100' : 'white/10'}`}>
                                         {card.icon}
                                     </div>
-                                    <h4 className="text-xl font-black uppercase tracking-tighter italic">{card.tier}</h4>
+                                    <h4 className="text-lg sm:text-xl font-black uppercase tracking-tighter italic">{card.tier}</h4>
                                 </div>
-                                <ul className="space-y-6">
+                                <ul className="space-y-4 sm:space-y-6">
                                     {Array.isArray(card.benefits) && card.benefits.map((b, j) => (
-                                        <li key={j} className="flex items-start gap-3">
-                                            <CheckCircle2 size={16} className="text-emerald-500 flex-shrink-0 mt-1" />
-                                            <span className="text-[11px] font-bold uppercase tracking-widest leading-relaxed opacity-80">{b}</span>
+                                        <li key={j} className="flex items-start gap-2 sm:gap-3">
+                                            <CheckCircle2 size={14} className="sm:w-4 sm:h-4 text-emerald-500 flex-shrink-0 mt-1" />
+                                            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest leading-relaxed opacity-80">{b}</span>
                                         </li>
                                     ))}
                                 </ul>
-                                <div className="mt-12 pt-8 border-t border-slate-200/20">
-                                    <button className={`w-full py-4 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${card.color === 'slate-950' ? 'bg-emerald-500 text-black hover:bg-white' : 'bg-slate-900 text-white hover:bg-emerald-500 hover:text-black'}`}>
+                                <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-slate-200/20">
+                                    <button className={`w-full py-3 sm:py-4 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${card.color === 'slate-950' ? 'bg-emerald-500 text-black hover:bg-white' : 'bg-slate-900 text-white hover:bg-emerald-500 hover:text-black'}`}>
                                         {t('landing.benefits.cta')}
                                     </button>
                                 </div>

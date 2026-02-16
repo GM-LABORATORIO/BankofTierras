@@ -1,0 +1,494 @@
+# 📜 Guía Completa: Emisión de NFTs de Certificados de Carbono
+
+**Versión**: 1.0  
+**Fecha**: 2026-02-16  
+**Objetivo**: Mintear 2M de NFTs de forma eficiente, auditable y escalable
+
+---
+
+## 🎯 Resumen Ejecutivo
+
+Los NFTs se emiten en **batches automatizados** usando:
+1. **CSV con data** de cada certificado
+2. **Script de generación** de metadata JSON
+3. **Upload masivo** a IPFS (Pinata)
+4. **Batch minting** en blockchain
+
+**NO se mintea uno por uno manualmente.**
+
+---
+
+## 📊 Paso 1: Preparar Data en CSV
+
+### **Estructura del CSV**
+
+Crea un archivo `nft_batch_001.csv` con esta estructura:
+
+```csv
+serial,renare_id,colcx_id,project_name,vintage_year,issuance_date,country,region,coordinates,biome,community_name,community_impact,custodian,custodian_nit,legal_rep,project_type,methodology,legal_doc_cid,verification_cid,baseline_cid
+CPX-000001,RENARE-COL-2024-000001,COLCX-AMZ-2024-001234,Amazon Carbon - Conservación Forestal,2024,2024-08-15,Colombia,Amazonas,"-1.2345,-70.5678",Tropical Rainforest,Comunidad Tikuna - Resguardo Puerto Nariño,120 families - 480 people,GM Holding SAS,901234567-8,Estefan Gómez,REDD+ (Avoided Deforestation),VCS VM0015,QmXXX...,QmYYY...,QmZZZ...
+CPX-000002,RENARE-COL-2024-000002,COLCX-AMZ-2024-001235,Amazon Carbon - Conservación Forestal,2024,2024-08-15,Colombia,Amazonas,"-1.2346,-70.5679",Tropical Rainforest,Comunidad Tikuna - Resguardo Puerto Nariño,120 families - 480 people,GM Holding SAS,901234567-8,Estefan Gómez,REDD+ (Avoided Deforestation),VCS VM0015,QmXXX...,QmYYY...,QmZZZ...
+```
+
+### **Campos Obligatorios**
+
+| Campo | Descripción | Ejemplo |
+|-------|-------------|---------|
+| `serial` | Serial único CPX | CPX-000001 |
+| `renare_id` | ID de RENARE | RENARE-COL-2024-000001 |
+| `colcx_id` | ID de ColCX | COLCX-AMZ-2024-001234 |
+| `project_name` | Nombre del proyecto | Amazon Carbon - Conservación Forestal |
+| `vintage_year` | Año de vintage | 2024 |
+| `issuance_date` | Fecha de emisión | 2024-08-15 |
+| `coordinates` | Lat, Long | -1.2345,-70.5678 |
+| `community_name` | Comunidad beneficiaria | Comunidad Tikuna |
+| `custodian` | Tenedor legal | GM Holding SAS |
+| `legal_doc_cid` | CID del PDF legal en IPFS | QmXXX... |
+
+### **¿Cómo Llenar el CSV?**
+
+**Opción A: Data Real (Ideal)**
+- Obtener lista de RENARE con todos los certificados
+- Mapear cada certificado a una fila del CSV
+- Subir documentos legales a IPFS primero
+
+**Opción B: Data Template (Piloto)**
+- Usar data genérica para el batch piloto
+- Ajustar después con data real
+- Útil para testing
+
+---
+
+## 📝 Paso 2: Script de Generación de Metadata
+
+### **Script Node.js**
+
+Crea `scripts/generate-metadata.js`:
+
+```javascript
+const fs = require('fs');
+const csv = require('csv-parser');
+const path = require('path');
+
+const CSV_FILE = './data/nft_batch_001.csv';
+const OUTPUT_DIR = './metadata';
+
+// Crear carpeta de output
+if (!fs.existsSync(OUTPUT_DIR)) {
+  fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+}
+
+const rows = [];
+
+fs.createReadStream(CSV_FILE)
+  .pipe(csv())
+  .on('data', (row) => {
+    rows.push(row);
+  })
+  .on('end', () => {
+    console.log(`📊 CSV loaded: ${rows.length} NFTs`);
+    
+    rows.forEach((row, index) => {
+      const tokenId = index + 1;
+      const metadata = generateMetadata(row, tokenId);
+      
+      // Guardar JSON
+      const filename = `${tokenId}.json`;
+      fs.writeFileSync(
+        path.join(OUTPUT_DIR, filename),
+        JSON.stringify(metadata, null, 2)
+      );
+    });
+    
+    console.log(`✅ Generated ${rows.length} metadata files`);
+  });
+
+function generateMetadata(row, tokenId) {
+  return {
+    name: `CPX Carbon Certificate #${row.serial.split('-')[1]}`,
+    description: "Digital Certificate of Custody - 1 Ton CO2 Equivalent",
+    image: "ipfs://QmCertificateTemplate/certificate.png", // Template genérico
+    external_url: `https://cpx.exchange/certificate/${tokenId}`,
+    background_color: "000000",
+    
+    attributes: [
+      // CERTIFICACIÓN LEGAL
+      { trait_type: "RENARE Registry ID", value: row.renare_id },
+      { trait_type: "ColCX Certificate ID", value: row.colcx_id },
+      { trait_type: "Serial Number", value: row.serial },
+      { trait_type: "Vintage Year", value: row.vintage_year },
+      { trait_type: "Issuance Date", value: row.issuance_date },
+      
+      // PROYECTO ORIGINADOR
+      { trait_type: "Project Name", value: row.project_name },
+      { trait_type: "Project Type", value: row.project_type },
+      { trait_type: "Methodology", value: row.methodology },
+      
+      // UBICACIÓN
+      { trait_type: "Country", value: row.country },
+      { trait_type: "Region", value: row.region },
+      { trait_type: "Coordinates", value: row.coordinates },
+      { trait_type: "Biome", value: row.biome },
+      
+      // COMUNIDAD
+      { trait_type: "Indigenous Community", value: row.community_name },
+      { trait_type: "Community Beneficiary", value: "true" },
+      { trait_type: "Social Impact", value: row.community_impact },
+      
+      // TENEDOR
+      { trait_type: "Current Custodian", value: row.custodian },
+      { trait_type: "Custodian NIT", value: row.custodian_nit },
+      { trait_type: "Legal Representative", value: row.legal_rep },
+      
+      // ESTADO
+      { trait_type: "Status", value: "Active" },
+      { trait_type: "Fractionalized", value: "false" },
+      { trait_type: "Tokens Issued", value: "0" },
+      { trait_type: "Tokens Burned", value: "0" },
+      
+      // DOCUMENTACIÓN
+      { trait_type: "Legal Document (IPFS)", value: `ipfs://${row.legal_doc_cid}` },
+      { trait_type: "Verification Report (IPFS)", value: `ipfs://${row.verification_cid}` },
+      { trait_type: "Baseline Study (IPFS)", value: `ipfs://${row.baseline_cid}` }
+    ]
+  };
+}
+```
+
+### **Ejecutar Script**
+
+```bash
+npm install csv-parser
+node scripts/generate-metadata.js
+```
+
+**Output**: Carpeta `metadata/` con 100 archivos JSON (1.json, 2.json, ..., 100.json)
+
+---
+
+## ☁️ Paso 3: Upload a IPFS (Pinata)
+
+### **Script de Upload Masivo**
+
+Crea `scripts/upload-to-ipfs.js`:
+
+```javascript
+const pinataSDK = require('@pinata/sdk');
+const fs = require('fs');
+const path = require('path');
+
+const pinata = new pinataSDK(
+  process.env.PINATA_API_KEY,
+  process.env.PINATA_SECRET_KEY
+);
+
+const METADATA_DIR = './metadata';
+
+async function uploadBatch() {
+  const files = fs.readdirSync(METADATA_DIR);
+  const results = [];
+  
+  console.log(`📤 Uploading ${files.length} files to IPFS...`);
+  
+  for (const file of files) {
+    const filepath = path.join(METADATA_DIR, file);
+    const readableStream = fs.createReadStream(filepath);
+    
+    try {
+      const result = await pinata.pinFileToIPFS(readableStream, {
+        pinataMetadata: {
+          name: file
+        }
+      });
+      
+      results.push({
+        tokenId: parseInt(file.replace('.json', '')),
+        ipfsHash: result.IpfsHash,
+        uri: `ipfs://${result.IpfsHash}`
+      });
+      
+      console.log(`✅ ${file} → ${result.IpfsHash}`);
+    } catch (error) {
+      console.error(`❌ Error uploading ${file}:`, error);
+    }
+  }
+  
+  // Guardar mapping
+  fs.writeFileSync(
+    './ipfs-mapping.json',
+    JSON.stringify(results, null, 2)
+  );
+  
+  console.log(`\n🎉 Upload complete! Mapping saved to ipfs-mapping.json`);
+}
+
+uploadBatch();
+```
+
+### **Ejecutar Upload**
+
+```bash
+npm install @pinata/sdk
+export PINATA_API_KEY="tu_api_key"
+export PINATA_SECRET_KEY="tu_secret_key"
+node scripts/upload-to-ipfs.js
+```
+
+**Output**: Archivo `ipfs-mapping.json`:
+
+```json
+[
+  {
+    "tokenId": 1,
+    "ipfsHash": "QmABC123...",
+    "uri": "ipfs://QmABC123..."
+  },
+  {
+    "tokenId": 2,
+    "ipfsHash": "QmDEF456...",
+    "uri": "ipfs://QmDEF456..."
+  }
+]
+```
+
+---
+
+## ⛓️ Paso 4: Batch Minting en Blockchain
+
+### **Script de Minting**
+
+Crea `scripts/batch-mint.js`:
+
+```javascript
+const { ethers } = require('hardhat');
+const fs = require('fs');
+
+async function main() {
+  // Cargar mapping de IPFS
+  const mapping = JSON.parse(fs.readFileSync('./ipfs-mapping.json', 'utf8'));
+  
+  // Conectar al contrato
+  const CarbonNFT = await ethers.getContractFactory('CarbonNFT');
+  const carbonNFT = await CarbonNFT.attach(process.env.NFT_CONTRACT_ADDRESS);
+  
+  console.log(`🔗 Connected to CarbonNFT: ${carbonNFT.address}`);
+  console.log(`📦 Minting ${mapping.length} NFTs...`);
+  
+  // Wallet de GM Holding (owner)
+  const [owner] = await ethers.getSigners();
+  
+  for (const item of mapping) {
+    try {
+      const tx = await carbonNFT.mint(
+        owner.address,
+        item.uri
+      );
+      
+      await tx.wait();
+      
+      console.log(`✅ Minted Token ID ${item.tokenId} → ${item.ipfsHash}`);
+    } catch (error) {
+      console.error(`❌ Error minting Token ID ${item.tokenId}:`, error.message);
+    }
+  }
+  
+  console.log(`\n🎉 Batch minting complete!`);
+}
+
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+```
+
+### **Ejecutar Minting**
+
+```bash
+export NFT_CONTRACT_ADDRESS="0xYourContractAddress"
+npx hardhat run scripts/batch-mint.js --network cpx
+```
+
+---
+
+## 🔄 Flujo Completo (Resumen Visual)
+
+```
+┌─────────────────────────────────────────────────────┐
+│ 1. PREPARAR DATA                                    │
+│    nft_batch_001.csv (100 filas)                   │
+└────────────────┬────────────────────────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────────────────────────┐
+│ 2. GENERAR METADATA                                 │
+│    node scripts/generate-metadata.js               │
+│    Output: metadata/1.json ... 100.json           │
+└────────────────┬────────────────────────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────────────────────────┐
+│ 3. UPLOAD A IPFS                                    │
+│    node scripts/upload-to-ipfs.js                  │
+│    Output: ipfs-mapping.json                       │
+└────────────────┬────────────────────────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────────────────────────┐
+│ 4. BATCH MINTING                                    │
+│    npx hardhat run scripts/batch-mint.js           │
+│    Output: 100 NFTs on-chain                       │
+└─────────────────────────────────────────────────────┘
+```
+
+---
+
+## 📋 Checklist de Ejecución
+
+### **Batch Piloto (100 NFTs)**
+
+- [ ] Crear `data/nft_batch_001.csv` con 100 filas
+- [ ] Subir documentos legales a IPFS (obtener CIDs)
+- [ ] Ejecutar `generate-metadata.js`
+- [ ] Revisar metadata generada (sample check)
+- [ ] Ejecutar `upload-to-ipfs.js`
+- [ ] Verificar `ipfs-mapping.json`
+- [ ] Desplegar contrato `CarbonNFT.sol`
+- [ ] Ejecutar `batch-mint.js`
+- [ ] Verificar NFTs en blockchain explorer
+- [ ] Validar metadata en OpenSea/marketplace
+
+### **Batch Inicial (10,000 NFTs)**
+
+- [ ] Repetir proceso con CSV de 10,000 filas
+- [ ] Optimizar gas (batch minting en una sola tx)
+- [ ] Monitorear costos de gas
+- [ ] Validar paridad con tabla maestra (Supabase)
+
+### **Batches Mensuales (50,000 NFTs)**
+
+- [ ] Automatizar proceso con CI/CD
+- [ ] Integrar con backend (auto-sync a Supabase)
+- [ ] Dashboard de monitoreo de minteo
+
+---
+
+## 💡 Optimizaciones
+
+### **Gas Optimization: Batch Minting en Una Sola TX**
+
+```solidity
+function batchMint(
+    address to,
+    string[] memory uris
+) external onlyOwner {
+    for (uint256 i = 0; i < uris.length; i++) {
+        uint256 tokenId = nextTokenId;
+        _safeMint(to, tokenId);
+        _setTokenURI(tokenId, uris[i]);
+        nextTokenId++;
+    }
+    
+    emit BatchMinted(to, uris.length);
+}
+```
+
+**Ventaja**: Mintear 100 NFTs en una sola transacción (ahorro de gas)
+
+### **Metadata Dinámica (Avanzado)**
+
+En lugar de subir 2M de JSONs a IPFS, usar un servidor de metadata:
+
+```solidity
+function tokenURI(uint256 tokenId) public view override returns (string memory) {
+    return string(abi.encodePacked(
+        "https://api.cpx.exchange/metadata/",
+        tokenId.toString()
+    ));
+}
+```
+
+**Backend** genera metadata on-the-fly desde Supabase.
+
+---
+
+## 🔐 Seguridad
+
+### **Validaciones Pre-Minting**
+
+```javascript
+// Validar que no haya duplicados de RENARE ID
+function validateCSV(rows) {
+  const renareIds = new Set();
+  
+  rows.forEach((row, index) => {
+    if (renareIds.has(row.renare_id)) {
+      throw new Error(`Duplicate RENARE ID at row ${index}: ${row.renare_id}`);
+    }
+    renareIds.add(row.renare_id);
+  });
+  
+  console.log('✅ No duplicate RENARE IDs found');
+}
+```
+
+### **Backup de Metadata**
+
+- Guardar todos los JSONs en GitHub (backup)
+- Usar Pinata Pinning Service (permanencia garantizada)
+- Tener copia local de `ipfs-mapping.json`
+
+---
+
+## 📊 Tabla Maestra (Supabase)
+
+Después del minting, sincronizar con Supabase:
+
+```sql
+CREATE TABLE nft_registry (
+  token_id INTEGER PRIMARY KEY,
+  serial TEXT UNIQUE NOT NULL,
+  renare_id TEXT UNIQUE NOT NULL,
+  colcx_id TEXT UNIQUE NOT NULL,
+  ipfs_hash TEXT NOT NULL,
+  metadata_uri TEXT NOT NULL,
+  tx_hash TEXT NOT NULL,
+  minted_at TIMESTAMP DEFAULT NOW(),
+  status TEXT DEFAULT 'Active',
+  fractionalized BOOLEAN DEFAULT false
+);
+```
+
+Script de sync:
+
+```javascript
+async function syncToSupabase(mapping) {
+  for (const item of mapping) {
+    await supabase.from('nft_registry').insert({
+      token_id: item.tokenId,
+      serial: `CPX-${item.tokenId.toString().padStart(6, '0')}`,
+      renare_id: item.renareId, // del CSV
+      colcx_id: item.colcxId,   // del CSV
+      ipfs_hash: item.ipfsHash,
+      metadata_uri: item.uri,
+      tx_hash: item.txHash
+    });
+  }
+}
+```
+
+---
+
+## 🎯 Próximos Pasos
+
+1. **Crear CSV piloto** con 100 certificados reales (o template)
+2. **Configurar Pinata** (API keys)
+3. **Desarrollar CarbonNFT.sol** (contrato base)
+4. **Ejecutar batch piloto** (100 NFTs)
+5. **Validar** metadata y on-chain data
+6. **Escalar** a batches más grandes
+
+---
+
+**¿Listo para empezar con el batch piloto?** 🚀
