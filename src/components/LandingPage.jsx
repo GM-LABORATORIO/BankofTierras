@@ -167,6 +167,95 @@ const LandingPage = ({ onEnter }) => {
                         {isMenuOpen ? <X /> : <Menu />}
                     </button>
                 </div>
+
+                {/* Mobile Menu */}
+                <AnimatePresence>
+                    {isMenuOpen && (
+                        <>
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="fixed inset-0 bg-black/80 backdrop-blur-md z-[90] lg:hidden"
+                                onClick={() => setIsMenuOpen(false)}
+                            />
+                            <motion.div
+                                initial={{ x: '100%' }}
+                                animate={{ x: 0 }}
+                                exit={{ x: '100%' }}
+                                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                                className="fixed right-0 top-0 bottom-0 w-80 bg-black border-l border-white/10 z-[95] lg:hidden overflow-y-auto"
+                            >
+                                <div className="p-8 space-y-8">
+                                    <div className="flex items-center justify-between mb-12">
+                                        <span className="text-sm font-black text-white uppercase tracking-widest">Menu</span>
+                                        <button onClick={() => setIsMenuOpen(false)} className="text-white/60 hover:text-white">
+                                            <X size={24} />
+                                        </button>
+                                    </div>
+
+                                    {/* Language Selector */}
+                                    <div className="space-y-3">
+                                        <span className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em]">Language</span>
+                                        <div className="flex gap-3">
+                                            {['ES', 'EN', 'AR'].map((lang) => (
+                                                <button
+                                                    key={lang}
+                                                    onClick={() => {
+                                                        setLanguage(lang.toLowerCase());
+                                                        setIsMenuOpen(false);
+                                                    }}
+                                                    className={`text-xs font-black tracking-widest px-4 py-2 rounded-lg border transition-all ${language === lang.toLowerCase() ? 'bg-emerald-500 text-black border-emerald-500' : 'text-white/60 border-white/10 hover:text-white hover:border-white/30'}`}
+                                                >
+                                                    {lang}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Navigation */}
+                                    <nav className="space-y-4 pt-8 border-t border-white/10">
+                                        {navItems.map(item => (
+                                            <button
+                                                key={item.id}
+                                                onClick={() => {
+                                                    document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' });
+                                                    setIsMenuOpen(false);
+                                                }}
+                                                className="block w-full text-left text-sm font-black text-white/60 uppercase tracking-widest hover:text-emerald-500 transition-colors py-2"
+                                            >
+                                                {item.label}
+                                            </button>
+                                        ))}
+                                    </nav>
+
+                                    {/* Actions */}
+                                    <div className="space-y-4 pt-8 border-t border-white/10">
+                                        <button
+                                            onClick={() => {
+                                                setActiveWhitepaperTab(language.toUpperCase());
+                                                setShowWhitepaper(true);
+                                                setIsMenuOpen(false);
+                                            }}
+                                            className="block w-full text-left text-sm font-black text-white/60 uppercase tracking-widest hover:text-emerald-500 transition-colors py-2"
+                                        >
+                                            {t('landing.nav.whitepaper')}
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                onEnter();
+                                                setIsMenuOpen(false);
+                                            }}
+                                            className="w-full px-6 py-4 bg-emerald-500 text-black text-xs font-black uppercase tracking-widest rounded-lg hover:bg-emerald-400 transition-all flex items-center justify-center gap-2"
+                                        >
+                                            {t('landing.hero.cta_terminal')} <Search size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </>
+                    )}
+                </AnimatePresence>
             </nav>
 
             {/* 2. Hero Section (Global Impact Terminal) */}
