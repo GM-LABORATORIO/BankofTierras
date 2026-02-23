@@ -48,22 +48,36 @@ const CarbonMarketplace = ({ projects }) => {
         if (!account) return alert('Please connect your wallet');
         setIsProcessing(true);
         try {
-            // Logic for ClimateVault interaction:
-            // 1. Check if user has enough $USDT/$GM for the purchase
-            // 2. Call ClimateVault.redeemGrams(purchaseAmount)
-            // 3. Update the global score and user signals
+            // Processing purchase logic
+            console.log(`Processing purchase of ${purchaseAmount} grams...`);
 
-            console.log(`Processing purchase of ${purchaseAmount} grams via ClimateVault...`);
-
-            // Simulating contract call for now
+            // 1. Simulating contract call for now (waiting for specific C-Chain deployment address)
             await new Promise(resolve => setTimeout(resolve, 2000));
-            setLastTxHash('0x' + Math.random().toString(16).slice(2));
+            const txHash = '0x' + Math.random().toString(16).slice(2);
+            setLastTxHash(txHash);
 
-            // Update signal pool visualization
-            setSignalGasPool(prev => prev - 12); // Simulate gas usage
+            // 2. REAL PERSISTENCE: Register the action in the CPX Reputation System
+            const { supabaseService } = await import('../services/supabaseService');
+            await supabaseService.addReputationLog({
+                wallet_address: account,
+                action_type: 'burn',
+                points: Math.floor(purchaseAmount / 1000), // 1 point per kg for now
+                impact_metrics: {
+                    co2_grams: purchaseAmount,
+                    usd_value: purchaseAmount * CARBON_PRICE_PER_GRAM
+                },
+                payment_method: 'web3',
+                tx_hash: txHash,
+                metadata: {
+                    project_name: selectedProject?.name,
+                    timestamp: new Date().toISOString()
+                }
+            });
 
-            // In a real scenario, we'd wait for tx confirmation and update the Score
-            alert(`SUCCESS: ${purchaseAmount.toLocaleString()} grams burned and converted to Climate Signals.`);
+            // Update signal pool visualization (local UI state)
+            setSignalGasPool(prev => prev - 12);
+
+            alert(`SUCCESS: ${purchaseAmount.toLocaleString()} grams processed and registered in your Climate Pass™.`);
             setShowBuyModal(false);
         } catch (error) {
             console.error('Purchase failed:', error);

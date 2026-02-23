@@ -163,7 +163,7 @@ const Dashboard = ({ onBack }) => {
             id: 'passport',
             label: userProfile?.type === 'corporate' ? 'Strategy' : t('dashboard.passport'),
             icon: <Globe size={24} />,
-            component: <ImpactPassport />,
+            component: <ImpactPassport reputation={reputation} account={account} />,
             roles: ['citizen', 'corporate', 'commerce']
         },
         {
@@ -384,17 +384,22 @@ const Dashboard = ({ onBack }) => {
                         <div className="flex-1 overflow-y-auto p-4 2xl:p-6 space-y-6 2xl:space-y-8 custom-scrollbar">
                             <div className="flex flex-col gap-8 2xl:gap-10">
                                 {[
-                                    { biz: 'Shell PLC', amount: '5,000 t', zone: 'Amazonas' },
-                                    { biz: 'Delta Air', amount: '1,200 t', zone: 'Meta' },
-                                    { biz: 'Google ESG', amount: '12,500 t', zone: 'Global' }
+                                    { biz: 'Shell PLC', amount: '5,000 t', zone: 'Amazonas', logo: '/assets/Shell_logo.svg.png' },
+                                    { biz: 'Delta Air', amount: '1,200 t', zone: 'Meta', logo: '/assets/delta.png' },
+                                    { biz: 'Google ESG', amount: '12,500 t', zone: 'Global', logo: '/assets/Google__G__logo.svg.png' }
                                 ].map((signal, i) => (
                                     <div key={i} className="flex-shrink-0">
                                         <div className="flex items-center justify-between mb-1">
-                                            <span className="text-[9px] 2xl:text-[10px] font-black text-slate-800 italic tracking-tighter uppercase truncate">{signal.biz}</span>
+                                            <div className="flex items-center gap-2 truncate">
+                                                <div className="w-5 h-5 bg-slate-50 rounded flex items-center justify-center border border-slate-100 p-0.5">
+                                                    <img src={signal.logo} alt="" className="w-full h-full object-contain" />
+                                                </div>
+                                                <span className="text-[9px] 2xl:text-[10px] font-black text-slate-800 italic tracking-tighter uppercase truncate">{signal.biz}</span>
+                                            </div>
                                             <span className="text-[8px] 2xl:text-[9px] font-black text-emerald-600 px-1.5 2xl:px-2 py-0.5 bg-emerald-50 rounded border border-emerald-100 flex-shrink-0">{signal.amount}</span>
                                         </div>
-                                        <div className="text-[7px] 2xl:text-[8px] font-bold text-slate-400 uppercase tracking-widest truncate">Node: {signal.zone}</div>
-                                        <div className="mt-2 h-0.5 w-full bg-slate-50 rounded-full overflow-hidden">
+                                        <div className="text-[7px] 2xl:text-[8px] font-bold text-slate-400 uppercase tracking-widest truncate ml-7">Node: {signal.zone}</div>
+                                        <div className="mt-2 h-0.5 w-full bg-slate-50 rounded-full overflow-hidden ml-7">
                                             <div className="h-full bg-emerald-500/20 animate-pulse" style={{ width: '60%' }} />
                                         </div>
                                     </div>

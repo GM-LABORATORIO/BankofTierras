@@ -264,23 +264,39 @@ export const supabaseService = {
             .select();
         if (error) throw error;
 
-        // Update total adoptions count
-        if (data[0] && data[0].species_id) {
+        const result = data[0];
+
+        // 1. Update total adoptions count
+        if (result && result.species_id) {
             const { data: speciesData } = await supabase
                 .from('species')
                 .select('total_adoptions')
-                .eq('id', data[0].species_id)
+                .eq('id', result.species_id)
                 .single();
 
             if (speciesData) {
                 await supabase
                     .from('species')
                     .update({ total_adoptions: (speciesData.total_adoptions || 0) + 1 })
-                    .eq('id', data[0].species_id);
+                    .eq('id', result.species_id);
             }
         }
 
-        return data[0];
+        // 2. CPX Signal: Register adoption in reputation history
+        try {
+            await this.addReputationLog({
+                wallet_address: adoption.adopter_wallet,
+                action_type: 'adoption',
+                points: 50, // Fixed points for adoption
+                impact_metrics: { species_id: adoption.species_id },
+                tx_hash: adoption.tx_hash,
+                metadata: { guardian_name: adoption.guardian_name }
+            });
+        } catch (repError) {
+            console.warn("Could not register reputation signal for adoption:", repError);
+        }
+
+        return result;
     },
 
     // --- Marketplace: Donations ---
@@ -314,7 +330,24 @@ export const supabaseService = {
             .insert([donation])
             .select();
         if (error) throw error;
-        return data[0];
+
+        const result = data[0];
+
+        // CPX Signal: Register donation in reputation history
+        try {
+            await this.addReputationLog({
+                wallet_address: donation.donor_wallet,
+                action_type: 'donation',
+                points: Math.floor(parseFloat(donation.amount) * 10), // 10 points per 1 unit donated
+                impact_metrics: { amount: donation.amount, currency: donation.currency || 'USD' },
+                tx_hash: donation.tx_hash,
+                metadata: { originator_wallet: donation.originator_wallet }
+            });
+        } catch (repError) {
+            console.warn("Could not register reputation signal for donation:", repError);
+        }
+
+        return result;
     },
 
     // --- Marketplace: Carbon Purchases (using compensations table) ---
@@ -759,7 +792,7 @@ export const supabaseService = {
         if (!supabase || !walletAddress) return [];
         try {
             const { data, error } = await supabase
-                .from('reputation_logs')
+                .from('reputation_history')
                 .select('*')
                 .eq('wallet_address', walletAddress)
                 .order('created_at', { ascending: false });
@@ -769,6 +802,22 @@ export const supabaseService = {
         } catch (error) {
             console.error("Error getting reputation logs:", error);
             return [];
+        }
+    },
+
+    async addReputationLog(logEntry) {
+        if (!supabase) return null;
+        try {
+            const { data, error } = await supabase
+                .from('reputation_history')
+                .insert([logEntry])
+                .select();
+
+            if (error) throw error;
+            return data[0];
+        } catch (error) {
+            console.error("Error adding reputation log:", error);
+            throw error;
         }
     },
 

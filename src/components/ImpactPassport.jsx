@@ -8,7 +8,7 @@ const IMPACT_CARDS = [
         id: 1,
         title: "Amazonas Node #204",
         sub: "Primary Forest Conservation • ColCX certified",
-        image: "https://images.unsplash.com/photo-1546272446-615729161cb9?auto=format&fit=crop&q=80&w=800",
+        image: "/assets/322.png",
         category: "Stewardship"
     },
     {
@@ -29,12 +29,12 @@ const IMPACT_CARDS = [
         id: 4,
         title: "Social Impact Anchor",
         sub: "Local Communities Empowerment Program",
-        image: "https://images.unsplash.com/photo-1627941094354-949449f9024c?auto=format&fit=crop&q=80&w=800",
+        image: "/assets/vv.png",
         category: "Social"
     }
 ];
 
-const ImpactPassport = () => {
+const ImpactPassport = ({ reputation, account }) => {
     const { t } = useLanguage();
 
     return (
@@ -47,12 +47,12 @@ const ImpactPassport = () => {
                 </div>
                 <div className="flex gap-4">
                     <div className="text-right">
-                        <div className="text-xl font-black text-slate-800 italic tracking-tighter">1,240,000 g</div>
-                        <div className="text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-none">Verified Compensation</div>
+                        <div className="text-xl font-black text-slate-800 italic tracking-tighter">{reputation?.total_score || 0} CSU</div>
+                        <div className="text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-none">Climate Signal Units</div>
                     </div>
                     <div className="text-right border-l border-slate-100 pl-4">
-                        <div className="text-xl font-black text-slate-800 italic tracking-tighter">12 Active Nodes</div>
-                        <div className="text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-none">Global Coverage</div>
+                        <div className="text-xl font-black text-slate-800 italic tracking-tighter">{reputation?.total_actions || 0} Actions</div>
+                        <div className="text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-none">Verified Trajectory</div>
                     </div>
                 </div>
             </div>

@@ -122,20 +122,34 @@ const GlobalRankings = () => {
                                     transition={{ duration: 0.2 }}
                                     className="divide-y divide-slate-100"
                                 >
-                                    {activeCategory === 'institutional' && companies.map((co, i) => (
-                                        <div key={co.id} className="grid grid-cols-12 gap-4 items-center px-6 py-6 hover:bg-slate-50 transition-colors cursor-pointer group">
-                                            <span className="col-span-1 text-sm font-black text-slate-300 italic">0{i + 1}</span>
-                                            <div className="col-span-4 flex flex-col">
-                                                <span className="text-sm font-black text-slate-900 uppercase italic group-hover:text-emerald-600 transition-colors">{co.name}</span>
-                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{co.status} · {co.country}</span>
+                                    {activeCategory === 'institutional' && companies.map((co, i) => {
+                                        const logoMap = {
+                                            "Shell PLC": "/assets/Shell_logo.svg.png",
+                                            "Delta Airlines": "/assets/delta.png",
+                                            "Google Cloud": "/assets/Google__G__logo.svg.png"
+                                        };
+                                        return (
+                                            <div key={co.id} className="grid grid-cols-12 gap-4 items-center px-6 py-6 hover:bg-slate-50 transition-colors cursor-pointer group">
+                                                <span className="col-span-1 text-sm font-black text-slate-300 italic">0{i + 1}</span>
+                                                <div className="col-span-4 flex items-center gap-4">
+                                                    {logoMap[co.name] && (
+                                                        <div className="w-8 h-8 bg-slate-50 rounded-lg flex items-center justify-center border border-slate-100 p-1">
+                                                            <img src={logoMap[co.name]} alt="" className="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all" />
+                                                        </div>
+                                                    )}
+                                                    <div className="flex flex-col">
+                                                        <span className="text-sm font-black text-slate-900 uppercase italic group-hover:text-emerald-600 transition-colors">{co.name}</span>
+                                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{co.status} · {co.country}</span>
+                                                    </div>
+                                                </div>
+                                                <span className="col-span-3 text-sm font-black text-slate-800 tracking-tighter">{co.impact} compensated</span>
+                                                <span className="col-span-2 text-base font-black text-slate-900 italic">{co.score} CPX</span>
+                                                <div className="col-span-2 text-right">
+                                                    <span className="text-xs font-black text-emerald-500 bg-emerald-50 px-3 py-1.5 rounded-lg">{co.trend}</span>
+                                                </div>
                                             </div>
-                                            <span className="col-span-3 text-sm font-black text-slate-800 tracking-tighter">{co.impact} compensated</span>
-                                            <span className="col-span-2 text-base font-black text-slate-900 italic">{co.score} CPX</span>
-                                            <div className="col-span-2 text-right">
-                                                <span className="text-xs font-black text-emerald-500 bg-emerald-50 px-3 py-1.5 rounded-lg">{co.trend}</span>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
 
                                     {activeCategory === 'commerce' && commerces.map((comm, i) => (
                                         <div key={comm.id} className="grid grid-cols-12 gap-4 items-center px-6 py-6 hover:bg-slate-50 transition-colors group">
